@@ -57,9 +57,18 @@
         .card-row::-webkit-scrollbar { display: none; }
         .card-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; padding: 16px; }
         .channel-card { min-width: 115px; height: 135px; background: linear-gradient(145deg, #0f172a, #090d16); border: 1px solid rgba(0, 242, 254, 0.2); border-radius: 12px; display: flex; flex-direction: column; align-items: center; justify-content: space-between; padding: 8px; position: relative; cursor: pointer; flex-shrink: 0; text-decoration: none; color: #fff; transition: transform 0.2s, border-color 0.2s; overflow: hidden; }
-        .card-grid .channel-card { width: 100%; height: 145px; min-width: unset; }
+        .card-grid .channel-card { width: 100%; height: 155px; min-width: unset; }
         .channel-card:hover { transform: translateY(-2px); border-color: #00f2fe; }
-        .card-thumb { width: 100%; height: 70px; border-radius: 8px; object-fit: cover; background: #030712; }
+        /* Circle thumbnail: poori image circle ke andar, bg colour auto match */
+        .thumb-wrap { position: relative; width: 70px; height: 70px; border-radius: 50%; overflow: hidden; background: #111827; flex-shrink: 0; margin: 0 auto; border: 2px solid rgba(0, 242, 254, 0.55); box-shadow: 0 0 10px rgba(0, 242, 254, 0.25); transition: background-color 0.25s; }
+        .card-grid .thumb-wrap { width: 82px; height: 82px; }
+        .thumb-bg { position: absolute; inset: -12px; width: calc(100% + 24px); height: calc(100% + 24px); object-fit: cover; filter: blur(12px) brightness(0.55) saturate(1.3); }
+        .card-thumb { position: relative; z-index: 1; width: 100%; height: 100%; object-fit: contain; object-position: center; padding: 15%; display: block; }
+        /* Explore categories: purana original design (rounded rectangle, full width image) */
+        .card-grid .channel-card.explore-card { height: 145px; }
+        .card-grid .explore-card .thumb-wrap { width: 100%; height: 70px; border-radius: 8px; border: none; box-shadow: none; background: #030712; margin: 0; }
+        .explore-card .thumb-bg { display: none; }
+        .explore-card .card-thumb { object-fit: cover; padding: 0; }
         .save-heart { position: absolute; top: 6px; right: 8px; font-size: 11px; color: #64748b; padding: 4px; z-index: 5; transition: color 0.2s; }
         .save-heart:hover, .channel-card.saved .save-heart { color: #ff0055; }
         .channel-logo-text { font-size: 10px; font-weight: 700; text-align: center; line-height: 1.1; width: 100%; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
@@ -311,11 +320,53 @@
         }
 
         /* ---------------- CARDS ---------------- */
+        /* ---- AUTO background colour: image ke kinaron ka sab se zyada aane wala rang ---- */
+        const bgColorCache = {};
+        function applyAutoBg(wrap, url) {
+            if (!url) return;
+            const paint = (rgb) => {
+                wrap.style.backgroundColor = rgb;
+                const blurImg = wrap.querySelector('.thumb-bg');
+                if (blurImg) blurImg.style.display = 'none'; // colour mil gaya, blur ki zarurat nahi
+            };
+            if (bgColorCache[url]) { paint(bgColorCache[url]); return; }
+
+            const probe = new Image();
+            probe.crossOrigin = 'anonymous';
+            probe.onload = () => {
+                try {
+                    const S = 40;
+                    const cv = document.createElement('canvas');
+                    cv.width = S; cv.height = S;
+                    const ctx = cv.getContext('2d', { willReadFrequently: true });
+                    ctx.drawImage(probe, 0, 0, S, S);
+                    const d = ctx.getImageData(0, 0, S, S).data;
+                    const buckets = {};
+                    let best = null, bestCount = 0, opaque = 0;
+                    const take = (x, y) => {
+                        const i = (y * S + x) * 4;
+                        if (d[i + 3] < 40) return; // transparent pixel ignore
+                        opaque++;
+                        const key = (d[i] >> 5) + ',' + (d[i + 1] >> 5) + ',' + (d[i + 2] >> 5);
+                        const b = buckets[key] || (buckets[key] = { n: 0, r: 0, g: 0, b: 0 });
+                        b.n++; b.r += d[i]; b.g += d[i + 1]; b.b += d[i + 2];
+                        if (b.n > bestCount) { bestCount = b.n; best = b; }
+                    };
+                    for (let k = 0; k < S; k++) { take(k, 0); take(k, S - 1); take(0, k); take(S - 1, k); }
+                    if (!best || opaque < S) return; // transparent PNG: default dark rehta hai
+                    const rgb = `rgb(${Math.round(best.r / best.n)},${Math.round(best.g / best.n)},${Math.round(best.b / best.n)})`;
+                    bgColorCache[url] = rgb;
+                    paint(rgb);
+                } catch (e) { /* CORS block: blur wala background hi chalega */ }
+            };
+            probe.src = url;
+        }
+
         function buildCard(prefix, key, item, opts) {
             const id = storeItem(prefix, key, item);
             const name = item.name || item.title || 'Untitled';
             const card = document.createElement(opts.link ? 'a' : 'div');
-            card.className = 'channel-card' + (favourites[key] ? ' saved' : '');
+            card.className = 'channel-card' + (opts.link ? ' explore-card' : '') + (favourites[key] ? ' saved' : '');
             card.dataset.key = key;
             card.dataset.id = id;
             card.dataset.search = (name + ' ' + (item.category || '') + ' ' + (item.subtitle || '')).toLowerCase();
@@ -326,13 +377,14 @@
             }
             card.innerHTML = `
                 <i class="fa-solid fa-heart save-heart" data-action="fav"></i>
-                <img src="${safeImg(item.image)}" class="card-thumb" loading="lazy" alt="">
+                <div class="thumb-wrap"><img src="${safeImg(item.image)}" class="thumb-bg" alt=""><img src="${safeImg(item.image)}" class="card-thumb" loading="lazy" alt=""></div>
                 <div class="channel-logo-text">${esc(name)}<span>${esc(opts.sub)}</span></div>
                 <div class="channel-footer">
                     <span class="live-badge" style="${opts.badgeStyle || ''}">${esc(opts.badge)}</span>
                     <span class="view-count"><i class="fa-solid ${opts.icon}"></i> ${esc(opts.right)}</span>
                 </div>`;
-            card.querySelector('img').onerror = function () { this.onerror = null; this.src = PLACEHOLDER; };
+            if (!opts.link) applyAutoBg(card.querySelector('.thumb-wrap'), item.image);
+            card.querySelectorAll('img.thumb-bg, img.card-thumb').forEach(im => { im.onerror = function () { this.onerror = null; this.src = PLACEHOLDER; }; });
             return card;
         }
 
