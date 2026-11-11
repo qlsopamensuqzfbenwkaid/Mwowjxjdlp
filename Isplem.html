@@ -212,24 +212,70 @@
         </div>
     </div>
 
-    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
     <!-- Video.js 8 already includes HLS (m3u8) support, so hls.js is not needed -->
     <script src="https://vjs.zencdn.net/8.10.0/video.min.js"></script>
 
     <script>
-        const firebaseConfig = {
-            apiKey: "AIzaSyAJy149ksyrf6qoQV0eF3uaKsttJ9RlFLI",
-            authDomain: "sprtixweb.firebaseapp.com",
-            projectId: "sprtixweb",
-            storageBucket: "sprtixweb.firebasestorage.app",
-            messagingSenderId: "304748401927",
-            appId: "1:304748401927:web:f805924814ac55ecb7a1a2",
-            measurementId: "G-5QTXL58YGD"
-        };
+        /* ============================================================
+           GITHUB DATA (Firebase ki jagah)
+           Data repo ke  data/  folder ki JSON files se aata hai:
+           settings, sliders, liveChannels, liveTvScreen, newsUpdates, playlist
+           ============================================================ */
+        const GH_USER   = 'qlsopamensuqzfbenwkaid';   // <- apna GitHub username
+        const GH_REPO   = 'Mwowjxjdlp';               // <- jis repo mein data/ folder hai
+        const GH_BRANCH = 'main';
+        const REFRESH_MS = 120000;                    // har 2 minute mein naya data check
 
-        firebase.initializeApp(firebaseConfig);
-        const database = firebase.database();
+        // GitHub Pages par ho to relative path, warna (APK/WebView) raw link
+        const DATA_BASE = location.hostname.endsWith('github.io')
+            ? 'data/'
+            : `https://raw.githubusercontent.com/${GH_USER}/${GH_REPO}/${GH_BRANCH}/data/`;
+
+        // JSON array [{id,...}] ko {id: {...}} object mein badalta hai (purana code same chalega)
+        function normalize(data) {
+            if (Array.isArray(data)) {
+                const o = {};
+                data.forEach((it, i) => { if (it) o[String(it.id || ('i' + i))] = it; });
+                return o;
+            }
+            return data;
+        }
+
+        const database = {
+            ref(name) {
+                return {
+                    on(evt, cb) {
+                        const cacheKey = 'sprtix_data_' + name;
+                        let lastText = null;
+                        const deliver = (text) => {
+                            if (text === lastText) return;       // data badla nahi to dobara draw nahi
+                            lastText = text;
+                            let val = null;
+                            try { val = normalize(JSON.parse(text)); } catch (e) {}
+                            const empty = !val || (typeof val === 'object' && Object.keys(val).length === 0);
+                            cb({ val: () => (empty ? null : val), exists: () => !empty });
+                        };
+                        // 1) pehle phone mein saved data foran dikhao (tez + offline)
+                        try { const c = localStorage.getItem(cacheKey); if (c) deliver(c); } catch (e) {}
+                        // 2) phir GitHub se naya lo
+                        const load = async () => {
+                            try {
+                                const r = await fetch(DATA_BASE + name + '.json?t=' + Date.now(), { cache: 'no-store' });
+                                if (!r.ok) throw new Error(r.status);
+                                const text = await r.text();
+                                JSON.parse(text); // sahi JSON hai ya nahi
+                                try { localStorage.setItem(cacheKey, text); } catch (e) {}
+                                deliver(text);
+                            } catch (e) {
+                                if (lastText === null) deliver('null'); // pehli baar aur kuch nahi mila
+                            }
+                        };
+                        load();
+                        setInterval(load, REFRESH_MS);
+                    }
+                };
+            }
+        };
 
         const PLACEHOLDER = 'data:image/svg+xml;utf8,' + encodeURIComponent(
             '<svg xmlns="http://www.w3.org/2000/svg" width="100" height="70" viewBox="0 0 100 70"><rect width="100" height="70" fill="#0f172a"/><text x="50" y="40" font-size="14" fill="#00f2fe" text-anchor="middle" font-family="Arial">SPRtix</text></svg>'
