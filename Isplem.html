@@ -4,47 +4,22 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>SPRtix - Live TV & Movies</title>
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&family=Jost:wght@500;600&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://vjs.zencdn.net/8.10.0/video-js.css" rel="stylesheet" />
 
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Poppins', sans-serif; user-select: none; -webkit-tap-highlight-color: transparent; }
-        body { background-color: #030712; color: #ffffff; display: flex; justify-content: center; align-items: center; min-height: 100vh; }
-        .app-container { width: 100%; max-width: 420px; height: 100vh; max-height: 890px; background: radial-gradient(circle at top, #0f172a 0%, #030712 70%); display: flex; flex-direction: column; position: relative; overflow: hidden; box-shadow: 0 0 30px rgba(0, 242, 254, 0.15); }
-        .header { display: flex; justify-content: space-between; align-items: center; padding: 12px 16px; flex-shrink: 0; z-index: 10; }
-        .logo-area { display: flex; flex-direction: column; }
-        .logo-main { display: flex; align-items: center; gap: 8px; font-size: 20px; font-weight: 700; letter-spacing: 0.5px; cursor: pointer; }
-        .logo-img { width: 26px; height: 26px; object-fit: cover; border-radius: 50%; border: 1px solid #00f2fe; }
-        .logo-sub { font-size: 7px; letter-spacing: 1.5px; color: #94a3b8; margin-top: 1px; }
-        .header-icons { display: flex; gap: 14px; color: #ffffff; font-size: 16px; }
-        .header-icons i { cursor: pointer; position: relative; padding: 4px; transition: color 0.2s; }
-        .header-icons i:hover { color: #00f2fe; }
-        .notification-dot::after { content: ''; position: absolute; top: 2px; right: 2px; width: 5px; height: 5px; background-color: #ff0055; border-radius: 50%; }
-        .search-container { position: absolute; top: -60px; left: 0; width: 100%; background: rgba(3, 7, 18, 0.98); padding: 12px 16px; display: flex; align-items: center; gap: 10px; z-index: 50; border-bottom: 1px solid rgba(0, 242, 254, 0.3); transition: top 0.3s ease; }
+        body { background-color: #070b14; color: #ffffff; display: flex; justify-content: center; align-items: center; min-height: 100vh; }
+        .app-container { width: 100%; max-width: 420px; height: 100vh; max-height: 890px; background: #0e1525; display: flex; flex-direction: column; position: relative; overflow: hidden; box-shadow: 0 0 30px rgba(0, 242, 254, 0.15); }
+        .search-container { position: absolute; top: -60px; left: 0; width: 100%; background: #212839; padding: 12px 16px; display: flex; align-items: center; gap: 10px; z-index: 50; border-bottom: 1px solid rgba(0, 242, 254, 0.3); transition: top 0.3s ease; }
         .search-container.active { top: 0; }
         .search-input { flex: 1; background: #0f172a; border: 1px solid #00f2fe; border-radius: 20px; padding: 6px 14px; color: #fff; font-size: 11px; outline: none; user-select: text; }
         .search-close { color: #ff0055; cursor: pointer; font-size: 14px; padding: 4px; }
-        .screen { display: none; flex: 1; flex-direction: column; overflow-y: auto; padding-bottom: 75px; scrollbar-width: none; }
+        .screen { display: none; flex: 1; flex-direction: column; overflow-y: auto; padding-bottom: 104px; scrollbar-width: none; }
         .screen::-webkit-scrollbar { display: none; }
         .screen.active-screen { display: flex; }
-        .screen-header-title { font-size: 16px; font-weight: 700; color: #00f2fe; padding: 14px 16px 4px 16px; display: flex; align-items: center; gap: 8px; }
-        .screen-desc { font-size: 10px; color: #94a3b8; padding: 0 16px 12px 16px; }
-        .banner-slider { position: relative; margin: 6px 16px; height: 175px; border-radius: 14px; overflow: hidden; border: 1px solid rgba(0, 242, 254, 0.3); box-shadow: 0 4px 15px rgba(0, 0, 0, 0.4); flex-shrink: 0; }
-        .banner-track { display: flex; height: 100%; transition: transform 0.4s ease-in-out; }
-        .banner-slide { min-width: 100%; height: 100%; position: relative; background-size: cover; background-position: center; display: flex; flex-direction: column; justify-content: flex-end; padding: 12px; }
-        .banner-slide::before { content: ''; position: absolute; inset: 0; background: linear-gradient(90deg, rgba(3,7,18,0.95) 30%, rgba(3,7,18,0.4) 70%, transparent); }
-        .banner-content { position: relative; z-index: 2; }
-        .badge-episode { display: inline-block; background: #ff0055; color: #fff; font-size: 8px; font-weight: 600; padding: 2px 6px; border-radius: 20px; margin-bottom: 4px; }
-        .banner-title { font-size: 20px; font-weight: 700; color: #00f2fe; line-height: 1.1; margin-bottom: 2px; text-transform: uppercase; }
-        .banner-desc { font-size: 8.5px; color: #cbd5e1; margin-bottom: 8px; line-height: 1.2; max-width: 65%; }
-        .watch-btn { display: inline-flex; align-items: center; gap: 5px; background: linear-gradient(135deg, #00f2fe, #7000ff); color: #fff; border: none; padding: 5px 12px; border-radius: 20px; font-size: 9px; font-weight: 600; cursor: pointer; box-shadow: 0 0 8px rgba(0, 242, 254, 0.4); text-decoration: none; }
-        .slider-arrow { position: absolute; top: 50%; transform: translateY(-50%); background: rgba(0, 0, 0, 0.5); color: #fff; border: none; width: 24px; height: 24px; border-radius: 50%; cursor: pointer; display: flex; align-items: center; justify-content: center; z-index: 5; font-size: 10px; }
-        .prev-arrow { left: 6px; }
-        .next-arrow { right: 6px; }
-        .slider-dots { position: absolute; bottom: 6px; right: 12px; display: flex; gap: 3px; z-index: 5; }
-        .dot { width: 4px; height: 4px; background: rgba(255, 255, 255, 0.4); border-radius: 50%; cursor: pointer; transition: 0.3s; }
-        .dot.active { width: 12px; border-radius: 3px; background: #00f2fe; }
+        .screen-desc { font-size: 10px; color: #94a3b8; padding: 14px 16px 0 16px; }
         .section-block { margin-top: 14px; display: flex; flex-direction: column; }
         .section-header { display: flex; justify-content: space-between; align-items: center; padding: 0 16px; }
         .section-title-wrapper { display: flex; align-items: center; gap: 6px; }
@@ -56,7 +31,7 @@
         .card-row { display: flex; gap: 10px; overflow-x: auto; padding: 2px 16px 4px 16px; scrollbar-width: none; }
         .card-row::-webkit-scrollbar { display: none; }
         .card-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; padding: 16px; }
-        .channel-card { min-width: 115px; height: 135px; background: linear-gradient(145deg, #0f172a, #090d16); border: 1px solid rgba(0, 242, 254, 0.2); border-radius: 12px; display: flex; flex-direction: column; align-items: center; justify-content: space-between; padding: 8px; position: relative; cursor: pointer; flex-shrink: 0; text-decoration: none; color: #fff; transition: transform 0.2s, border-color 0.2s; overflow: hidden; }
+        .channel-card { min-width: 115px; height: 135px; background: linear-gradient(145deg, #1a2338, #141b2d); border: 1px solid rgba(0, 242, 254, 0.2); border-radius: 12px; display: flex; flex-direction: column; align-items: center; justify-content: space-between; padding: 8px; position: relative; cursor: pointer; flex-shrink: 0; text-decoration: none; color: #fff; transition: transform 0.2s, border-color 0.2s; overflow: hidden; }
         .card-grid .channel-card { width: 100%; height: 155px; min-width: unset; }
         .channel-card:hover { transform: translateY(-2px); border-color: #00f2fe; }
         /* Circle thumbnail: poori image circle ke andar, bg colour auto match */
@@ -86,30 +61,102 @@
         .player-body { flex: 1; position: relative; background: #000; min-height: 0; }
         .player-body .video-js { position: absolute; inset: 0; width: 100%; height: 100%; background-color: #000; }
 
-        .bottom-nav { position: absolute; bottom: 0; left: 0; width: 100%; height: 60px; background: rgba(3, 7, 18, 0.92); backdrop-filter: blur(12px); border-top: 1px solid rgba(255, 255, 255, 0.08); display: flex; justify-content: space-around; align-items: center; z-index: 20; }
-        .nav-item { display: flex; flex-direction: column; align-items: center; gap: 3px; color: #64748b; text-decoration: none; font-size: 9.5px; cursor: pointer; transition: color 0.3s; position: relative; padding: 4px 10px; }
-        .nav-item i { font-size: 16px; }
-        .nav-item.active { color: #00f2fe; }
-        .nav-item.active::after { content: ''; position: absolute; bottom: 0px; width: 18px; height: 2.5px; background: #00f2fe; border-radius: 2px; box-shadow: 0 0 6px #00f2fe; }
-        .toast-popup { position: absolute; top: 65px; left: 50%; transform: translateX(-50%) translateY(-15px); background: rgba(15, 23, 42, 0.95); border: 1px solid #00f2fe; color: #fff; padding: 6px 14px; border-radius: 20px; font-size: 10px; box-shadow: 0 5px 15px rgba(0,0,0,0.5); z-index: 200; opacity: 0; pointer-events: none; transition: all 0.3s ease; max-width: 90%; text-align: center; }
+        .toast-popup { position: absolute; top: 76px; left: 50%; transform: translateX(-50%) translateY(-15px); background: rgba(15, 23, 42, 0.95); border: 1px solid #00f2fe; color: #fff; padding: 6px 14px; border-radius: 20px; font-size: 10px; box-shadow: 0 5px 15px rgba(0,0,0,0.5); z-index: 200; opacity: 0; pointer-events: none; transition: all 0.3s ease; max-width: 90%; text-align: center; }
         .toast-popup.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+        /* ===== TOP BAR ===== */
+        .header { display: flex; justify-content: space-between; align-items: center; padding: 16px 18px; background: #212839; flex-shrink: 0; z-index: 10; }
+        .screen-title { font-family: 'Jost', 'Poppins', sans-serif; font-size: 30px; font-weight: 500; letter-spacing: .3px; line-height: 1.1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .header-icons { display: flex; gap: 26px; color: #fff; font-size: 21px; flex-shrink: 0; }
+        .header-icons i { cursor: pointer; padding: 4px; transition: color .2s; }
+        .header-icons i:hover { color: #00f2fe; }
+        @keyframes spin { to { transform: rotate(360deg); } }
+        .header-icons i.spin { animation: spin .8s linear infinite; }
+
+        /* ===== FLOATING BOTTOM NAV ===== */
+        .bottom-nav { position: absolute; left: 12px; right: 12px; bottom: 14px; height: 64px; border-radius: 36px; background: #212839; border: 1px solid rgba(255,255,255,.08); box-shadow: 0 10px 28px rgba(0,0,0,.6), inset 0 1px 0 rgba(255,255,255,.06); display: flex; align-items: center; z-index: 20; }
+        .nav-item { position: relative; z-index: 1; flex: 1; height: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px; color: #94a3b8; font-size: 9.5px; font-weight: 600; cursor: pointer; text-decoration: none; transition: color .25s; }
+        .nav-item i { font-size: 19px; }
+        .nav-item::before { content: ''; position: absolute; left: 50%; top: 50%; width: 58px; height: 58px; border-radius: 50%; background: linear-gradient(135deg, #00f2fe, #7000ff); box-shadow: 0 0 14px rgba(0,242,254,.45); z-index: -1; transform: translate(-50%, -50%) scale(0); transition: transform .25s ease; }
+        .nav-item.active { color: #fff; }
+        .nav-item.active::before { transform: translate(-50%, -50%) scale(1); }
+
+        /* ===== MENU SCREEN ===== */
+        .menu-list { display: flex; flex-direction: column; gap: 10px; padding: 16px; }
+        .menu-item { display: flex; align-items: center; gap: 12px; background: linear-gradient(145deg, #1a2338, #141b2d); border: 1px solid rgba(0,242,254,.2); border-radius: 12px; padding: 14px; font-size: 12.5px; font-weight: 600; cursor: pointer; }
+        .menu-item > i:first-child { color: #00f2fe; width: 20px; text-align: center; font-size: 15px; }
+        .menu-item span { flex: 1; }
+        .menu-item .arrow { color: #64748b; font-size: 11px; }
+
+        /* ===== POPUPS (Notification / Connect Us / Update) ===== */
+        .popup-overlay { position: absolute; inset: 0; background: rgba(3,7,18,.78); backdrop-filter: blur(4px); z-index: 180; display: none; align-items: center; justify-content: center; padding: 22px; }
+        .popup-overlay.active { display: flex; }
+        .popup-box { width: 100%; max-height: 78%; display: flex; flex-direction: column; background: #212839; border: 1px solid rgba(0,242,254,.3); border-radius: 18px; padding: 18px; box-shadow: 0 12px 40px rgba(0,0,0,.6); }
+        .popup-head { font-size: 15px; font-weight: 700; color: #00f2fe; display: flex; align-items: center; gap: 8px; margin-bottom: 12px; }
+        .popup-body { overflow-y: auto; display: flex; flex-direction: column; gap: 10px; margin-bottom: 14px; scrollbar-width: none; }
+        .popup-body::-webkit-scrollbar { display: none; }
+        .notif-item { background: #0e1525; border-radius: 12px; padding: 11px 12px; }
+        .notif-title { font-size: 12.5px; font-weight: 700; margin-bottom: 3px; }
+        .notif-msg { font-size: 11.5px; color: #cbd5e1; line-height: 1.45; white-space: pre-wrap; word-break: break-word; user-select: text; }
+        .popup-btns { display: flex; gap: 8px; }
+        .popup-btn { flex: 1; border: none; border-radius: 24px; padding: 10px; font-size: 12.5px; font-weight: 600; color: #fff; background: linear-gradient(135deg, #00f2fe, #7000ff); cursor: pointer; }
+        .popup-btn.secondary { background: #334155; }
+        .connect-row { display: flex; align-items: center; gap: 12px; background: #0e1525; border-radius: 12px; padding: 12px; font-size: 12.5px; font-weight: 600; cursor: pointer; }
+        .connect-row > i:first-child { font-size: 20px; width: 24px; text-align: center; }
+        .connect-row span { flex: 1; }
+        .connect-row .arrow { color: #64748b; font-size: 11px; }
+
+        /* ===== LIVE EVENTS (match feed) ===== */
+        .ticker { margin: 12px 12px 0; background: #161e30; border: 1px solid rgba(0,242,254,.25); border-radius: 12px; padding: 10px 0; overflow: hidden; white-space: nowrap; flex-shrink: 0; }
+        .ticker-track { display: inline-block; padding-left: 100%; font-size: 13px; font-weight: 500; animation: tick var(--dur, 20s) linear infinite; }
+        @keyframes tick { from { transform: translateX(0); } to { transform: translateX(-100%); } }
+        .chip-row { display: flex; gap: 10px; overflow-x: auto; padding: 14px 12px 4px; scrollbar-width: none; flex-shrink: 0; }
+        .chip-row::-webkit-scrollbar { display: none; }
+        .cat-chip { position: relative; flex-shrink: 0; min-width: 78px; height: 62px; padding: 6px 8px; border-radius: 14px; background: #161e30; border: 1px solid #243049; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 5px; cursor: pointer; font-size: 10px; font-weight: 500; color: #cbd5e1; }
+        .cat-chip i { font-size: 20px; }
+        .cat-chip.active { border-color: #00d4e6; background: #12263a; color: #fff; box-shadow: 0 0 10px rgba(0,242,254,.25); }
+        .cat-chip .badge { position: absolute; top: -5px; left: -4px; min-width: 19px; height: 19px; padding: 0 5px; border-radius: 10px; background: #ff4b3e; color: #fff; font-size: 10px; font-weight: 700; display: flex; align-items: center; justify-content: center; }
+        .pill-row { display: flex; gap: 10px; overflow-x: auto; padding: 12px 12px 6px; scrollbar-width: none; flex-shrink: 0; }
+        .pill-row::-webkit-scrollbar { display: none; }
+        .pill { flex-shrink: 0; padding: 8px 18px; border-radius: 24px; background: #161e30; border: 1px solid #2a3753; font-size: 12.5px; font-weight: 500; color: #cbd5e1; cursor: pointer; display: flex; align-items: center; gap: 6px; white-space: nowrap; }
+        .pill.active { border-color: #00d4e6; color: #fff; background: #12263a; }
+        .match-list { padding: 8px 12px 0; display: flex; flex-direction: column; gap: 12px; }
+        .match-card { position: relative; overflow: hidden; background: linear-gradient(145deg, #1a2338, #141b2d); border: 1px solid #263451; border-radius: 14px; padding: 11px 12px 10px; cursor: pointer; }
+        .m-head { font-size: 12px; font-weight: 600; letter-spacing: .2px; display: flex; align-items: center; gap: 7px; padding-right: 64px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; text-transform: uppercase; }
+        .m-head i { color: #00d4e6; font-size: 12px; }
+        .m-hot { position: absolute; top: 0; right: 0; background: #12c4d6; color: #fff; font-size: 12px; font-weight: 700; padding: 4px 18px 5px 20px; border-bottom-left-radius: 16px; }
+        .m-body { display: flex; align-items: center; justify-content: space-between; gap: 6px; margin-top: 10px; }
+        .m-team { display: flex; align-items: center; gap: 10px; flex: 1; min-width: 0; }
+        .m-team.right { flex-direction: row-reverse; text-align: right; }
+        .m-flag { width: 54px; height: 54px; border-radius: 50%; flex-shrink: 0; display: flex; align-items: center; justify-content: center; font-size: 30px; font-weight: 700; color: #fff; background: #0e1525; border: 1px solid #2b3956; overflow: hidden; }
+        .m-info { min-width: 0; }
+        .m-name { font-size: 14px; font-weight: 600; white-space: nowrap; }
+        .m-run { font-size: 10.5px; color: #9fb0c8; margin-top: 2px; white-space: nowrap; }
+        .m-mid { width: 70px; flex-shrink: 0; text-align: center; font-size: 11px; font-weight: 600; }
+        .m-status.live { color: #ff3b5c; }
+        .m-status.live::before { content: ''; display: block; width: 6px; height: 6px; margin: 0 auto 3px; border-radius: 50%; background: #ff3b5c; animation: pulse 1.2s infinite; }
+        .m-status.up { color: #f5b301; }
+        .m-status.done { color: #94a3b8; }
+        @keyframes pulse { 0%,100% { opacity: 1; transform: scale(1); } 50% { opacity: .35; transform: scale(.7); } }
+        .m-timer { text-align: center; margin-top: 8px; font-size: 15px; font-weight: 600; font-variant-numeric: tabular-nums; letter-spacing: .4px; }
+        .m-timer small { display: block; font-size: 9.5px; font-weight: 400; color: #94a3b8; letter-spacing: 0; margin-bottom: 1px; }
+        .m-when { text-align: center; font-size: 10.5px; color: #cbd5e1; margin-top: 4px; }
+        .m-over { text-align: center; font-size: 10.5px; color: #cbd5e1; margin-top: 6px; line-height: 1.35; }
+        .kv { display: flex; justify-content: space-between; gap: 10px; font-size: 11.5px; padding: 6px 0; border-bottom: 1px solid #1d2840; }
+        .kv:last-child { border-bottom: none; }
+        .kv b { color: #00f2fe; font-weight: 600; flex-shrink: 0; }
+        .kv span { text-align: right; color: #e2e8f0; }
     </style>
 </head>
 <body>
 
     <div class="app-container">
         <div class="header">
-            <div class="logo-area">
-                <div class="logo-main" onclick="switchScreen('home', document.querySelectorAll('.nav-item')[0])">
-                    <img id="logoImg" src="" class="logo-img" alt="Logo">
-                    SPRtix
-                </div>
-                <div class="logo-sub">LIVE TV &bull; MOVIES &bull; ENTERTAINMENT</div>
-            </div>
+            <div id="screenTitle" class="screen-title">SPRtix</div>
             <div class="header-icons">
-                <i class="fa-solid fa-bell notification-dot" onclick="showNotificationAlert()" title="Notifications"></i>
-                <i class="fa-solid fa-magnifying-glass" onclick="toggleSearch()" title="Search"></i>
                 <i class="fa-solid fa-share-nodes" onclick="shareApp()" title="Share"></i>
+                <i class="fa-solid fa-rotate-right" id="refreshIcon" onclick="refreshData()" title="Refresh"></i>
+                <i class="fa-solid fa-magnifying-glass" onclick="toggleSearch()" title="Search"></i>
             </div>
         </div>
 
@@ -119,6 +166,9 @@
         </div>
 
         <div id="toastPopup" class="toast-popup">Message</div>
+
+        <!-- Popup (Notification / Connect Us / Update) -->
+        <div id="popupOverlay" class="popup-overlay"><div class="popup-box" id="popupBox"></div></div>
 
         <!-- Video Player Modal -->
         <div id="playerModal" class="player-modal">
@@ -133,13 +183,13 @@
 
         <!-- HOME -->
         <div id="homeScreen" class="screen active-screen">
-            <div class="banner-slider">
-                <button class="slider-arrow prev-arrow" onclick="moveSlide(-1)"><i class="fa-solid fa-chevron-left"></i></button>
-                <button class="slider-arrow next-arrow" onclick="moveSlide(1)"><i class="fa-solid fa-chevron-right"></i></button>
-                <div class="banner-track" id="bannerTrack"></div>
-                <div class="slider-dots" id="sliderDots"></div>
-            </div>
+            <div id="tickerBar" class="ticker" style="display:none;"><div id="tickerText" class="ticker-track"></div></div>
+            <div id="catChips" class="chip-row"></div>
+            <div id="statusPills" class="pill-row"></div>
+            <div id="matchList" class="match-list"></div>
 
+            <!-- purana home content (Trending/News/Favourites): abhi hidden, data/JS ke liye rakha hai -->
+            <div style="display:none;">
             <div class="section-block">
                 <div class="section-header">
                     <div class="section-title-wrapper">
@@ -160,7 +210,7 @@
                         <i class="fa-solid fa-newspaper" style="font-size: 11px; color: #00f2fe;"></i>
                         <div class="section-title">NEWS & <span>UPDATES</span></div>
                     </div>
-                    <div class="view-all" onclick="switchScreen('news', document.querySelectorAll('.nav-item')[2])">VIEW ALL <i class="fa-solid fa-chevron-right" style="font-size: 7.5px;"></i></div>
+                    <div class="view-all" onclick="switchScreen('news')">VIEW ALL <i class="fa-solid fa-chevron-right" style="font-size: 7.5px;"></i></div>
                 </div>
                 <div class="section-subtitle">Latest Breaking News Bulletins</div>
                 <div class="card-row" id="homeNewsContainer"></div>
@@ -172,43 +222,54 @@
                         <i class="fa-solid fa-heart" style="color: #00f2fe; font-size: 11px;"></i>
                         <div class="section-title">YOUR <span>FAVOURITES</span></div>
                     </div>
-                    <div class="view-all" onclick="switchScreen('saved', document.querySelectorAll('.nav-item')[3])">VIEW ALL <i class="fa-solid fa-chevron-right" style="font-size: 7.5px;"></i></div>
+                    <div class="view-all" onclick="switchScreen('saved')">VIEW ALL <i class="fa-solid fa-chevron-right" style="font-size: 7.5px;"></i></div>
                 </div>
                 <div class="section-subtitle">Quick Access to Your Favourite Channels</div>
                 <div class="card-row" id="favouritesContainer"></div>
             </div>
+            </div>
         </div>
 
         <div id="liveScreen" class="screen">
-            <div class="screen-header-title"><i class="fa-solid fa-tv"></i> Live TV Channels</div>
             <div class="screen-desc">Stream Live Television Broadcasts</div>
             <div class="card-grid" id="liveTvGrid"></div>
         </div>
 
         <div id="newsScreen" class="screen">
-            <div class="screen-header-title"><i class="fa-solid fa-newspaper"></i> News & Updates</div>
             <div class="screen-desc">Latest Breaking News & Live Bulletins</div>
             <div class="card-grid" id="newsGrid"></div>
         </div>
 
         <div id="savedScreen" class="screen">
-            <div class="screen-header-title"><i class="fa-solid fa-heart"></i> Saved Favourites</div>
             <div class="screen-desc">Your Bookmarked Channels & Streams</div>
             <div class="card-grid" id="savedGrid"></div>
         </div>
 
         <div id="exploreScreen" class="screen">
-            <div class="screen-header-title"><i class="fa-solid fa-compass"></i> Explore Categories</div>
             <div class="screen-desc">Browse All Available Categories & Playlists</div>
             <div class="card-grid" id="exploreGrid"></div>
         </div>
 
+        <div id="worldwideScreen" class="screen">
+            <div class="screen-desc">Worldwide Categories & Channels</div>
+            <div class="card-grid" id="worldwideGrid"></div>
+        </div>
+
+        <div id="menuScreen" class="screen">
+            <div class="menu-list">
+                <div class="menu-item" onclick="openConnectUs()"><i class="fa-solid fa-headset"></i><span>Connect Us</span><i class="fa-solid fa-chevron-right arrow"></i></div>
+                <div class="menu-item" onclick="checkUpdate()"><i class="fa-solid fa-cloud-arrow-down"></i><span>Check Update</span><i class="fa-solid fa-chevron-right arrow"></i></div>
+                <div class="menu-item" onclick="shareApp()"><i class="fa-solid fa-share-nodes"></i><span>Share App</span><i class="fa-solid fa-chevron-right arrow"></i></div>
+                <div class="menu-item" onclick="refreshData()"><i class="fa-solid fa-rotate-right"></i><span>Refresh Data</span><i class="fa-solid fa-chevron-right arrow"></i></div>
+            </div>
+        </div>
+
         <div class="bottom-nav">
-            <a class="nav-item active" onclick="switchScreen('home', this)"><i class="fa-solid fa-house"></i><span>Home</span></a>
-            <a class="nav-item" onclick="switchScreen('live', this)"><i class="fa-solid fa-tv"></i><span>Live TV</span></a>
-            <a class="nav-item" onclick="switchScreen('news', this)"><i class="fa-solid fa-newspaper"></i><span>News</span></a>
-            <a class="nav-item" onclick="switchScreen('saved', this)"><i class="fa-solid fa-heart"></i><span>Saved</span></a>
-            <a class="nav-item" onclick="switchScreen('explore', this)"><i class="fa-solid fa-compass"></i><span>Explore</span></a>
+            <a class="nav-item" data-screen="saved" onclick="switchScreen('saved')"><i class="fa-solid fa-heart"></i><span>Favourite</span></a>
+            <a class="nav-item" data-screen="worldwide" onclick="switchScreen('worldwide')"><i class="fa-solid fa-globe"></i><span>Worldwide</span></a>
+            <a class="nav-item active" data-screen="home" onclick="switchScreen('home')"><i class="fa-solid fa-tower-broadcast"></i><span>Live Event</span></a>
+            <a class="nav-item" data-screen="explore" onclick="switchScreen('explore')"><i class="fa-solid fa-compass"></i><span>Explore</span></a>
+            <a class="nav-item" data-screen="menu" onclick="switchScreen('menu')"><i class="fa-solid fa-bars"></i><span>Menu</span></a>
         </div>
     </div>
 
@@ -219,7 +280,7 @@
         /* ============================================================
            GITHUB DATA (Firebase ki jagah)
            Data repo ke  data/  folder ki JSON files se aata hai:
-           settings, sliders, liveChannels, liveTvScreen, newsUpdates, playlist
+           settings, notifications, liveChannels, liveTvScreen, newsUpdates, playlist
            ============================================================ */
         const GH_USER   = 'qlsopamensuqzfbenwkaid';   // <- apna GitHub username
         const GH_REPO   = 'Mwowjxjdlp';               // <- jis repo mein data/ folder hai
@@ -240,6 +301,8 @@
             }
             return data;
         }
+
+        const dataLoaders = [];
 
         const database = {
             ref(name) {
@@ -270,6 +333,7 @@
                                 if (lastText === null) deliver('null'); // pehli baar aur kuch nahi mila
                             }
                         };
+                        dataLoaders.push(load);
                         load();
                         setInterval(load, REFRESH_MS);
                     }
@@ -281,9 +345,8 @@
             '<svg xmlns="http://www.w3.org/2000/svg" width="100" height="70" viewBox="0 0 100 70"><rect width="100" height="70" fill="#0f172a"/><text x="50" y="40" font-size="14" fill="#00f2fe" text-anchor="middle" font-family="Arial">SPRtix</text></svg>'
         );
 
-        let currentSlideIndex = 0;
-        let slideInterval;
-        let globalSettings = { notification: "Welcome to SPRtix Live TV & Movies!", shareMessage: "Download SPRtix App now!" };
+        let globalSettings = { shareMessage: "Download SPRtix App now!" };
+        const APP_VERSION = '4.8.1';   // <- apni APK ka versionName yahan likhein (Check Update isi se compare karta hai)
         let favourites = {};
         try { favourites = JSON.parse(localStorage.getItem('sprtix_favs') || '{}'); } catch (e) { favourites = {}; }
         let playerInstance = null;
@@ -303,10 +366,12 @@
         }
 
         window.addEventListener('DOMContentLoaded', () => {
-            document.getElementById('logoImg').src = PLACEHOLDER; // put a DIRECT image link here (.png/.jpg), not a Google Photos page link
-            initPlayer();
+            try { initPlayer(); } catch (e) { console.error('Player load nahi hua', e); } // player na bhi load ho to data phir bhi aaye
             fetchDatabaseData();
             document.addEventListener('click', onDocumentClick);
+            loadMatches();
+            setInterval(loadMatches, 60000);   // har 1 minute mein score/status refresh
+            setInterval(tickTimers, 1000);     // har second timer
         });
 
         /* ---------------- PLAYER ---------------- */
@@ -347,6 +412,7 @@
             url = (url || '').trim();
             if (!url) { showToast('Stream URL not available!'); return; }
 
+            if (!playerInstance) { showToast('Player load nahi hua, internet check karke dobara kholein'); return; }
             document.getElementById('playerTitle').innerText = title || 'Live Stream';
             document.getElementById('playerModal').classList.add('active');
 
@@ -466,41 +532,11 @@
 
         function fetchDatabaseData() {
             database.ref('settings').on('value', snap => {
-                if (snap.exists()) globalSettings = snap.val();
+                if (snap.exists()) { globalSettings = snap.val(); updateTicker(); }
             });
 
-            // Sliders
-            database.ref('sliders').on('value', snap => {
-                const track = document.getElementById('bannerTrack');
-                const dotsContainer = document.getElementById('sliderDots');
-                track.innerHTML = '';
-                dotsContainer.innerHTML = '';
-                currentSlideIndex = 0;
-                updateSliderPosition();
-                const data = snap.val();
-                if (!data) return;
-                Object.keys(data).forEach((key, index) => {
-                    const item = data[key];
-                    const id = storeItem('slider', key, item);
-                    const slide = document.createElement('div');
-                    slide.className = 'banner-slide';
-                    slide.style.backgroundImage = `url("${(item.image || '').replace(/"/g, '%22')}")`;
-                    slide.innerHTML = `
-                        <div class="banner-content">
-                            <span class="badge-episode">${esc(item.badge || 'FEATURED')}</span>
-                            <div class="banner-title">${esc(item.title)}</div>
-                            <div class="banner-desc">${esc(item.desc)}</div>
-                            <button class="watch-btn" data-id="${id}"><i class="fa-solid fa-play"></i> Watch Now</button>
-                        </div>`;
-                    slide.querySelector('.watch-btn').addEventListener('click', () => playStream(item.url, item.title));
-                    track.appendChild(slide);
-                    const dot = document.createElement('div');
-                    dot.className = 'dot' + (index === 0 ? ' active' : '');
-                    dot.onclick = () => goToSlide(index);
-                    dotsContainer.appendChild(dot);
-                });
-                startSliderAutoPlay();
-            });
+            // Notifications (app khulte hi popup, skip ke baad dobara nahi)
+            database.ref('notifications').on('value', snap => checkNotifications(snap.val()));
 
             // Trending Live
             database.ref('liveChannels').on('value', snap => {
@@ -554,38 +590,37 @@
                 });
             });
 
+            // Worldwide (Explore ki tarah categories)
+            database.ref('worldwide').on('value', snap => {
+                const grid = document.getElementById('worldwideGrid');
+                grid.innerHTML = '';
+                const data = snap.val();
+                if (!data) { grid.innerHTML = emptyMsg('Nothing here yet.'); return; }
+                Object.keys(data).forEach(key => {
+                    const item = data[key];
+                    grid.appendChild(buildCard('ww', key, item, { link: true, sub: item.category || 'WORLDWIDE', badge: 'GO', badgeStyle: 'background:#7000ff;', icon: 'fa-link', right: 'Link' }));
+                });
+            });
+
             renderFavourites();
         }
 
         /* ---------------- NAV / SLIDER ---------------- */
-        function switchScreen(screenName, navElement) {
+        function switchScreen(screenName) {
             document.querySelectorAll('.screen').forEach(s => s.classList.remove('active-screen'));
-            document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+            document.querySelectorAll('.nav-item').forEach(n => n.classList.toggle('active', n.dataset.screen === screenName));
             const target = document.getElementById(screenName + 'Screen');
-            if (target) target.classList.add('active-screen');
+            if (target) { target.classList.add('active-screen'); target.scrollTop = 0; }
             if (screenName === 'saved') renderFavourites();
-            if (navElement) navElement.classList.add('active');
-            else {
-                const idx = ['home', 'live', 'news', 'saved', 'explore'].indexOf(screenName);
-                const nav = document.querySelectorAll('.nav-item')[idx];
-                if (nav) nav.classList.add('active');
-            }
         }
 
-        function moveSlide(direction) {
-            const total = document.getElementById('bannerTrack').children.length;
-            if (total === 0) return;
-            currentSlideIndex = (currentSlideIndex + direction + total) % total;
-            updateSliderPosition();
-        }
-        function goToSlide(index) { currentSlideIndex = index; updateSliderPosition(); }
-        function updateSliderPosition() {
-            document.getElementById('bannerTrack').style.transform = `translateX(-${currentSlideIndex * 100}%)`;
-            document.querySelectorAll('.slider-dots .dot').forEach((d, i) => d.classList.toggle('active', i === currentSlideIndex));
-        }
-        function startSliderAutoPlay() {
-            clearInterval(slideInterval);
-            slideInterval = setInterval(() => moveSlide(1), 4500);
+        function refreshData() {
+            const icon = document.getElementById('refreshIcon');
+            icon.classList.add('spin');
+            Promise.all([...dataLoaders.map(f => f()), loadMatches()]).finally(() => {
+                icon.classList.remove('spin');
+                showToast('Data refresh ho gaya');
+            });
         }
 
         /* ---------------- FAVOURITES ---------------- */
@@ -636,12 +671,422 @@
 
         function filterCategories(query) {
             const q = (query || '').trim().toLowerCase();
-            document.querySelectorAll('.channel-card').forEach(c => {
+            document.querySelectorAll('.channel-card, .match-card').forEach(c => {
                 c.style.display = (!q || (c.dataset.search || '').includes(q)) ? '' : 'none';
             });
         }
 
-        function showNotificationAlert() { showToast(globalSettings.notification || "No new notifications."); }
+
+        /* ============ LIVE EVENTS (Cricket matches) ============ */
+        const CRIC_API = 'https://cricbuzz-live.vercel.app/v1';
+        const CRIC_TYPES = ['international', 'league', 'domestic', 'women'];
+        const CRIC_STATUSES = ['live', 'recent', 'upcoming'];
+        const CRIC_TZ_OFFSET_MIN = 0;   // API ke time ki timezone (UTC = 0, Pakistan = 300)
+        const CAT_META = {
+            all: ['All', 'fa-layer-group'], international: ['International', 'fa-globe'], league: ['League', 'fa-trophy'],
+            domestic: ['Domestic', 'fa-flag'], women: ['Women', 'fa-person-dress']
+        };
+        const COUNTRIES = {
+            'pakistan': ['PAK', '🇵🇰'], 'india': ['IND', '🇮🇳'], 'sri lanka': ['SL', '🇱🇰'], 'bangladesh': ['BAN', '🇧🇩'],
+            'afghanistan': ['AFG', '🇦🇫'], 'australia': ['AUS', '🇦🇺'], 'england': ['ENG', '🇬🇧'], 'south africa': ['SA', '🇿🇦'],
+            'new zealand': ['NZ', '🇳🇿'], 'zimbabwe': ['ZIM', '🇿🇼'], 'ireland': ['IRE', '🇮🇪'], 'netherlands': ['NED', '🇳🇱'],
+            'nepal': ['NEP', '🇳🇵'], 'united arab emirates': ['UAE', '🇦🇪'], 'uae': ['UAE', '🇦🇪'], 'oman': ['OMA', '🇴🇲'],
+            'scotland': ['SCO', '🇬🇧'], 'namibia': ['NAM', '🇳🇦'], 'usa': ['USA', '🇺🇸'], 'united states': ['USA', '🇺🇸'],
+            'canada': ['CAN', '🇨🇦'], 'kenya': ['KEN', '🇰🇪'], 'uganda': ['UGA', '🇺🇬'], 'papua new guinea': ['PNG', '🇵🇬'],
+            'hong kong': ['HK', '🇭🇰'], 'malaysia': ['MAS', '🇲🇾'], 'singapore': ['SIN', '🇸🇬'], 'qatar': ['QAT', '🇶🇦'],
+            'kuwait': ['KUW', '🇰🇼'], 'saudi arabia': ['KSA', '🇸🇦'], 'bahrain': ['BHR', '🇧🇭'], 'thailand': ['THA', '🇹🇭'],
+            'japan': ['JPN', '🇯🇵'], 'italy': ['ITA', '🇮🇹'], 'germany': ['GER', '🇩🇪']
+        };
+        let allMatches = [], catFilter = 'all', statusFilter = 'all', matchesLoading = false;
+
+        function cleanText(x) { return String(x == null ? '' : x).replace(/&nbsp;|\u00a0/g, ' ').replace(/[•·]/g, ' ').replace(/\s+/g, ' ').trim(); }
+        function hashColor(str) {
+            let h = 0; for (let i = 0; i < str.length; i++) h = (h * 31 + str.charCodeAt(i)) >>> 0;
+            return `hsl(${h % 360}, 45%, 38%)`;
+        }
+        function teamInfo(name) {
+            name = cleanText(name);
+            const u19 = name.match(/\bU-?(\d{2})\b/i);
+            const women = /\bwomen'?s?\b|\(w\)|\bW\b/i.test(name);
+            let base = name.replace(/\bU-?\d{2}\b/ig, '').replace(/\bwomen'?s?\b/ig, '').replace(/\(w\)/ig, '').replace(/\s+/g, ' ').trim();
+            const c = COUNTRIES[base.toLowerCase()];
+            let code;
+            if (c) code = c[0];
+            else {
+                const words = base.split(' ').filter(Boolean);
+                code = words.length > 1 ? words.map(w => w[0]).join('').toUpperCase().slice(0, 4) : base.slice(0, 3).toUpperCase();
+            }
+            if (u19) code += '-U' + u19[1];
+            if (women) code += '-W';
+            return { name, code: code || '?', flag: c ? c[1] : '', initials: (code || '?').replace(/-.*/, '').slice(0, 3), color: hashColor(base || name), run: '' };
+        }
+
+        // API ke date/time text se start time (ms) nikalta hai; na mile to null
+        function parseStartMs(tp) {
+            if (!tp) return null;
+            const date = cleanText(tp.date), time = cleanText(tp.time);
+            const full = (date + ' ' + time).trim();
+            let tm = full.match(/(\d{1,2}):(\d{2})\s*(AM|PM)?\s*(?:GMT|UTC)/i), off = CRIC_TZ_OFFSET_MIN;
+            if (tm) off = 0; else tm = full.match(/(\d{1,2}):(\d{2})\s*(AM|PM)?/i);
+            if (!tm) return null;
+            let h = +tm[1]; const mi = +tm[2], ap = (tm[3] || '').toUpperCase();
+            if (ap === 'PM' && h < 12) h += 12;
+            if (ap === 'AM' && h === 12) h = 0;
+            const now = new Date(Date.now() + off * 60000);
+            let y = now.getUTCFullYear(), mo = now.getUTCMonth(), d = now.getUTCDate();
+            const dl = date.toLowerCase();
+            if (/tomorrow/.test(dl)) d += 1;
+            else if (/yesterday/.test(dl)) d -= 1;
+            else if (dl && !/today/.test(dl)) {
+                const MON = 'jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec';
+                const names = MON.split('|');
+                let m1 = dl.match(new RegExp('(' + MON + ')[a-z]*\\.?\\s*(\\d{1,2})')), m2 = dl.match(new RegExp('(\\d{1,2})\\s*(' + MON + ')'));
+                if (m1) { mo = names.indexOf(m1[1]); d = +m1[2]; }
+                else if (m2) { mo = names.indexOf(m2[2]); d = +m2[1]; }
+                else return null;
+                const yy = dl.match(/\b(20\d{2})\b/);
+                if (yy) y = +yy[1];
+                else if (Date.UTC(y, mo, d) < now.getTime() - 90 * 86400000) y += 1;
+            }
+            return Date.UTC(y, mo, d, h, mi) - off * 60000;
+        }
+
+        function getStarts() { try { return JSON.parse(localStorage.getItem('sprtix_starts') || '{}'); } catch (e) { return {}; } }
+
+        function normalizeMatch(raw, starts) {
+            const title = cleanText(raw.title).replace(/\s*-\s*Live Cricket Score.*$/i, '');
+            const parts = title.split(',');
+            const head = parts[0].trim();
+            const label = parts.slice(1).join(',').trim();
+            const teamsRaw = Array.isArray(raw.teams) ? raw.teams : [];
+            let names = head.split(/\s+vs\s+/i).map(x => x.trim());
+            if (names.length < 2) names = [(teamsRaw[0] && teamsRaw[0].team) || 'Team 1', (teamsRaw[1] && teamsRaw[1].team) || 'Team 2'];
+            const t1 = teamInfo(names[0]), t2 = teamInfo(names[1]);
+            t1.run = cleanText(teamsRaw[0] && teamsRaw[0].run);
+            t2.run = cleanText(teamsRaw[1] && teamsRaw[1].run);
+            const tp = raw.timeAndPlace || {};
+            const m = {
+                id: String(raw.id), type: raw.type || 'international', status: raw.status, label, t1, t2,
+                overview: cleanText(raw.overview), place: cleanText(tp.place), dateText: cleanText(tp.date), timeText: cleanText(tp.time),
+                startMs: null, approx: false
+            };
+            let ms = parseStartMs(tp);
+            if (m.status === 'upcoming') {
+                if (ms) { starts[m.id] = { ms, approx: false }; m.startMs = ms; }
+            } else if (m.status === 'live') {
+                const cached = starts[m.id];
+                if (ms && ms <= Date.now() + 60000) { m.startMs = ms; starts[m.id] = { ms, approx: false }; }
+                else if (cached && !cached.approx) { m.startMs = cached.ms; }
+                else if (raw.liveSince && Date.parse(raw.liveSince)) { m.startMs = Date.parse(raw.liveSince); m.approx = true; }
+                else if (cached) { m.startMs = cached.ms; m.approx = true; }
+                else { m.startMs = Date.now(); m.approx = true; starts[m.id] = { ms: m.startMs, approx: true }; }
+            }
+            m.search = (names[0] + ' ' + names[1] + ' ' + t1.code + ' ' + t2.code + ' ' + label + ' ' + m.type).toLowerCase();
+            return m;
+        }
+
+        async function fetchJSON(url, ms) {
+            const ctrl = new AbortController();
+            const t = setTimeout(() => ctrl.abort(), ms || 12000);
+            try {
+                const r = await fetch(url, { signal: ctrl.signal });
+                if (!r.ok) throw new Error(r.status);
+                return await r.json();
+            } finally { clearTimeout(t); }
+        }
+
+        async function loadMatches() {
+            if (matchesLoading) return;
+            matchesLoading = true;
+            if (!allMatches.length) {
+                try { const c = JSON.parse(localStorage.getItem('sprtix_matches') || '[]'); if (c.length) { allMatches = c; renderMatches(); } } catch (e) {}
+                if (!allMatches.length) renderMatches();
+            }
+            const jobs = [];
+            CRIC_TYPES.forEach(t => CRIC_STATUSES.forEach(st => jobs.push(
+                fetchJSON(`${CRIC_API}/matches/${st}?type=${t}`)
+                    .then(j => ({ t, st, list: (j && j.data && j.data.matches) || [] })).catch(() => null)
+            )));
+            const res = (await Promise.all(jobs)).filter(Boolean);
+            let rawList = [];
+            if (res.length) {
+                res.forEach(r => {
+                    const list = r.st === 'recent' ? r.list.slice(0, 10) : r.list;
+                    list.forEach(m => rawList.push(Object.assign({}, m, { status: r.st === 'recent' ? 'finished' : r.st, type: r.t })));
+                });
+            } else {
+                // direct API na chale (CORS/down) to GitHub wali cricket.json se lo (optional Action)
+                try { const j = await fetchJSON(DATA_BASE + 'cricket.json?t=' + Date.now()); rawList = (j && j.matches) || []; } catch (e) {}
+            }
+            if (rawList.length) {
+                const starts = getStarts(), seen = {}, out = [];
+                rawList.forEach(r => {
+                    if (!r || r.id == null || seen[r.id]) return;
+                    seen[r.id] = 1;
+                    out.push(normalizeMatch(r, starts));
+                });
+                const lim = Date.now() - 4 * 86400000;
+                Object.keys(starts).forEach(k => { if (starts[k].ms < lim) delete starts[k]; });
+                try { localStorage.setItem('sprtix_starts', JSON.stringify(starts)); localStorage.setItem('sprtix_matches', JSON.stringify(out)); } catch (e) {}
+                allMatches = out;
+            } else if (!allMatches.length) {
+                showToast('Matches load nahi hue. Internet check karein.');
+            }
+            matchesLoading = false;
+            renderMatches(true);
+        }
+
+        function fmtDur(sec) {
+            sec = Math.max(0, Math.floor(sec));
+            const d = Math.floor(sec / 86400), h = Math.floor(sec % 86400 / 3600), m = Math.floor(sec % 3600 / 60), s = sec % 60;
+            const p = n => String(n).padStart(2, '0');
+            return (d ? d + 'd ' : '') + p(h) + ':' + p(m) + ':' + p(s);
+        }
+
+        function tickTimers() {
+            const now = Date.now();
+            document.querySelectorAll('.m-timer[data-ms]').forEach(el => {
+                const ms = +el.dataset.ms, t = el.querySelector('.t');
+                if (!t) return;
+                if (el.dataset.kind === 'up') t.textContent = fmtDur((now - ms) / 1000);
+                else t.textContent = (ms - now) > 0 ? fmtDur((ms - now) / 1000) : 'Starting soon';
+            });
+        }
+
+        function teamHTML(t, right) {
+            const av = t.flag ? `<div class="m-flag">${t.flag}</div>` : `<div class="m-flag" style="background:${t.color};font-size:${t.initials.length <= 2 ? 22 : t.initials.length === 3 ? 16 : 13}px">${esc(t.initials)}</div>`;
+            return `<div class="m-team ${right ? 'right' : ''}">${av}<div class="m-info"><div class="m-name">${esc(t.code)}</div>${t.run ? `<div class="m-run">${esc(t.run)}</div>` : ''}</div></div>`;
+        }
+
+        function matchCardHTML(m) {
+            const typeLabel = (CAT_META[m.type] || [m.type])[0];
+            let mid = '', bottom = '';
+            if (m.status === 'live') {
+                mid = '<div class="m-status live">Live</div>';
+                bottom = `<div class="m-timer" data-kind="up" data-ms="${m.startMs}"><small>${m.approx ? 'Live since ~' : 'Live since'}</small><span class="t">--:--:--</span></div>`
+                    + (m.overview ? `<div class="m-over">${esc(m.overview)}</div>` : '');
+            } else if (m.status === 'upcoming') {
+                mid = '<div class="m-status up">Upcoming</div>';
+                if (m.startMs) {
+                    const when = new Date(m.startMs).toLocaleString([], { weekday: 'short', day: 'numeric', month: 'short', hour: 'numeric', minute: '2-digit' });
+                    bottom = `<div class="m-timer" data-kind="down" data-ms="${m.startMs}"><small>Starts in</small><span class="t">--:--:--</span></div><div class="m-when">${esc(when)}</div>`;
+                } else {
+                    const txt = [m.dateText, m.timeText].filter(Boolean).join(' • ');
+                    bottom = txt ? `<div class="m-when">${esc(txt)}</div>` : '';
+                }
+                if (m.place) bottom += `<div class="m-over">${esc(m.place)}</div>`;
+            } else {
+                mid = '<div class="m-status done">Finished</div>';
+                bottom = (m.overview ? `<div class="m-over">${esc(m.overview)}</div>` : '') + (m.dateText ? `<div class="m-when">${esc(m.dateText)}</div>` : '');
+            }
+            return `<div class="match-card" data-mid="${esc(m.id)}" data-search="${esc(m.search)}">
+                ${m.status === 'live' ? '<div class="m-hot">HOT</div>' : ''}
+                <div class="m-head"><i class="fa-solid fa-baseball-bat-ball"></i><span>CRICKET | ${esc(typeLabel)}${m.label ? ' • ' + esc(m.label) : ''}</span></div>
+                <div class="m-body">${teamHTML(m.t1, false)}<div class="m-mid">${mid}</div>${teamHTML(m.t2, true)}</div>
+                ${bottom}
+            </div>`;
+        }
+
+        function renderMatches() {
+            const inCat = allMatches.filter(m => catFilter === 'all' || m.type === catFilter);
+            const cnt = { all: inCat.length, live: 0, upcoming: 0, finished: 0 };
+            inCat.forEach(m => cnt[m.status]++);
+
+            // category chips
+            document.getElementById('catChips').innerHTML = Object.keys(CAT_META).map(k => {
+                const n = k === 'all' ? allMatches.length : allMatches.filter(m => m.type === k).length;
+                if (k !== 'all' && n === 0 && k !== catFilter) return '';
+                return `<div class="cat-chip ${k === catFilter ? 'active' : ''}" data-cat="${k}"><span class="badge">${n}</span><i class="fa-solid ${CAT_META[k][1]}"></i><span>${CAT_META[k][0]}</span></div>`;
+            }).join('');
+
+            // status pills
+            const PILLS = [['all', 'All'], ['live', 'Live'], ['upcoming', 'Upcoming'], ['finished', 'Finished']];
+            document.getElementById('statusPills').innerHTML = PILLS.map(p =>
+                `<div class="pill ${p[0] === statusFilter ? 'active' : ''}" data-st="${p[0]}">${p[0] === statusFilter ? '<i class="fa-solid fa-check"></i>' : ''}${p[1]} (${cnt[p[0]]})</div>`).join('');
+
+            // list
+            const order = { live: 0, upcoming: 1, finished: 2 };
+            const list = inCat.filter(m => statusFilter === 'all' || m.status === statusFilter).sort((a, b) => {
+                if (order[a.status] !== order[b.status]) return order[a.status] - order[b.status];
+                if (a.status === 'live') return (a.startMs || 0) - (b.startMs || 0);
+                if (a.status === 'upcoming') return (a.startMs || Infinity) - (b.startMs || Infinity);
+                return 0;
+            });
+            const box = document.getElementById('matchList');
+            if (!list.length) {
+                box.innerHTML = `<div class="empty-msg" style="text-align:center;padding:30px 0;">${matchesLoading && !allMatches.length ? 'Matches load ho rahe hain...' : 'Abhi koi match nahi hai.'}</div>`;
+            } else box.innerHTML = list.map(matchCardHTML).join('');
+            tickTimers();
+            const q = document.getElementById('searchInput').value;
+            if (q) filterCategories(q);
+        }
+
+        async function openMatchDetail(id) {
+            const m = allMatches.find(x => x.id === id);
+            if (!m) return;
+            const head = `<div class="popup-head"><i class="fa-solid fa-baseball-bat-ball"></i> ${esc(m.t1.code)} vs ${esc(m.t2.code)}</div>`;
+            const foot = '<div class="popup-btns"><button class="popup-btn secondary" onclick="closePopup()">Close</button></div>';
+            openPopup(head + '<div class="popup-body"><div class="notif-item"><div class="notif-msg">Loading...</div></div></div>' + foot, 'match');
+            let d = null;
+            try { const j = await fetchJSON(`${CRIC_API}/score/${encodeURIComponent(id)}`, 10000); d = j && j.data; } catch (e) {}
+            if (popupType !== 'match') return;
+            const ok = v => v != null && String(v).trim() !== '' && !/\{\{/.test(String(v));
+            const rows = [];
+            const add = (k, v) => { if (ok(v)) rows.push(`<div class="kv"><b>${esc(k)}</b><span>${esc(cleanText(v))}</span></div>`); };
+            add('Match', m.t1.name + ' vs ' + m.t2.name + (m.label ? ' (' + m.label + ')' : ''));
+            add('Status', (d && d.update) || m.overview);
+            add('Score', d && d.liveScore);
+            add('Run rate', d && d.runRate);
+            if (d) {
+                add('Batsman', ok(d.batsmanOne) ? `${d.batsmanOne} ${d.batsmanOneRun || ''}${d.batsmanOneBall || ''}` : '');
+                add('Batsman', ok(d.batsmanTwo) ? `${d.batsmanTwo} ${d.batsmanTwoRun || ''}${d.batsmanTwoBall || ''}` : '');
+                add('Bowler', ok(d.bowlerOne) ? `${d.bowlerOne} ${d.bowlerOneRun || ''}/${d.bowlerOneWickets || ''}` : '');
+                add('Bowler', ok(d.bowlerTwo) && ok(d.bowlerTwoRun) && d.bowlerTwoRun !== 'R' ? `${d.bowlerTwo} ${d.bowlerTwoRun}/${d.bowlerTwoWicket || ''}` : '');
+            }
+            add('Venue', m.place);
+            if (m.status === 'live' && m.startMs) add('Live since', new Date(m.startMs).toLocaleString([], { hour: 'numeric', minute: '2-digit', day: 'numeric', month: 'short' }) + (m.approx ? ' (approx)' : ''));
+            if (m.status === 'upcoming' && m.startMs) add('Starts', new Date(m.startMs).toLocaleString([], { weekday: 'short', day: 'numeric', month: 'short', hour: 'numeric', minute: '2-digit' }));
+            openPopup(head + `<div class="popup-body"><div class="notif-item">${rows.join('') || '<div class="notif-msg">Details abhi available nahi hain.</div>'}</div></div>` + foot, 'match');
+        }
+
+        function updateTicker() {
+            const bar = document.getElementById('tickerBar'), tx = document.getElementById('tickerText');
+            const text = cleanText(globalSettings && globalSettings.ticker);
+            if (!text) { bar.style.display = 'none'; return; }
+            tx.textContent = text;
+            tx.style.setProperty('--dur', Math.max(10, text.length * 0.22) + 's');
+            bar.style.display = '';
+        }
+
+        document.addEventListener('click', e => {
+            const chip = e.target.closest('#catChips .cat-chip');
+            if (chip) { catFilter = chip.dataset.cat; renderMatches(); return; }
+            const pill = e.target.closest('#statusPills .pill');
+            if (pill) { statusFilter = pill.dataset.st; renderMatches(); return; }
+            const card = e.target.closest('#matchList .match-card');
+            if (card) openMatchDetail(card.dataset.mid);
+        });
+        document.addEventListener('visibilitychange', () => { if (!document.hidden) loadMatches(); });
+
+        /* ============ POPUPS ============ */
+        let popupType = '';
+        let popupIds = [];
+        function openPopup(html, type) {
+            document.getElementById('popupBox').innerHTML = html;
+            document.getElementById('popupOverlay').classList.add('active');
+            popupType = type || '';
+        }
+        function closePopup() {
+            document.getElementById('popupOverlay').classList.remove('active');
+            popupType = '';
+        }
+
+        /* ============ NOTIFICATIONS ============ */
+        let notifIds = [];
+        function getSeen() { try { return JSON.parse(localStorage.getItem('sprtix_seen_notifs') || '[]'); } catch (e) { return []; } }
+
+        function checkNotifications(obj) {
+            const items = Object.values(obj || {});
+            notifIds = items.map(n => String(n.id));
+            const seen = getSeen();
+            const unseen = items.filter(n => !seen.includes(String(n.id))).reverse(); // naya sab se upar
+            if (!unseen.length) return;
+            const overlayOpen = document.getElementById('popupOverlay').classList.contains('active');
+            if (overlayOpen && popupType !== 'notif') return;
+            popupIds = unseen.map(n => String(n.id));
+            openPopup(`
+                <div class="popup-head"><i class="fa-solid fa-bell"></i> Notification</div>
+                <div class="popup-body">${unseen.map(n => `
+                    <div class="notif-item">
+                        ${n.title ? `<div class="notif-title">${esc(n.title)}</div>` : ''}
+                        <div class="notif-msg">${esc(n.message || '')}</div>
+                    </div>`).join('')}</div>
+                <div class="popup-btns"><button class="popup-btn" onclick="skipNotifications()">Skip</button></div>`, 'notif');
+        }
+
+        function skipNotifications() {
+            // jo bhi abhi maujood hain unko "dekha hua" mark karo; naya add hoga tabhi popup aayega
+            const seen = new Set(getSeen());
+            notifIds.forEach(id => seen.add(id));
+            popupIds.forEach(id => seen.add(id));
+            try { localStorage.setItem('sprtix_seen_notifs', JSON.stringify([...seen])); } catch (e) {}
+            closePopup();
+        }
+
+        /* ============ CONNECT US ============ */
+        const CONNECT_LINKS = [
+            ['whatsapp', 'WhatsApp', 'fa-brands fa-whatsapp', '#25d366'],
+            ['telegram', 'Telegram', 'fa-brands fa-telegram', '#29a9eb'],
+            ['facebook', 'Facebook', 'fa-brands fa-facebook', '#4c8bf5'],
+            ['instagram', 'Instagram', 'fa-brands fa-instagram', '#e1306c'],
+            ['youtube', 'YouTube', 'fa-brands fa-youtube', '#ff0033'],
+            ['email', 'Email', 'fa-solid fa-envelope', '#f59e0b']
+        ];
+
+        function openConnectUs() {
+            const links = CONNECT_LINKS.filter(l => globalSettings && globalSettings[l[0]]);
+            if (!links.length) { showToast('Contact links abhi set nahi hain'); return; }
+            openPopup(`
+                <div class="popup-head"><i class="fa-solid fa-headset"></i> Connect Us</div>
+                <div class="popup-body">${links.map(l => `
+                    <a class="connect-row" data-link="${l[0]}"><i class="${l[2]}" style="color:${l[3]}"></i><span>${l[1]}</span><i class="fa-solid fa-chevron-right arrow"></i></a>`).join('')}</div>
+                <div class="popup-btns"><button class="popup-btn secondary" onclick="closePopup()">Close</button></div>`, 'connect');
+        }
+
+        function openContactLink(key) {
+            let v = String((globalSettings && globalSettings[key]) || '').trim();
+            if (!v) return;
+            if (!/^(https?:|mailto:|tel:)/i.test(v)) {
+                if (key === 'email') v = 'mailto:' + v;
+                else if (key === 'whatsapp' && /^[+\d\s-]+$/.test(v)) v = 'https://wa.me/' + v.replace(/\D/g, '');
+                else if (key === 'telegram') v = 'https://t.me/' + v.replace(/^@/, '');
+                else v = 'https://' + v;
+            }
+            window.open(v, '_blank');
+        }
+
+        /* ============ CHECK UPDATE ============ */
+        function versionGreater(a, b) {
+            const pa = String(a).split('.').map(x => parseInt(x, 10) || 0);
+            const pb = String(b).split('.').map(x => parseInt(x, 10) || 0);
+            for (let i = 0; i < Math.max(pa.length, pb.length); i++) {
+                const x = pa[i] || 0, y = pb[i] || 0;
+                if (x > y) return true;
+                if (x < y) return false;
+            }
+            return false;
+        }
+
+        async function checkUpdate() {
+            showToast('Update check ho raha hai...');
+            try {
+                const r = await fetch(DATA_BASE + 'settings.json?t=' + Date.now(), { cache: 'no-store' });
+                if (!r.ok) throw new Error(r.status);
+                const st = await r.json();
+                globalSettings = st;
+                const latest = String(st.latestVersion || '').trim();
+                if (latest && versionGreater(latest, APP_VERSION)) {
+                    if (!st.updateUrl) { showToast('Naya version ' + latest + ' available hai'); return; }
+                    openPopup(`
+                        <div class="popup-head"><i class="fa-solid fa-cloud-arrow-down"></i> Update Available</div>
+                        <div class="popup-body"><div class="notif-item">
+                            <div class="notif-title">Version ${esc(latest)}</div>
+                            <div class="notif-msg">${esc(st.updateMessage || 'Naya update available hai. Behtar experience ke liye update karein.')}</div>
+                        </div></div>
+                        <div class="popup-btns">
+                            <button class="popup-btn secondary" onclick="closePopup()">Later</button>
+                            <button class="popup-btn" onclick="window.open(globalSettings.updateUrl, '_blank'); closePopup();">Update Now</button>
+                        </div>`, 'update');
+                } else {
+                    showToast('Aap latest version (v' + APP_VERSION + ') use kar rahe hain ✔');
+                }
+            } catch (e) { showToast('Update check nahi ho saka. Internet check karein.'); }
+        }
+
+        document.addEventListener('click', e => {
+            const a = e.target.closest('#popupBox [data-link]');
+            if (a) openContactLink(a.dataset.link);
+        });
 
         function shareApp() {
             const text = globalSettings.shareMessage || 'Download SPRtix App now!';
