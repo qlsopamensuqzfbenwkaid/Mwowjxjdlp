@@ -8,6 +8,7 @@
     "team2": "Ind",
     "start": "2026-11-13T11:19:00.000Z",
     "status": "auto",
-    "hot": "no"
+    "hot": "no",
+    "channels": "https://sonyeventsglobal.akamaized.net/hls/live/2120299/Footlive1311/ENG/std_lrh-800300010.m3u8?hdnea=exp=1794630361~acl=/*~id=29281024628665723715919917940190~hmac=042a7f72b08ef1bc44d6dc91eef332d9e5a18737fabb2cfe6685958d3d0c79c0|User-Agent=Mozilla/5.0 (Linux; Android 13; sdk_gphone_x86_64 Build/TE1A.220922.033) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/103.0.5060.71 Mobile Safari/537.36"
   }
 ]
