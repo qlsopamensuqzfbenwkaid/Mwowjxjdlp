@@ -112,40 +112,35 @@
         @keyframes tick { from { transform: translateX(0); } to { transform: translateX(-100%); } }
         .chip-row { display: flex; gap: 10px; overflow-x: auto; padding: 14px 12px 4px; scrollbar-width: none; flex-shrink: 0; }
         .chip-row::-webkit-scrollbar { display: none; }
-        .cat-chip { position: relative; flex-shrink: 0; min-width: 78px; height: 62px; padding: 6px 8px; border-radius: 14px; background: #161e30; border: 1px solid #243049; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 5px; cursor: pointer; font-size: 10px; font-weight: 500; color: #cbd5e1; }
-        .cat-chip i { font-size: 20px; }
-        .cat-chip.active { border-color: #00d4e6; background: #12263a; color: #fff; box-shadow: 0 0 10px rgba(0,242,254,.25); }
-        .cat-chip .badge { position: absolute; top: -5px; left: -4px; min-width: 19px; height: 19px; padding: 0 5px; border-radius: 10px; background: #ff4b3e; color: #fff; font-size: 10px; font-weight: 700; display: flex; align-items: center; justify-content: center; }
+        .sport-chip { position: relative; flex-shrink: 0; height: 48px; min-width: 52px; padding: 0 13px; border-radius: 13px; background: #1a2338; border: 1px solid #27344f; display: flex; align-items: center; justify-content: center; gap: 8px; cursor: pointer; font-size: 12.5px; font-weight: 500; color: #9fb0c8; }
+        .sport-chip i { font-size: 21px; }
+        .sport-chip.active { border-color: #00d4e6; background: #12263a; color: #fff; box-shadow: 0 0 10px rgba(0,242,254,.2); }
+        .sport-chip .badge { position: absolute; top: -6px; left: -5px; min-width: 19px; height: 19px; padding: 0 5px; border-radius: 10px; background: #ff4b3e; color: #fff; font-size: 10px; font-weight: 700; display: flex; align-items: center; justify-content: center; }
         .pill-row { display: flex; gap: 10px; overflow-x: auto; padding: 12px 12px 6px; scrollbar-width: none; flex-shrink: 0; }
         .pill-row::-webkit-scrollbar { display: none; }
         .pill { flex-shrink: 0; padding: 8px 18px; border-radius: 24px; background: #161e30; border: 1px solid #2a3753; font-size: 12.5px; font-weight: 500; color: #cbd5e1; cursor: pointer; display: flex; align-items: center; gap: 6px; white-space: nowrap; }
         .pill.active { border-color: #00d4e6; color: #fff; background: #12263a; }
-        .match-list { padding: 8px 12px 0; display: flex; flex-direction: column; gap: 12px; }
-        .match-card { position: relative; overflow: hidden; background: linear-gradient(145deg, #1a2338, #141b2d); border: 1px solid #263451; border-radius: 14px; padding: 11px 12px 10px; cursor: pointer; }
-        .m-head { font-size: 12px; font-weight: 600; letter-spacing: .2px; display: flex; align-items: center; gap: 7px; padding-right: 64px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; text-transform: uppercase; }
-        .m-head i { color: #00d4e6; font-size: 12px; }
-        .m-hot { position: absolute; top: 0; right: 0; background: #12c4d6; color: #fff; font-size: 12px; font-weight: 700; padding: 4px 18px 5px 20px; border-bottom-left-radius: 16px; }
-        .m-body { display: flex; align-items: center; justify-content: space-between; gap: 6px; margin-top: 10px; }
-        .m-team { display: flex; align-items: center; gap: 10px; flex: 1; min-width: 0; }
+        .match-list { padding: 8px 10px 0; display: flex; flex-direction: column; gap: 10px; }
+        .match-card { position: relative; overflow: hidden; background: #1a2237; border: 1px solid #27344f; border-radius: 12px; padding: 9px 12px 9px; cursor: pointer; }
+        .m-head { font-size: 12px; font-weight: 600; display: flex; align-items: center; gap: 6px; padding-right: 60px; white-space: nowrap; overflow: hidden; text-transform: uppercase; }
+        .m-head img { width: 15px; height: 15px; object-fit: contain; border-radius: 3px; flex-shrink: 0; }
+        .m-head span { overflow: hidden; text-overflow: ellipsis; }
+        .m-hot { position: absolute; top: 0; right: 0; background: #12c4d6; color: #fff; font-size: 12px; font-weight: 700; padding: 3px 16px 4px 20px; border-bottom-left-radius: 16px; }
+        .m-body { display: flex; align-items: center; justify-content: space-between; gap: 6px; margin-top: 8px; }
+        .m-team { display: flex; align-items: center; gap: 9px; flex: 1; min-width: 0; }
         .m-team.right { flex-direction: row-reverse; text-align: right; }
-        .m-flag { width: 54px; height: 54px; border-radius: 50%; flex-shrink: 0; display: flex; align-items: center; justify-content: center; font-size: 30px; font-weight: 700; color: #fff; background: #0e1525; border: 1px solid #2b3956; overflow: hidden; }
-        .m-info { min-width: 0; }
-        .m-name { font-size: 14px; font-weight: 600; white-space: nowrap; }
-        .m-run { font-size: 10.5px; color: #9fb0c8; margin-top: 2px; white-space: nowrap; }
-        .m-mid { width: 70px; flex-shrink: 0; text-align: center; font-size: 11px; font-weight: 600; }
-        .m-status.live { color: #ff3b5c; }
-        .m-status.live::before { content: ''; display: block; width: 6px; height: 6px; margin: 0 auto 3px; border-radius: 50%; background: #ff3b5c; animation: pulse 1.2s infinite; }
-        .m-status.up { color: #f5b301; }
-        .m-status.done { color: #94a3b8; }
+        .m-logo { width: 38px; height: 38px; border-radius: 50%; object-fit: contain; flex-shrink: 0; background: transparent; }
+        .m-logo.ph { display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 700; color: #fff; }
+        .m-name { font-size: 13px; font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; min-width: 0; }
+        .m-mid { width: 92px; flex-shrink: 0; text-align: center; }
+        .m-time { font-size: 13px; font-weight: 600; }
+        .m-time.done { color: #94a3b8; }
+        .m-date { font-size: 11px; color: #00d4e6; margin-top: 1px; }
+        .m-status.live { font-size: 10.5px; font-weight: 600; color: #ff3b5c; }
+        .m-status.live::before { content: ''; display: block; width: 5px; height: 5px; margin: 0 auto 2px; border-radius: 50%; background: #ff3b5c; animation: pulse 1.2s infinite; }
         @keyframes pulse { 0%,100% { opacity: 1; transform: scale(1); } 50% { opacity: .35; transform: scale(.7); } }
-        .m-timer { text-align: center; margin-top: 8px; font-size: 15px; font-weight: 600; font-variant-numeric: tabular-nums; letter-spacing: .4px; }
-        .m-timer small { display: block; font-size: 9.5px; font-weight: 400; color: #94a3b8; letter-spacing: 0; margin-bottom: 1px; }
-        .m-when { text-align: center; font-size: 10.5px; color: #cbd5e1; margin-top: 4px; }
-        .m-over { text-align: center; font-size: 10.5px; color: #cbd5e1; margin-top: 6px; line-height: 1.35; }
-        .kv { display: flex; justify-content: space-between; gap: 10px; font-size: 11.5px; padding: 6px 0; border-bottom: 1px solid #1d2840; }
-        .kv:last-child { border-bottom: none; }
-        .kv b { color: #00f2fe; font-weight: 600; flex-shrink: 0; }
-        .kv span { text-align: right; color: #e2e8f0; }
+        .m-timer { text-align: center; margin-top: 4px; font-size: 13px; font-weight: 600; font-variant-numeric: tabular-nums; }
+        .m-starts { text-align: center; margin-top: 4px; font-size: 11.5px; font-weight: 600; color: #e2e8f0; }
     </style>
 </head>
 <body>
@@ -280,7 +275,7 @@
         /* ============================================================
            GITHUB DATA (Firebase ki jagah)
            Data repo ke  data/  folder ki JSON files se aata hai:
-           settings, notifications, liveChannels, liveTvScreen, newsUpdates, playlist
+           settings, events, notifications, liveChannels, liveTvScreen, newsUpdates, playlist
            ============================================================ */
         const GH_USER   = 'qlsopamensuqzfbenwkaid';   // <- apna GitHub username
         const GH_REPO   = 'Mwowjxjdlp';               // <- jis repo mein data/ folder hai
@@ -369,9 +364,9 @@
             try { initPlayer(); } catch (e) { console.error('Player load nahi hua', e); } // player na bhi load ho to data phir bhi aaye
             fetchDatabaseData();
             document.addEventListener('click', onDocumentClick);
-            loadMatches();
-            setInterval(loadMatches, 60000);   // har 1 minute mein score/status refresh
-            setInterval(tickTimers, 1000);     // har second timer
+            renderMatches();
+            setInterval(tickTimers, 1000);     // har second live timer / countdown
+            setInterval(renderMatches, 30000); // status (upcoming -> live -> finished) badalne ke liye
         });
 
         /* ---------------- PLAYER ---------------- */
@@ -535,6 +530,14 @@
                 if (snap.exists()) { globalSettings = snap.val(); updateTicker(); }
             });
 
+            // Live Events (Admin Panel -> Live Events)
+            database.ref('events').on('value', snap => {
+                const data = snap.val();
+                allEvents = data ? Object.values(data).map(normalizeEvent) : [];
+                eventsLoaded = true;
+                renderMatches();
+            });
+
             // Notifications (app khulte hi popup, skip ke baad dobara nahi)
             database.ref('notifications').on('value', snap => checkNotifications(snap.val()));
 
@@ -617,7 +620,7 @@
         function refreshData() {
             const icon = document.getElementById('refreshIcon');
             icon.classList.add('spin');
-            Promise.all([...dataLoaders.map(f => f()), loadMatches()]).finally(() => {
+            Promise.all(dataLoaders.map(f => f())).finally(() => {
                 icon.classList.remove('spin');
                 showToast('Data refresh ho gaya');
             });
@@ -677,276 +680,159 @@
         }
 
 
-        /* ============ LIVE EVENTS (Cricket matches) ============ */
-        const CRIC_API = 'https://cricbuzz-live.vercel.app/v1';
-        const CRIC_TYPES = ['international', 'league', 'domestic', 'women'];
-        const CRIC_STATUSES = ['live', 'recent', 'upcoming'];
-        const CRIC_TZ_OFFSET_MIN = 0;   // API ke time ki timezone (UTC = 0, Pakistan = 300)
-        const CAT_META = {
-            all: ['All', 'fa-layer-group'], international: ['International', 'fa-globe'], league: ['League', 'fa-trophy'],
-            domestic: ['Domestic', 'fa-flag'], women: ['Women', 'fa-person-dress']
+        /* ============ LIVE EVENTS (Admin Panel se add hote hain) ============ */
+        const FINISHED_KEEP_MS = 48 * 3600 * 1000;   // khatam hone ke 48 ghante baad match list se hat jata hai
+        const SPORT_META = {
+            cricket: ['Cricket', 'fa-baseball-bat-ball'], football: ['Football', 'fa-futbol'], boxing: ['Boxing', 'fa-hand-fist'],
+            wrestling: ['Wrestling', 'fa-hand-fist'], motorsport: ['Motorsport', 'fa-flag-checkered'], tennis: ['Tennis', 'fa-table-tennis-paddle-ball'],
+            basketball: ['Basketball', 'fa-basketball'], hockey: ['Hockey', 'fa-hockey-puck'], baseball: ['Baseball', 'fa-baseball'],
+            rugby: ['Rugby', 'fa-football'], volleyball: ['Volleyball', 'fa-volleyball'], golf: ['Golf', 'fa-golf-ball-tee'], other: ['Other', 'fa-trophy']
         };
-        const COUNTRIES = {
-            'pakistan': ['PAK', '🇵🇰'], 'india': ['IND', '🇮🇳'], 'sri lanka': ['SL', '🇱🇰'], 'bangladesh': ['BAN', '🇧🇩'],
-            'afghanistan': ['AFG', '🇦🇫'], 'australia': ['AUS', '🇦🇺'], 'england': ['ENG', '🇬🇧'], 'south africa': ['SA', '🇿🇦'],
-            'new zealand': ['NZ', '🇳🇿'], 'zimbabwe': ['ZIM', '🇿🇼'], 'ireland': ['IRE', '🇮🇪'], 'netherlands': ['NED', '🇳🇱'],
-            'nepal': ['NEP', '🇳🇵'], 'united arab emirates': ['UAE', '🇦🇪'], 'uae': ['UAE', '🇦🇪'], 'oman': ['OMA', '🇴🇲'],
-            'scotland': ['SCO', '🇬🇧'], 'namibia': ['NAM', '🇳🇦'], 'usa': ['USA', '🇺🇸'], 'united states': ['USA', '🇺🇸'],
-            'canada': ['CAN', '🇨🇦'], 'kenya': ['KEN', '🇰🇪'], 'uganda': ['UGA', '🇺🇬'], 'papua new guinea': ['PNG', '🇵🇬'],
-            'hong kong': ['HK', '🇭🇰'], 'malaysia': ['MAS', '🇲🇾'], 'singapore': ['SIN', '🇸🇬'], 'qatar': ['QAT', '🇶🇦'],
-            'kuwait': ['KUW', '🇰🇼'], 'saudi arabia': ['KSA', '🇸🇦'], 'bahrain': ['BHR', '🇧🇭'], 'thailand': ['THA', '🇹🇭'],
-            'japan': ['JPN', '🇯🇵'], 'italy': ['ITA', '🇮🇹'], 'germany': ['GER', '🇩🇪']
-        };
-        let allMatches = [], catFilter = 'all', statusFilter = 'all', matchesLoading = false;
+        let allEvents = [], sportFilter = 'all', statusFilter = 'all', eventsLoaded = false;
+        let currentChannels = [], currentEventTitle = '';
 
-        function cleanText(x) { return String(x == null ? '' : x).replace(/&nbsp;|\u00a0/g, ' ').replace(/[•·]/g, ' ').replace(/\s+/g, ' ').trim(); }
-        function hashColor(str) {
-            let h = 0; for (let i = 0; i < str.length; i++) h = (h * 31 + str.charCodeAt(i)) >>> 0;
-            return `hsl(${h % 360}, 45%, 38%)`;
+        function cleanText(x) { return String(x == null ? '' : x).replace(/\s+/g, ' ').trim(); }
+        function hashColor(str) { let h = 0; for (let i = 0; i < str.length; i++) h = (h * 31 + str.charCodeAt(i)) >>> 0; return `hsl(${h % 360}, 45%, 38%)`; }
+        function initialsOf(name) {
+            const w = cleanText(name).split(' ').filter(Boolean);
+            return (w.length > 1 ? w.map(x => x[0]).join('') : (w[0] || '?').slice(0, 3)).toUpperCase().slice(0, 3);
         }
-        function teamInfo(name) {
-            name = cleanText(name);
-            const u19 = name.match(/\bU-?(\d{2})\b/i);
-            const women = /\bwomen'?s?\b|\(w\)|\bW\b/i.test(name);
-            let base = name.replace(/\bU-?\d{2}\b/ig, '').replace(/\bwomen'?s?\b/ig, '').replace(/\(w\)/ig, '').replace(/\s+/g, ' ').trim();
-            const c = COUNTRIES[base.toLowerCase()];
-            let code;
-            if (c) code = c[0];
-            else {
-                const words = base.split(' ').filter(Boolean);
-                code = words.length > 1 ? words.map(w => w[0]).join('').toUpperCase().slice(0, 4) : base.slice(0, 3).toUpperCase();
-            }
-            if (u19) code += '-U' + u19[1];
-            if (women) code += '-W';
-            return { name, code: code || '?', flag: c ? c[1] : '', initials: (code || '?').replace(/-.*/, '').slice(0, 3), color: hashColor(base || name), run: '' };
+        function sportMeta(k) { return SPORT_META[k] || [k.charAt(0).toUpperCase() + k.slice(1), 'fa-trophy']; }
+        function apiHeaders() { const k = globalSettings && globalSettings.apiKey; return k ? { 'x-api-key': k } : {}; }  // admin panel wali API key
+
+        function parseChannels(v) {
+            const lines = Array.isArray(v) ? v : String(v || '').split(/\r?\n/);
+            const out = [];
+            lines.forEach(line => {
+                line = String(line).trim();
+                if (!line) return;
+                const i = line.indexOf('|');
+                if (i > -1) out.push({ name: line.slice(0, i).trim() || 'Channel ' + (out.length + 1), url: line.slice(i + 1).trim() });
+                else out.push({ name: 'Channel ' + (out.length + 1), url: line });
+            });
+            return out.filter(c => c.url);
         }
 
-        // API ke date/time text se start time (ms) nikalta hai; na mile to null
-        function parseStartMs(tp) {
-            if (!tp) return null;
-            const date = cleanText(tp.date), time = cleanText(tp.time);
-            const full = (date + ' ' + time).trim();
-            let tm = full.match(/(\d{1,2}):(\d{2})\s*(AM|PM)?\s*(?:GMT|UTC)/i), off = CRIC_TZ_OFFSET_MIN;
-            if (tm) off = 0; else tm = full.match(/(\d{1,2}):(\d{2})\s*(AM|PM)?/i);
-            if (!tm) return null;
-            let h = +tm[1]; const mi = +tm[2], ap = (tm[3] || '').toUpperCase();
-            if (ap === 'PM' && h < 12) h += 12;
-            if (ap === 'AM' && h === 12) h = 0;
-            const now = new Date(Date.now() + off * 60000);
-            let y = now.getUTCFullYear(), mo = now.getUTCMonth(), d = now.getUTCDate();
-            const dl = date.toLowerCase();
-            if (/tomorrow/.test(dl)) d += 1;
-            else if (/yesterday/.test(dl)) d -= 1;
-            else if (dl && !/today/.test(dl)) {
-                const MON = 'jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec';
-                const names = MON.split('|');
-                let m1 = dl.match(new RegExp('(' + MON + ')[a-z]*\\.?\\s*(\\d{1,2})')), m2 = dl.match(new RegExp('(\\d{1,2})\\s*(' + MON + ')'));
-                if (m1) { mo = names.indexOf(m1[1]); d = +m1[2]; }
-                else if (m2) { mo = names.indexOf(m2[2]); d = +m2[1]; }
-                else return null;
-                const yy = dl.match(/\b(20\d{2})\b/);
-                if (yy) y = +yy[1];
-                else if (Date.UTC(y, mo, d) < now.getTime() - 90 * 86400000) y += 1;
-            }
-            return Date.UTC(y, mo, d, h, mi) - off * 60000;
-        }
-
-        function getStarts() { try { return JSON.parse(localStorage.getItem('sprtix_starts') || '{}'); } catch (e) { return {}; } }
-
-        function normalizeMatch(raw, starts) {
-            const title = cleanText(raw.title).replace(/\s*-\s*Live Cricket Score.*$/i, '');
-            const parts = title.split(',');
-            const head = parts[0].trim();
-            const label = parts.slice(1).join(',').trim();
-            const teamsRaw = Array.isArray(raw.teams) ? raw.teams : [];
-            let names = head.split(/\s+vs\s+/i).map(x => x.trim());
-            if (names.length < 2) names = [(teamsRaw[0] && teamsRaw[0].team) || 'Team 1', (teamsRaw[1] && teamsRaw[1].team) || 'Team 2'];
-            const t1 = teamInfo(names[0]), t2 = teamInfo(names[1]);
-            t1.run = cleanText(teamsRaw[0] && teamsRaw[0].run);
-            t2.run = cleanText(teamsRaw[1] && teamsRaw[1].run);
-            const tp = raw.timeAndPlace || {};
-            const m = {
-                id: String(raw.id), type: raw.type || 'international', status: raw.status, label, t1, t2,
-                overview: cleanText(raw.overview), place: cleanText(tp.place), dateText: cleanText(tp.date), timeText: cleanText(tp.time),
-                startMs: null, approx: false
+        function normalizeEvent(r) {
+            const sport = cleanText(r.sport || 'other').toLowerCase();
+            const e = {
+                id: String(r.id), sport, league: cleanText(r.league || r.title), leagueLogo: cleanText(r.leagueLogo || r.image),
+                t1: { name: cleanText(r.team1), logo: cleanText(r.team1Logo) }, t2: { name: cleanText(r.team2), logo: cleanText(r.team2Logo) },
+                startMs: Date.parse(r.start), durMs: (parseFloat(r.duration) || 180) * 60000,
+                manual: (r.status && r.status !== 'auto') ? r.status : '', hot: r.hot === 'yes' || r.hot === true,
+                channels: parseChannels(r.channels)
             };
-            let ms = parseStartMs(tp);
-            if (m.status === 'upcoming') {
-                if (ms) { starts[m.id] = { ms, approx: false }; m.startMs = ms; }
-            } else if (m.status === 'live') {
-                const cached = starts[m.id];
-                if (ms && ms <= Date.now() + 60000) { m.startMs = ms; starts[m.id] = { ms, approx: false }; }
-                else if (cached && !cached.approx) { m.startMs = cached.ms; }
-                else if (raw.liveSince && Date.parse(raw.liveSince)) { m.startMs = Date.parse(raw.liveSince); m.approx = true; }
-                else if (cached) { m.startMs = cached.ms; m.approx = true; }
-                else { m.startMs = Date.now(); m.approx = true; starts[m.id] = { ms: m.startMs, approx: true }; }
-            }
-            m.search = (names[0] + ' ' + names[1] + ' ' + t1.code + ' ' + t2.code + ' ' + label + ' ' + m.type).toLowerCase();
-            return m;
+            e.title = e.t1.name && e.t2.name ? e.t1.name + ' vs ' + e.t2.name : (e.t1.name || e.league);
+            e.search = (e.t1.name + ' ' + e.t2.name + ' ' + e.league + ' ' + sport).toLowerCase();
+            return e;
         }
 
-        async function fetchJSON(url, ms) {
-            const ctrl = new AbortController();
-            const t = setTimeout(() => ctrl.abort(), ms || 12000);
-            try {
-                const r = await fetch(url, { signal: ctrl.signal });
-                if (!r.ok) throw new Error(r.status);
-                return await r.json();
-            } finally { clearTimeout(t); }
+        function statusOf(e, now) {
+            if (e.manual) return e.manual;
+            if (isNaN(e.startMs)) return 'upcoming';
+            if (now < e.startMs) return 'upcoming';
+            return now < e.startMs + e.durMs ? 'live' : 'finished';
         }
 
-        async function loadMatches() {
-            if (matchesLoading) return;
-            matchesLoading = true;
-            if (!allMatches.length) {
-                try { const c = JSON.parse(localStorage.getItem('sprtix_matches') || '[]'); if (c.length) { allMatches = c; renderMatches(); } } catch (e) {}
-                if (!allMatches.length) renderMatches();
-            }
-            const jobs = [];
-            CRIC_TYPES.forEach(t => CRIC_STATUSES.forEach(st => jobs.push(
-                fetchJSON(`${CRIC_API}/matches/${st}?type=${t}`)
-                    .then(j => ({ t, st, list: (j && j.data && j.data.matches) || [] })).catch(() => null)
-            )));
-            const res = (await Promise.all(jobs)).filter(Boolean);
-            let rawList = [];
-            if (res.length) {
-                res.forEach(r => {
-                    const list = r.st === 'recent' ? r.list.slice(0, 10) : r.list;
-                    list.forEach(m => rawList.push(Object.assign({}, m, { status: r.st === 'recent' ? 'finished' : r.st, type: r.t })));
-                });
-            } else {
-                // direct API na chale (CORS/down) to GitHub wali cricket.json se lo (optional Action)
-                try { const j = await fetchJSON(DATA_BASE + 'cricket.json?t=' + Date.now()); rawList = (j && j.matches) || []; } catch (e) {}
-            }
-            if (rawList.length) {
-                const starts = getStarts(), seen = {}, out = [];
-                rawList.forEach(r => {
-                    if (!r || r.id == null || seen[r.id]) return;
-                    seen[r.id] = 1;
-                    out.push(normalizeMatch(r, starts));
-                });
-                const lim = Date.now() - 4 * 86400000;
-                Object.keys(starts).forEach(k => { if (starts[k].ms < lim) delete starts[k]; });
-                try { localStorage.setItem('sprtix_starts', JSON.stringify(starts)); localStorage.setItem('sprtix_matches', JSON.stringify(out)); } catch (e) {}
-                allMatches = out;
-            } else if (!allMatches.length) {
-                showToast('Matches load nahi hue. Internet check karein.');
-            }
-            matchesLoading = false;
-            renderMatches(true);
-        }
-
-        function fmtDur(sec) {
-            sec = Math.max(0, Math.floor(sec));
-            const d = Math.floor(sec / 86400), h = Math.floor(sec % 86400 / 3600), m = Math.floor(sec % 3600 / 60), s = sec % 60;
-            const p = n => String(n).padStart(2, '0');
-            return (d ? d + 'd ' : '') + p(h) + ':' + p(m) + ':' + p(s);
+        const p2 = n => String(n).padStart(2, '0');
+        function fmtDur(sec) { sec = Math.max(0, Math.floor(sec)); return p2(Math.floor(sec / 3600)) + ':' + p2(Math.floor(sec % 3600 / 60)) + ':' + p2(sec % 60); }
+        function fmtTime(ms) { const d = new Date(ms); let h = d.getHours(); const ap = h >= 12 ? 'PM' : 'AM'; h = h % 12 || 12; return p2(h) + ':' + p2(d.getMinutes()) + ' ' + ap; }
+        function fmtDate(ms) { const d = new Date(ms); return p2(d.getDate()) + '/' + p2(d.getMonth() + 1) + '/' + d.getFullYear(); }
+        function startsIn(ms) {
+            const diff = ms - Date.now();
+            if (diff < 60000) return 'Starting soon';
+            const d = Math.floor(diff / 86400000), h = Math.floor(diff / 3600000), m = Math.floor(diff / 60000);
+            if (d >= 1) return 'Starts in ' + d + (d === 1 ? ' day' : ' days');
+            if (h >= 1) return 'Starts in ' + h + (h === 1 ? ' hour' : ' hours');
+            return 'Starts in ' + m + (m === 1 ? ' minute' : ' minutes');
         }
 
         function tickTimers() {
             const now = Date.now();
-            document.querySelectorAll('.m-timer[data-ms]').forEach(el => {
-                const ms = +el.dataset.ms, t = el.querySelector('.t');
-                if (!t) return;
-                if (el.dataset.kind === 'up') t.textContent = fmtDur((now - ms) / 1000);
-                else t.textContent = (ms - now) > 0 ? fmtDur((ms - now) / 1000) : 'Starting soon';
-            });
+            document.querySelectorAll('.m-timer[data-ms]').forEach(el => { el.textContent = fmtDur((now - +el.dataset.ms) / 1000); });
+            document.querySelectorAll('.m-starts[data-ms]').forEach(el => { el.textContent = startsIn(+el.dataset.ms); });
         }
 
-        function teamHTML(t, right) {
-            const av = t.flag ? `<div class="m-flag">${t.flag}</div>` : `<div class="m-flag" style="background:${t.color};font-size:${t.initials.length <= 2 ? 22 : t.initials.length === 3 ? 16 : 13}px">${esc(t.initials)}</div>`;
-            return `<div class="m-team ${right ? 'right' : ''}">${av}<div class="m-info"><div class="m-name">${esc(t.code)}</div>${t.run ? `<div class="m-run">${esc(t.run)}</div>` : ''}</div></div>`;
+        function logoHTML(t, cls) {
+            const init = esc(initialsOf(t.name)), col = hashColor(t.name || '?');
+            if (t.logo) return `<img class="m-logo ${cls || ''}" src="${esc(t.logo)}" alt="" loading="lazy" data-i="${init}" data-c="${col}">`;
+            return `<div class="m-logo ph" style="background:${col}">${init}</div>`;
         }
 
-        function matchCardHTML(m) {
-            const typeLabel = (CAT_META[m.type] || [m.type])[0];
-            let mid = '', bottom = '';
-            if (m.status === 'live') {
+        function eventCardHTML(e, st) {
+            const sm = sportMeta(e.sport);
+            let mid, bottom = '';
+            const ok = !isNaN(e.startMs);
+            if (st === 'live') {
                 mid = '<div class="m-status live">Live</div>';
-                bottom = `<div class="m-timer" data-kind="up" data-ms="${m.startMs}"><small>${m.approx ? 'Live since ~' : 'Live since'}</small><span class="t">--:--:--</span></div>`
-                    + (m.overview ? `<div class="m-over">${esc(m.overview)}</div>` : '');
-            } else if (m.status === 'upcoming') {
-                mid = '<div class="m-status up">Upcoming</div>';
-                if (m.startMs) {
-                    const when = new Date(m.startMs).toLocaleString([], { weekday: 'short', day: 'numeric', month: 'short', hour: 'numeric', minute: '2-digit' });
-                    bottom = `<div class="m-timer" data-kind="down" data-ms="${m.startMs}"><small>Starts in</small><span class="t">--:--:--</span></div><div class="m-when">${esc(when)}</div>`;
-                } else {
-                    const txt = [m.dateText, m.timeText].filter(Boolean).join(' • ');
-                    bottom = txt ? `<div class="m-when">${esc(txt)}</div>` : '';
-                }
-                if (m.place) bottom += `<div class="m-over">${esc(m.place)}</div>`;
+                bottom = `<div class="m-timer" data-ms="${ok ? Math.min(e.startMs, Date.now()) : Date.now()}">00:00:00</div>`;
+            } else if (st === 'upcoming') {
+                mid = ok ? `<div class="m-time">${fmtTime(e.startMs)}</div><div class="m-date">${fmtDate(e.startMs)}</div>` : '<div class="m-time">Time TBA</div>';
+                if (ok) bottom = `<div class="m-starts" data-ms="${e.startMs}">${startsIn(e.startMs)}</div>`;
             } else {
-                mid = '<div class="m-status done">Finished</div>';
-                bottom = (m.overview ? `<div class="m-over">${esc(m.overview)}</div>` : '') + (m.dateText ? `<div class="m-when">${esc(m.dateText)}</div>` : '');
+                mid = '<div class="m-time done">Finished</div>' + (ok ? `<div class="m-date">${fmtDate(e.startMs)}</div>` : '');
             }
-            return `<div class="match-card" data-mid="${esc(m.id)}" data-search="${esc(m.search)}">
-                ${m.status === 'live' ? '<div class="m-hot">HOT</div>' : ''}
-                <div class="m-head"><i class="fa-solid fa-baseball-bat-ball"></i><span>CRICKET | ${esc(typeLabel)}${m.label ? ' • ' + esc(m.label) : ''}</span></div>
-                <div class="m-body">${teamHTML(m.t1, false)}<div class="m-mid">${mid}</div>${teamHTML(m.t2, true)}</div>
+            const head = (e.leagueLogo ? `<img src="${esc(e.leagueLogo)}" alt="" onerror="this.style.display='none'">` : '') + `<span>${esc(sm[0])}${e.league ? ' | ' + esc(e.league) : ''}</span>`;
+            return `<div class="match-card" data-eid="${esc(e.id)}" data-search="${esc(e.search)}">
+                ${e.hot ? '<div class="m-hot">HOT</div>' : ''}
+                <div class="m-head">${head}</div>
+                <div class="m-body">
+                    <div class="m-team">${logoHTML(e.t1)}<div class="m-name">${esc(e.t1.name)}</div></div>
+                    <div class="m-mid">${mid}</div>
+                    <div class="m-team right">${logoHTML(e.t2)}<div class="m-name">${esc(e.t2.name)}</div></div>
+                </div>
                 ${bottom}
             </div>`;
         }
 
         function renderMatches() {
-            const inCat = allMatches.filter(m => catFilter === 'all' || m.type === catFilter);
-            const cnt = { all: inCat.length, live: 0, upcoming: 0, finished: 0 };
-            inCat.forEach(m => cnt[m.status]++);
+            const now = Date.now();
+            const evs = allEvents.map(e => ({ e, st: statusOf(e, now) }))
+                .filter(x => !(x.st === 'finished' && !isNaN(x.e.startMs) && now - (x.e.startMs + x.e.durMs) > FINISHED_KEEP_MS));
 
-            // category chips
-            document.getElementById('catChips').innerHTML = Object.keys(CAT_META).map(k => {
-                const n = k === 'all' ? allMatches.length : allMatches.filter(m => m.type === k).length;
-                if (k !== 'all' && n === 0 && k !== catFilter) return '';
-                return `<div class="cat-chip ${k === catFilter ? 'active' : ''}" data-cat="${k}"><span class="badge">${n}</span><i class="fa-solid ${CAT_META[k][1]}"></i><span>${CAT_META[k][0]}</span></div>`;
-            }).join('');
+            // sport chips (jo sports maujood hain)
+            const counts = {};
+            evs.forEach(x => { counts[x.e.sport] = (counts[x.e.sport] || 0) + 1; });
+            if (sportFilter !== 'all' && !counts[sportFilter]) sportFilter = 'all';
+            const sports = Object.keys(counts).sort((a, b) => counts[b] - counts[a]);
+            const chipHTML = (k, label, icon, n) => `<div class="sport-chip ${k === sportFilter ? 'active' : ''}" data-sport="${esc(k)}"><span class="badge">${n}</span><i class="fa-solid ${icon}"></i>${k === sportFilter ? `<span>${esc(label)}</span>` : ''}</div>`;
+            document.getElementById('catChips').innerHTML = chipHTML('all', 'All', 'fa-layer-group', evs.length)
+                + sports.map(k => { const m = sportMeta(k); return chipHTML(k, m[0], m[1], counts[k]); }).join('');
 
-            // status pills
+            // status pills (chuni hui sport ke hisaab se ginti)
+            const inSport = evs.filter(x => sportFilter === 'all' || x.e.sport === sportFilter);
+            const cnt = { all: inSport.length, live: 0, upcoming: 0, finished: 0 };
+            inSport.forEach(x => cnt[x.st]++);
             const PILLS = [['all', 'All'], ['live', 'Live'], ['upcoming', 'Upcoming'], ['finished', 'Finished']];
             document.getElementById('statusPills').innerHTML = PILLS.map(p =>
                 `<div class="pill ${p[0] === statusFilter ? 'active' : ''}" data-st="${p[0]}">${p[0] === statusFilter ? '<i class="fa-solid fa-check"></i>' : ''}${p[1]} (${cnt[p[0]]})</div>`).join('');
 
             // list
             const order = { live: 0, upcoming: 1, finished: 2 };
-            const list = inCat.filter(m => statusFilter === 'all' || m.status === statusFilter).sort((a, b) => {
-                if (order[a.status] !== order[b.status]) return order[a.status] - order[b.status];
-                if (a.status === 'live') return (a.startMs || 0) - (b.startMs || 0);
-                if (a.status === 'upcoming') return (a.startMs || Infinity) - (b.startMs || Infinity);
-                return 0;
+            const t = x => isNaN(x.e.startMs) ? Infinity : x.e.startMs;
+            const list = inSport.filter(x => statusFilter === 'all' || x.st === statusFilter).sort((a, b) => {
+                if (order[a.st] !== order[b.st]) return order[a.st] - order[b.st];
+                return a.st === 'finished' ? (t(b) === Infinity ? 0 : t(b)) - (t(a) === Infinity ? 0 : t(a)) : t(a) - t(b);
             });
             const box = document.getElementById('matchList');
-            if (!list.length) {
-                box.innerHTML = `<div class="empty-msg" style="text-align:center;padding:30px 0;">${matchesLoading && !allMatches.length ? 'Matches load ho rahe hain...' : 'Abhi koi match nahi hai.'}</div>`;
-            } else box.innerHTML = list.map(matchCardHTML).join('');
+            box.innerHTML = list.length ? list.map(x => eventCardHTML(x.e, x.st)).join('')
+                : `<div class="empty-msg" style="text-align:center;padding:30px 0;">${eventsLoaded ? 'Abhi koi match nahi hai.' : 'Matches load ho rahe hain...'}</div>`;
             tickTimers();
             const q = document.getElementById('searchInput').value;
             if (q) filterCategories(q);
         }
 
-        async function openMatchDetail(id) {
-            const m = allMatches.find(x => x.id === id);
-            if (!m) return;
-            const head = `<div class="popup-head"><i class="fa-solid fa-baseball-bat-ball"></i> ${esc(m.t1.code)} vs ${esc(m.t2.code)}</div>`;
-            const foot = '<div class="popup-btns"><button class="popup-btn secondary" onclick="closePopup()">Close</button></div>';
-            openPopup(head + '<div class="popup-body"><div class="notif-item"><div class="notif-msg">Loading...</div></div></div>' + foot, 'match');
-            let d = null;
-            try { const j = await fetchJSON(`${CRIC_API}/score/${encodeURIComponent(id)}`, 10000); d = j && j.data; } catch (e) {}
-            if (popupType !== 'match') return;
-            const ok = v => v != null && String(v).trim() !== '' && !/\{\{/.test(String(v));
-            const rows = [];
-            const add = (k, v) => { if (ok(v)) rows.push(`<div class="kv"><b>${esc(k)}</b><span>${esc(cleanText(v))}</span></div>`); };
-            add('Match', m.t1.name + ' vs ' + m.t2.name + (m.label ? ' (' + m.label + ')' : ''));
-            add('Status', (d && d.update) || m.overview);
-            add('Score', d && d.liveScore);
-            add('Run rate', d && d.runRate);
-            if (d) {
-                add('Batsman', ok(d.batsmanOne) ? `${d.batsmanOne} ${d.batsmanOneRun || ''}${d.batsmanOneBall || ''}` : '');
-                add('Batsman', ok(d.batsmanTwo) ? `${d.batsmanTwo} ${d.batsmanTwoRun || ''}${d.batsmanTwoBall || ''}` : '');
-                add('Bowler', ok(d.bowlerOne) ? `${d.bowlerOne} ${d.bowlerOneRun || ''}/${d.bowlerOneWickets || ''}` : '');
-                add('Bowler', ok(d.bowlerTwo) && ok(d.bowlerTwoRun) && d.bowlerTwoRun !== 'R' ? `${d.bowlerTwo} ${d.bowlerTwoRun}/${d.bowlerTwoWicket || ''}` : '');
-            }
-            add('Venue', m.place);
-            if (m.status === 'live' && m.startMs) add('Live since', new Date(m.startMs).toLocaleString([], { hour: 'numeric', minute: '2-digit', day: 'numeric', month: 'short' }) + (m.approx ? ' (approx)' : ''));
-            if (m.status === 'upcoming' && m.startMs) add('Starts', new Date(m.startMs).toLocaleString([], { weekday: 'short', day: 'numeric', month: 'short', hour: 'numeric', minute: '2-digit' }));
-            openPopup(head + `<div class="popup-body"><div class="notif-item">${rows.join('') || '<div class="notif-msg">Details abhi available nahi hain.</div>'}</div></div>` + foot, 'match');
+        function openEvent(id) {
+            const e = allEvents.find(x => x.id === id);
+            if (!e) return;
+            if (!e.channels.length) { showToast('Is match ka channel link abhi add nahi hua'); return; }
+            if (e.channels.length === 1) { playStream(e.channels[0].url, e.title); return; }
+            currentChannels = e.channels; currentEventTitle = e.title;
+            openPopup(`
+                <div class="popup-head"><i class="fa-solid fa-tv"></i> ${esc(e.title)}</div>
+                <div class="popup-body">${e.channels.map((c, i) => `
+                    <a class="connect-row" data-ch="${i}"><i class="fa-solid fa-circle-play" style="color:#00f2fe"></i><span>${esc(c.name)}</span><i class="fa-solid fa-chevron-right arrow"></i></a>`).join('')}</div>
+                <div class="popup-btns"><button class="popup-btn secondary" onclick="closePopup()">Close</button></div>`, 'channels');
         }
 
         function updateTicker() {
@@ -959,14 +845,24 @@
         }
 
         document.addEventListener('click', e => {
-            const chip = e.target.closest('#catChips .cat-chip');
-            if (chip) { catFilter = chip.dataset.cat; renderMatches(); return; }
+            const chip = e.target.closest('#catChips .sport-chip');
+            if (chip) { sportFilter = chip.dataset.sport; renderMatches(); return; }
             const pill = e.target.closest('#statusPills .pill');
             if (pill) { statusFilter = pill.dataset.st; renderMatches(); return; }
+            const ch = e.target.closest('#popupBox [data-ch]');
+            if (ch) { const c = currentChannels[+ch.dataset.ch]; closePopup(); if (c) playStream(c.url, currentEventTitle); return; }
             const card = e.target.closest('#matchList .match-card');
-            if (card) openMatchDetail(card.dataset.mid);
+            if (card) openEvent(card.dataset.eid);
         });
-        document.addEventListener('visibilitychange', () => { if (!document.hidden) loadMatches(); });
+        // logo na khule to initials wala gol circle
+        document.addEventListener('error', e => {
+            const el = e.target;
+            if (el && el.classList && el.classList.contains('m-logo') && el.tagName === 'IMG') {
+                const d = document.createElement('div');
+                d.className = 'm-logo ph'; d.style.background = el.dataset.c || '#334155'; d.textContent = el.dataset.i || '?';
+                el.replaceWith(d);
+            }
+        }, true);
 
         /* ============ POPUPS ============ */
         let popupType = '';
