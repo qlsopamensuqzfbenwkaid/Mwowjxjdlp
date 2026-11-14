@@ -354,962 +354,1215 @@
 
 
     <script>
-        /* ============================================================
-           GITHUB DATA (replaces Firebase)
-           Data comes from the JSON files in the repo's data/ folder:
-           settings, events, notifications, liveChannels, liveTvScreen, newsUpdates, playlist
-           ============================================================ */
-        const GH_USER   = 'qlsopamensuqzfbenwkaid';   // <- your GitHub username
-        const GH_REPO   = 'Mwowjxjdlp';               // <- the repo that contains the data/ folder
-        const GH_BRANCH = 'main';
-        const REFRESH_MS = 120000;                    // check for new data every 2 minutes
-
-        // On GitHub Pages use a relative path, otherwise (APK/WebView) use the raw link
-        const DATA_BASE = location.hostname.endsWith('github.io')
-            ? 'data/'
-            : `https://raw.githubusercontent.com/${GH_USER}/${GH_REPO}/${GH_BRANCH}/data/`;
-
-        // Converts a JSON array [{id,...}] into an object {id: {...}} so the rest of the code works unchanged
-        function normalize(data) {
-            if (Array.isArray(data)) {
-                const o = {};
-                data.forEach((it, i) => { if (it) o[String(it.id || ('i' + i))] = it; });
-                return o;
+"use strict";
+var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
+};
+var __generator = (this && this.__generator) || function (thisArg, body) {
+    var _ = { label: 0, sent: function() { if (t[0] & 1) throw t[1]; return t[1]; }, trys: [], ops: [] }, f, y, t, g = Object.create((typeof Iterator === "function" ? Iterator : Object).prototype);
+    return g.next = verb(0), g["throw"] = verb(1), g["return"] = verb(2), typeof Symbol === "function" && (g[Symbol.iterator] = function() { return this; }), g;
+    function verb(n) { return function (v) { return step([n, v]); }; }
+    function step(op) {
+        if (f) throw new TypeError("Generator is already executing.");
+        while (g && (g = 0, op[0] && (_ = 0)), _) try {
+            if (f = 1, y && (t = op[0] & 2 ? y["return"] : op[0] ? y["throw"] || ((t = y["return"]) && t.call(y), 0) : y.next) && !(t = t.call(y, op[1])).done) return t;
+            if (y = 0, t) op = [op[0] & 2, t.value];
+            switch (op[0]) {
+                case 0: case 1: t = op; break;
+                case 4: _.label++; return { value: op[1], done: false };
+                case 5: _.label++; y = op[1]; op = [0]; continue;
+                case 7: op = _.ops.pop(); _.trys.pop(); continue;
+                default:
+                    if (!(t = _.trys, t = t.length > 0 && t[t.length - 1]) && (op[0] === 6 || op[0] === 2)) { _ = 0; continue; }
+                    if (op[0] === 3 && (!t || (op[1] > t[0] && op[1] < t[3]))) { _.label = op[1]; break; }
+                    if (op[0] === 6 && _.label < t[1]) { _.label = t[1]; t = op; break; }
+                    if (t && _.label < t[2]) { _.label = t[2]; _.ops.push(op); break; }
+                    if (t[2]) _.ops.pop();
+                    _.trys.pop(); continue;
             }
-            return data;
-        }
-
-        const dataLoaders = [];
-        // Screens that are not visible at start are loaded a little later so the first screen opens faster
-        const LOW_PRIORITY = { liveChannels: 1, liveTvScreen: 1, newsUpdates: 1, playlist: 1, worldwide: 1 };
-
-        // XMLHttpRequest works on every Android WebView (fetch/AbortController do not)
-        function fetchText(url, ms) {
-            return new Promise((resolve, reject) => {
-                const xhr = new XMLHttpRequest();
-                xhr.open('GET', url, true);
-                xhr.timeout = ms || 10000;
-                xhr.onload = () => (xhr.status >= 200 && xhr.status < 300) ? resolve(xhr.responseText) : reject(new Error('HTTP ' + xhr.status));
-                xhr.onerror = () => reject(new Error('network'));
-                xhr.ontimeout = () => reject(new Error('timeout'));
-                xhr.send();
-            });
-        }
-
-        const database = {
-            ref(name) {
-                return {
-                    on(evt, cb) {
-                        const cacheKey = 'sprtix_data_' + name;
-                        let lastText = null;
-                        const deliver = (text) => {
-                            if (text === lastText) return;       // unchanged data: do not redraw
-                            lastText = text;
-                            let val = null;
-                            try { val = normalize(JSON.parse(text)); } catch (e) {}
-                            const empty = !val || (typeof val === 'object' && Object.keys(val).length === 0);
-                            cb({ val: () => (empty ? null : val), exists: () => !empty });
-                        };
-                        // 1) show the data saved on the phone immediately (fast + works offline)
-                        try { const c = localStorage.getItem(cacheKey); if (c) deliver(c); } catch (e) {}
-                        // 2) then fetch the latest data from GitHub
-                        const load = () => fetchText(DATA_BASE + name + '.json?t=' + Date.now(), 10000).then(text => {
-                            JSON.parse(text); // make sure it is valid JSON
-                            try { localStorage.setItem(cacheKey, text); } catch (e) {}
-                            deliver(text);
-                        }).catch(() => {
-                            if (lastText === null) deliver('null'); // first run and nothing could be loaded
-                        });
-                        dataLoaders.push(load);
-                        setTimeout(load, LOW_PRIORITY[name] ? 1500 : 0);
-                        setInterval(load, REFRESH_MS);
+            op = body.call(thisArg, _);
+        } catch (e) { op = [6, e]; y = 0; } finally { f = t = 0; }
+        if (op[0] & 5) throw op[1]; return { value: op[0] ? op[1] : void 0, done: true };
+    }
+};
+/* ============================================================
+   GITHUB DATA (replaces Firebase)
+   Data comes from the JSON files in the repo's data/ folder:
+   settings, events, notifications, liveChannels, liveTvScreen, newsUpdates, playlist
+   ============================================================ */
+var GH_USER = 'qlsopamensuqzfbenwkaid'; // <- your GitHub username
+var GH_REPO = 'Mwowjxjdlp'; // <- the repo that contains the data/ folder
+var GH_BRANCH = 'main';
+var REFRESH_MS = 120000; // check for new data every 2 minutes
+// On GitHub Pages use a relative path, otherwise (APK/WebView) use the raw link
+var DATA_BASE = location.hostname.endsWith('github.io')
+    ? 'data/'
+    : "https://raw.githubusercontent.com/".concat(GH_USER, "/").concat(GH_REPO, "/").concat(GH_BRANCH, "/data/");
+// Converts a JSON array [{id,...}] into an object {id: {...}} so the rest of the code works unchanged
+function normalize(data) {
+    if (Array.isArray(data)) {
+        var o_1 = {};
+        data.forEach(function (it, i) { if (it)
+            o_1[String(it.id || ('i' + i))] = it; });
+        return o_1;
+    }
+    return data;
+}
+var dataLoaders = [];
+// Screens that are not visible at start are loaded a little later so the first screen opens faster
+var LOW_PRIORITY = { liveChannels: 1, liveTvScreen: 1, newsUpdates: 1, playlist: 1, worldwide: 1 };
+// XMLHttpRequest works on every Android WebView (fetch/AbortController do not)
+function fetchText(url, ms) {
+    return new Promise(function (resolve, reject) {
+        var xhr = new XMLHttpRequest();
+        xhr.open('GET', url, true);
+        xhr.timeout = ms || 10000;
+        xhr.onload = function () { return (xhr.status >= 200 && xhr.status < 300) ? resolve(xhr.responseText) : reject(new Error('HTTP ' + xhr.status)); };
+        xhr.onerror = function () { return reject(new Error('network')); };
+        xhr.ontimeout = function () { return reject(new Error('timeout')); };
+        xhr.send();
+    });
+}
+var database = {
+    ref: function (name) {
+        return {
+            on: function (evt, cb) {
+                var cacheKey = 'sprtix_data_' + name;
+                var lastText = null;
+                var deliver = function (text) {
+                    if (text === lastText)
+                        return; // unchanged data: do not redraw
+                    lastText = text;
+                    var val = null;
+                    try {
+                        val = normalize(JSON.parse(text));
                     }
+                    catch (e) { }
+                    var empty = !val || (typeof val === 'object' && Object.keys(val).length === 0);
+                    cb({ val: function () { return (empty ? null : val); }, exists: function () { return !empty; } });
                 };
-            }
-        };
-
-        const PLACEHOLDER = 'data:image/svg+xml;utf8,' + encodeURIComponent(
-            '<svg xmlns="http://www.w3.org/2000/svg" width="100" height="70" viewBox="0 0 100 70"><rect width="100" height="70" fill="#0f172a"/><text x="50" y="40" font-size="14" fill="#00f2fe" text-anchor="middle" font-family="Arial">SPRtix</text></svg>'
-        );
-
-        let globalSettings = { shareMessage: "Download SPRtix App now!" };
-        const APP_VERSION = '4.8.1';   // <- put your APK's versionName here (Check Update compares against it)
-        let favourites = {};
-        try { favourites = JSON.parse(localStorage.getItem('sprtix_favs') || '{}'); } catch (e) { favourites = {}; }
-        let playerInstance = null;
-
-        // All items are kept here, so we never put URLs/titles inside onclick="" strings
-        // (quotes in names/URLs used to break the buttons).
-        const itemStore = {};
-
-        function esc(str) {
-            return String(str == null ? '' : str).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
-        }
-        function safeImg(url) { return esc(url || PLACEHOLDER); }
-        function storeItem(prefix, key, item) {
-            const id = prefix + '_' + key;
-            itemStore[id] = item;
-            return id;
-        }
-
-        window.addEventListener('DOMContentLoaded', () => {
-            fetchDatabaseData();
-            document.addEventListener('click', onDocumentClick);
-            renderMatches();
-            setInterval(tickTimers, 1000);      // live timers / countdowns every second
-            setInterval(renderMatches, 30000);  // refresh status (upcoming -> live -> finished)
-            document.getElementById('nativeVideo').addEventListener('error', () => {
-                if (playerOpen) showToast('Stream error: the link may be offline or not supported on this device.');
-            });
-            // Download the player library in the background, after the app is already visible
-            setTimeout(() => { if (HAS_MSE) ensureVideoJs().catch(() => {}); }, 2500);
-        });
-
-        /* ---------------- BACK BUTTON ----------------
-           Everything that can be "opened" (player, popup, search, a non-home screen) is a layer.
-           The phone's Back button closes the top layer instead of closing the whole app.
-           Native apps can also call  window.handleBack()  (returns true when it handled the press). */
-        const layers = [];
-        let ignorePops = 0;
-        let historyOK = true;
-        let reuseEntry = false;
-        function openLayer(name, closeFn) {
-            layers.push({ name: name, closeFn: closeFn });
-            if (reuseEntry) { reuseEntry = false; return; }   // re-uses the history entry of the layer that was just closed
-            try { history.pushState({ sprtix: layers.length }, ''); } catch (e) { historyOK = false; }
-        }
-        // Close a layer but keep its history entry for the layer that opens right after it
-        // (history.back() followed by pushState() in the same moment is unreliable)
-        function closeLayerForNext(name, hideFn) {
-            const i = layers.map(l => l.name).lastIndexOf(name);
-            if (i > -1) layers.splice(i, 1);
-            hideFn();
-            reuseEntry = true;
-            setTimeout(() => {
-                if (!reuseEntry) return;       // the next layer used the entry
-                reuseEntry = false;
-                if (historyOK) { ignorePops++; try { history.back(); } catch (e) { ignorePops--; } }
-            }, 100);
-        }
-        function popLayerUI(name) {            // closed from the UI (X button, nav tap, ...)
-            let i = -1;
-            layers.forEach((l, idx) => { if (l.name === name) i = idx; });
-            if (i === -1) return;
-            layers.splice(i, 1);
-            if (historyOK) { ignorePops++; try { history.back(); } catch (e) { ignorePops--; } }
-        }
-        window.addEventListener('popstate', () => {
-            if (ignorePops > 0) { ignorePops--; return; }
-            const l = layers.pop();
-            if (l) l.closeFn();
-        });
-        window.handleBack = function () {
-            const l = layers.pop();
-            if (!l) return false;
-            l.closeFn();
-            if (historyOK) { ignorePops++; try { history.back(); } catch (e) { ignorePops--; } }
-            return true;
-        };
-
-        /* ---------------- PLAYER ----------------
-           Engines (libraries are downloaded only when needed, so the app opens fast):
-             - Video.js  : HLS (.m3u8)           - Shaka Player : DASH (.mpd) and ClearKey DRM
-             - native <video> : mp4/webm, and HLS on devices without MSE
-           Stream spec format (everywhere a stream link is accepted):
-             URL | Referer=https://site | User-Agent=Mozilla/5.0 ... | Origin=https://site | kid:key
-           - "kid:key" (32 hex : 32 hex) or  drmLicense=kid:key  = ClearKey DRM key
-           - Referer / User-Agent / Origin cannot be set from JavaScript, so they are sent through
-               1) the native Android player  (window.SPRtixNative.play), or
-               2) the proxy URL from Admin -> Settings. */
-        const VJS_CSS = 'https://vjs.zencdn.net/8.10.0/video-js.css';
-        const VJS_JS = 'https://vjs.zencdn.net/8.10.0/video.min.js';
-        const SHAKA_JS = 'https://cdn.jsdelivr.net/npm/shaka-player@4.7.11/dist/shaka-player.compiled.js';
-        const HAS_MSE = !!(window.MediaSource || window.WebKitMediaSource);
-        const HEX_KEY = /^[0-9a-f]{32}:[0-9a-f]{32}$/i;
-        const KNOWN_HEADERS = { 'user-agent': 'User-Agent', 'referer': 'Referer', 'referrer': 'Referer', 'origin': 'Origin', 'cookie': 'Cookie', 'authorization': 'Authorization', 'accept': 'Accept', 'accept-language': 'Accept-Language', 'host': 'Host' };
-        const KEY_NAMES = ['key', 'clearkey', 'drm', 'drmlicense', 'license_key', 'licensekey'];
-        const IGNORED_NAMES = ['drmscheme', 'drmversion', 'drm_scheme'];
-        let playerOpen = false, playToken = 0, shakaPlayer = null, vjsPromise = null;
-        const loadCache = {};
-
-        function loadScriptOnce(src) {
-            if (loadCache[src]) return loadCache[src];
-            loadCache[src] = new Promise((resolve, reject) => {
-                const sc = document.createElement('script');
-                sc.src = src; sc.async = true;
-                sc.onload = () => resolve();
-                sc.onerror = () => { delete loadCache[src]; reject(new Error('Could not download the player. Check your internet connection.')); };
-                document.head.appendChild(sc);
-            });
-            return loadCache[src];
-        }
-        function loadCssOnce(href) {
-            if (loadCache[href]) return;
-            loadCache[href] = true;
-            const l = document.createElement('link');
-            l.rel = 'stylesheet'; l.href = href;
-            document.head.appendChild(l);
-        }
-        function ensureVideoJs() {
-            if (playerInstance) return Promise.resolve();
-            if (!vjsPromise) {
-                loadCssOnce(VJS_CSS);
-                vjsPromise = loadScriptOnce(VJS_JS).then(initPlayer).catch(e => { vjsPromise = null; throw e; });
-            }
-            return vjsPromise;
-        }
-        function ensureShaka() {
-            return window.shaka ? Promise.resolve() : loadScriptOnce(SHAKA_JS);
-        }
-
-        function initPlayer() {
-            playerInstance = videojs('videoPlayer', {
-                fill: true, controls: true, autoplay: false, preload: 'auto', playsinline: true,
-                html5: {
-                    vhs: { overrideNative: HAS_MSE, enableLowInitialPlaylist: true, smoothQualityChange: true, withCredentials: false },
-                    nativeAudioTracks: false, nativeVideoTracks: false
+                // 1) show the data saved on the phone immediately (fast + works offline)
+                try {
+                    var c = localStorage.getItem(cacheKey);
+                    if (c)
+                        deliver(c);
                 }
-            });
-            playerInstance.on('error', () => {
-                const err = playerInstance.error();
-                if (err && playerOpen) { console.error('Player error:', err); showToast(streamErrorText(null, lastSpec)); }
-            });
-        }
-
-        let lastSpec = null;
-        // "url|Header=value&Header2=value|kid:key"  ->  { url, headers, clearKey, hasHeaders }
-        function parseStreamSpec(raw) {
-            const parts = String(raw || '').split('|');
-            const out = { url: (parts[0] || '').trim(), headers: {}, clearKey: '', hasHeaders: false };
-            for (let i = 1; i < parts.length; i++) {
-                const part = parts[i].trim();
-                if (!part) continue;
-                if (HEX_KEY.test(part)) { out.clearKey = part; continue; }
-                if (part.indexOf('=') < 0) continue;
-                let last = null;
-                part.split('&').forEach(tok => {
-                    const eq = tok.indexOf('=');
-                    const k = eq > -1 ? tok.slice(0, eq).trim().toLowerCase() : '';
-                    const v = eq > -1 ? tok.slice(eq + 1).trim() : '';
-                    if (eq > -1 && IGNORED_NAMES.indexOf(k) > -1) { last = null; return; }
-                    if (eq > -1 && KEY_NAMES.indexOf(k) > -1) { if (HEX_KEY.test(v)) out.clearKey = v; last = null; return; }
-                    if (eq > -1 && (KNOWN_HEADERS[k] || /^x-[a-z0-9-]+$/.test(k))) { last = KNOWN_HEADERS[k] || k; out.headers[last] = v; return; }
-                    if (last) out.headers[last] += '&' + tok;   // the "&" was part of the previous value
-                });
+                catch (e) { }
+                // 2) then fetch the latest data from GitHub
+                var load = function () { return fetchText(DATA_BASE + name + '.json?t=' + Date.now(), 10000).then(function (text) {
+                    JSON.parse(text); // make sure it is valid JSON
+                    try {
+                        localStorage.setItem(cacheKey, text);
+                    }
+                    catch (e) { }
+                    deliver(text);
+                }).catch(function () {
+                    if (lastText === null)
+                        deliver('null'); // first run and nothing could be loaded
+                }); };
+                dataLoaders.push(load);
+                setTimeout(load, LOW_PRIORITY[name] ? 1500 : 0);
+                setInterval(load, REFRESH_MS);
             }
-            out.hasHeaders = Object.keys(out.headers).length > 0;
-            return out;
-        }
-        function cleanPath(url) { return url.split('#')[0].split('?')[0].toLowerCase(); }
-        function isProgressive(url) { return /\.(mp4|m4v|webm|ogv|ogg|mkv)$/.test(cleanPath(url)); }
-        function detectType(url) {
-            const u = cleanPath(url);
-            if (/\.(mp4|m4v)$/.test(u)) return 'video/mp4';
-            if (/\.(webm|mkv)$/.test(u)) return 'video/webm';
-            if (/\.(ogv|ogg)$/.test(u)) return 'video/ogg';
-            // .m3u8, and links with no extension (most live TV / IPTV links) are treated as HLS
-            return 'application/x-mpegURL';
-        }
-
-        function hasNativePlayer() { return !!(window.SPRtixNative && window.SPRtixNative.play); }
-        function streamErrorText(err, spec) {
-            if (spec && spec.hasHeaders && !hasNativePlayer() && !String((globalSettings && globalSettings.proxyUrl) || '').trim()) {
-                return 'This stream needs special headers (Referer / User-Agent). Use the native player or set a proxy URL in the Admin Panel settings.';
-            }
-            const m = err && err.message ? ' (' + err.message + ')' : '';
-            return 'Stream error: the link may be offline, blocked (CORS) or http on https.' + m;
-        }
-
-        function showEngine(name) {
-            const v = document.getElementById('videoPlayer');
-            if (v) v.style.display = name === 'videojs' ? '' : 'none';
-            document.getElementById('nativeVideo').style.display = name === 'videojs' ? 'none' : 'block';
-        }
-        function stopAllPlayers() {
-            if (playerInstance) { try { playerInstance.pause(); playerInstance.reset(); } catch (e) {} }
-            if (shakaPlayer) { try { shakaPlayer.destroy(); } catch (e) {} shakaPlayer = null; }
-            const nv = document.getElementById('nativeVideo');
-            try { nv.pause(); nv.removeAttribute('src'); nv.load(); } catch (e) {}
-        }
-
-        async function playStream(spec, title) {
-            const s = parseStreamSpec(spec);
-            if (!s.url) { showToast('Stream URL not available!'); return; }
-            lastSpec = s;
-
-            // Native Android player (ExoPlayer) for streams that need headers or a DRM key
-            if (hasNativePlayer() && (s.hasHeaders || s.clearKey)) {
-                try { window.SPRtixNative.play(s.url, JSON.stringify(s.headers), s.clearKey, title || ''); return; } catch (e) { console.error(e); }
-            }
-
-            const token = ++playToken;
-            document.getElementById('playerTitle').innerText = title || 'Live Stream';
-            document.getElementById('playerModal').classList.add('active');
-            document.getElementById('playerLoading').style.display = 'flex';
-            if (!playerOpen) { playerOpen = true; openLayer('player', hidePlayer); }
-            stopAllPlayers();
-
-            let url = s.url;
-            const proxy = String((globalSettings && globalSettings.proxyUrl) || '').trim();
-            if (s.hasHeaders && proxy) {
-                url = proxy + (proxy.indexOf('?') > -1 ? '&' : '?') + 'url=' + encodeURIComponent(s.url) + '&h=' + encodeURIComponent(JSON.stringify(s.headers));
-            }
-
+        };
+    }
+};
+var PLACEHOLDER = 'data:image/svg+xml;utf8,' + encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" width="100" height="70" viewBox="0 0 100 70"><rect width="100" height="70" fill="#0f172a"/><text x="50" y="40" font-size="14" fill="#00f2fe" text-anchor="middle" font-family="Arial">SPRtix</text></svg>');
+var globalSettings = { shareMessage: "Download SPRtix App now!" };
+var APP_VERSION = '4.8.1'; // <- put your APK's versionName here (Check Update compares against it)
+var favourites = {};
+try {
+    favourites = JSON.parse(localStorage.getItem('sprtix_favs') || '{}');
+}
+catch (e) {
+    favourites = {};
+}
+var playerInstance = null;
+// All items are kept here, so we never put URLs/titles inside onclick="" strings
+// (quotes in names/URLs used to break the buttons).
+var itemStore = {};
+function esc(str) {
+    return String(str == null ? '' : str).replace(/[&<>"']/g, function (c) { return ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]); });
+}
+function safeImg(url) { return esc(url || PLACEHOLDER); }
+function storeItem(prefix, key, item) {
+    var id = prefix + '_' + key;
+    itemStore[id] = item;
+    return id;
+}
+window.addEventListener('DOMContentLoaded', function () {
+    fetchDatabaseData();
+    document.addEventListener('click', onDocumentClick);
+    renderMatches();
+    setInterval(tickTimers, 1000); // live timers / countdowns every second
+    setInterval(renderMatches, 30000); // refresh status (upcoming -> live -> finished)
+    document.getElementById('nativeVideo').addEventListener('error', function () {
+        if (playerOpen)
+            showToast('Stream error: the link may be offline or not supported on this device.');
+    });
+    // Download the player library in the background, after the app is already visible
+    setTimeout(function () { if (HAS_MSE)
+        ensureVideoJs().catch(function () { }); }, 2500);
+});
+/* ---------------- BACK BUTTON ----------------
+   Everything that can be "opened" (player, popup, search, a non-home screen) is a layer.
+   The phone's Back button closes the top layer instead of closing the whole app.
+   Native apps can also call  window.handleBack()  (returns true when it handled the press). */
+var layers = [];
+var ignorePops = 0;
+var historyOK = true;
+var reuseEntry = false;
+function openLayer(name, closeFn) {
+    layers.push({ name: name, closeFn: closeFn });
+    if (reuseEntry) {
+        reuseEntry = false;
+        return;
+    } // re-uses the history entry of the layer that was just closed
+    try {
+        history.pushState({ sprtix: layers.length }, '');
+    }
+    catch (e) {
+        historyOK = false;
+    }
+}
+// Close a layer but keep its history entry for the layer that opens right after it
+// (history.back() followed by pushState() in the same moment is unreliable)
+function closeLayerForNext(name, hideFn) {
+    var i = layers.map(function (l) { return l.name; }).lastIndexOf(name);
+    if (i > -1)
+        layers.splice(i, 1);
+    hideFn();
+    reuseEntry = true;
+    setTimeout(function () {
+        if (!reuseEntry)
+            return; // the next layer used the entry
+        reuseEntry = false;
+        if (historyOK) {
+            ignorePops++;
             try {
-                if (/\.mpd$/.test(cleanPath(s.url)) || s.clearKey) {
-                    if (!HAS_MSE) throw new Error('this device does not support DASH/DRM streams');
-                    await ensureShaka();
-                    if (token !== playToken) return;
-                    await playWithShaka(url, s.clearKey, token);
-                } else if (isProgressive(s.url) || !HAS_MSE) {
+                history.back();
+            }
+            catch (e) {
+                ignorePops--;
+            }
+        }
+    }, 100);
+}
+function popLayerUI(name) {
+    var i = -1;
+    layers.forEach(function (l, idx) { if (l.name === name)
+        i = idx; });
+    if (i === -1)
+        return;
+    layers.splice(i, 1);
+    if (historyOK) {
+        ignorePops++;
+        try {
+            history.back();
+        }
+        catch (e) {
+            ignorePops--;
+        }
+    }
+}
+window.addEventListener('popstate', function () {
+    if (ignorePops > 0) {
+        ignorePops--;
+        return;
+    }
+    var l = layers.pop();
+    if (l)
+        l.closeFn();
+});
+window.handleBack = function () {
+    var l = layers.pop();
+    if (!l)
+        return false;
+    l.closeFn();
+    if (historyOK) {
+        ignorePops++;
+        try {
+            history.back();
+        }
+        catch (e) {
+            ignorePops--;
+        }
+    }
+    return true;
+};
+/* ---------------- PLAYER ----------------
+   Engines (libraries are downloaded only when needed, so the app opens fast):
+     - Video.js  : HLS (.m3u8)           - Shaka Player : DASH (.mpd) and ClearKey DRM
+     - native <video> : mp4/webm, and HLS on devices without MSE
+   Stream spec format (everywhere a stream link is accepted):
+     URL | Referer=https://site | User-Agent=Mozilla/5.0 ... | Origin=https://site | kid:key
+   - "kid:key" (32 hex : 32 hex) or  drmLicense=kid:key  = ClearKey DRM key
+   - Referer / User-Agent / Origin cannot be set from JavaScript, so they are sent through
+       1) the native Android player  (window.SPRtixNative.play), or
+       2) the proxy URL from Admin -> Settings. */
+var VJS_CSS = 'https://vjs.zencdn.net/8.10.0/video-js.css';
+var VJS_JS = 'https://vjs.zencdn.net/8.10.0/video.min.js';
+var SHAKA_JS = 'https://cdn.jsdelivr.net/npm/shaka-player@4.7.11/dist/shaka-player.compiled.js';
+var HAS_MSE = !!(window.MediaSource || window.WebKitMediaSource);
+var HEX_KEY = /^[0-9a-f]{32}:[0-9a-f]{32}$/i;
+var KNOWN_HEADERS = { 'user-agent': 'User-Agent', 'referer': 'Referer', 'referrer': 'Referer', 'origin': 'Origin', 'cookie': 'Cookie', 'authorization': 'Authorization', 'accept': 'Accept', 'accept-language': 'Accept-Language', 'host': 'Host' };
+var KEY_NAMES = ['key', 'clearkey', 'drm', 'drmlicense', 'license_key', 'licensekey'];
+var IGNORED_NAMES = ['drmscheme', 'drmversion', 'drm_scheme'];
+var playerOpen = false, playToken = 0, shakaPlayer = null, vjsPromise = null;
+var loadCache = {};
+function loadScriptOnce(src) {
+    if (loadCache[src])
+        return loadCache[src];
+    loadCache[src] = new Promise(function (resolve, reject) {
+        var sc = document.createElement('script');
+        sc.src = src;
+        sc.async = true;
+        sc.onload = function () { return resolve(); };
+        sc.onerror = function () { delete loadCache[src]; reject(new Error('Could not download the player. Check your internet connection.')); };
+        document.head.appendChild(sc);
+    });
+    return loadCache[src];
+}
+function loadCssOnce(href) {
+    if (loadCache[href])
+        return;
+    loadCache[href] = true;
+    var l = document.createElement('link');
+    l.rel = 'stylesheet';
+    l.href = href;
+    document.head.appendChild(l);
+}
+function ensureVideoJs() {
+    if (playerInstance)
+        return Promise.resolve();
+    if (!vjsPromise) {
+        loadCssOnce(VJS_CSS);
+        vjsPromise = loadScriptOnce(VJS_JS).then(initPlayer).catch(function (e) { vjsPromise = null; throw e; });
+    }
+    return vjsPromise;
+}
+function ensureShaka() {
+    return window.shaka ? Promise.resolve() : loadScriptOnce(SHAKA_JS);
+}
+function initPlayer() {
+    playerInstance = videojs('videoPlayer', {
+        fill: true, controls: true, autoplay: false, preload: 'auto', playsinline: true,
+        html5: {
+            vhs: { overrideNative: HAS_MSE, enableLowInitialPlaylist: true, smoothQualityChange: true, withCredentials: false },
+            nativeAudioTracks: false, nativeVideoTracks: false
+        }
+    });
+    playerInstance.on('error', function () {
+        var err = playerInstance.error();
+        if (err && playerOpen) {
+            console.error('Player error:', err);
+            showToast(streamErrorText(null, lastSpec));
+        }
+    });
+}
+var lastSpec = null;
+// "url|Header=value&Header2=value|kid:key"  ->  { url, headers, clearKey, hasHeaders }
+function parseStreamSpec(raw) {
+    var parts = String(raw || '').split('|');
+    var out = { url: (parts[0] || '').trim(), headers: {}, clearKey: '', hasHeaders: false };
+    var _loop_1 = function (i) {
+        var part = parts[i].trim();
+        if (!part)
+            return "continue";
+        if (HEX_KEY.test(part)) {
+            out.clearKey = part;
+            return "continue";
+        }
+        if (part.indexOf('=') < 0)
+            return "continue";
+        var last = null;
+        part.split('&').forEach(function (tok) {
+            var eq = tok.indexOf('=');
+            var k = eq > -1 ? tok.slice(0, eq).trim().toLowerCase() : '';
+            var v = eq > -1 ? tok.slice(eq + 1).trim() : '';
+            if (eq > -1 && IGNORED_NAMES.indexOf(k) > -1) {
+                last = null;
+                return;
+            }
+            if (eq > -1 && KEY_NAMES.indexOf(k) > -1) {
+                if (HEX_KEY.test(v))
+                    out.clearKey = v;
+                last = null;
+                return;
+            }
+            if (eq > -1 && (KNOWN_HEADERS[k] || /^x-[a-z0-9-]+$/.test(k))) {
+                last = KNOWN_HEADERS[k] || k;
+                out.headers[last] = v;
+                return;
+            }
+            if (last)
+                out.headers[last] += '&' + tok; // the "&" was part of the previous value
+        });
+    };
+    for (var i = 1; i < parts.length; i++) {
+        _loop_1(i);
+    }
+    out.hasHeaders = Object.keys(out.headers).length > 0;
+    return out;
+}
+function cleanPath(url) { return url.split('#')[0].split('?')[0].toLowerCase(); }
+function isProgressive(url) { return /\.(mp4|m4v|webm|ogv|ogg|mkv)$/.test(cleanPath(url)); }
+function detectType(url) {
+    var u = cleanPath(url);
+    if (/\.(mp4|m4v)$/.test(u))
+        return 'video/mp4';
+    if (/\.(webm|mkv)$/.test(u))
+        return 'video/webm';
+    if (/\.(ogv|ogg)$/.test(u))
+        return 'video/ogg';
+    // .m3u8, and links with no extension (most live TV / IPTV links) are treated as HLS
+    return 'application/x-mpegURL';
+}
+function hasNativePlayer() { return !!(window.SPRtixNative && window.SPRtixNative.play); }
+function streamErrorText(err, spec) {
+    if (spec && spec.hasHeaders && !hasNativePlayer() && !String((globalSettings && globalSettings.proxyUrl) || '').trim()) {
+        return 'This stream needs special headers (Referer / User-Agent). Use the native player or set a proxy URL in the Admin Panel settings.';
+    }
+    var m = err && err.message ? ' (' + err.message + ')' : '';
+    return 'Stream error: the link may be offline, blocked (CORS) or http on https.' + m;
+}
+function showEngine(name) {
+    var v = document.getElementById('videoPlayer');
+    if (v)
+        v.style.display = name === 'videojs' ? '' : 'none';
+    document.getElementById('nativeVideo').style.display = name === 'videojs' ? 'none' : 'block';
+}
+function stopAllPlayers() {
+    if (playerInstance) {
+        try {
+            playerInstance.pause();
+            playerInstance.reset();
+        }
+        catch (e) { }
+    }
+    if (shakaPlayer) {
+        try {
+            shakaPlayer.destroy();
+        }
+        catch (e) { }
+        shakaPlayer = null;
+    }
+    var nv = document.getElementById('nativeVideo');
+    try {
+        nv.pause();
+        nv.removeAttribute('src');
+        nv.load();
+    }
+    catch (e) { }
+}
+function playStream(spec, title) {
+    return __awaiter(this, void 0, void 0, function () {
+        var s, token, url, proxy, pr, e_1;
+        return __generator(this, function (_a) {
+            switch (_a.label) {
+                case 0:
+                    s = parseStreamSpec(spec);
+                    if (!s.url) {
+                        showToast('Stream URL not available!');
+                        return [2 /*return*/];
+                    }
+                    lastSpec = s;
+                    // Native Android player (ExoPlayer) for streams that need headers or a DRM key
+                    if (hasNativePlayer() && (s.hasHeaders || s.clearKey)) {
+                        try {
+                            window.SPRtixNative.play(s.url, JSON.stringify(s.headers), s.clearKey, title || '');
+                            return [2 /*return*/];
+                        }
+                        catch (e) {
+                            console.error(e);
+                        }
+                    }
+                    token = ++playToken;
+                    document.getElementById('playerTitle').innerText = title || 'Live Stream';
+                    document.getElementById('playerModal').classList.add('active');
+                    document.getElementById('playerLoading').style.display = 'flex';
+                    if (!playerOpen) {
+                        playerOpen = true;
+                        openLayer('player', hidePlayer);
+                    }
+                    stopAllPlayers();
+                    url = s.url;
+                    proxy = String((globalSettings && globalSettings.proxyUrl) || '').trim();
+                    if (s.hasHeaders && proxy) {
+                        url = proxy + (proxy.indexOf('?') > -1 ? '&' : '?') + 'url=' + encodeURIComponent(s.url) + '&h=' + encodeURIComponent(JSON.stringify(s.headers));
+                    }
+                    _a.label = 1;
+                case 1:
+                    _a.trys.push([1, 8, , 9]);
+                    if (!(/\.mpd$/.test(cleanPath(s.url)) || s.clearKey)) return [3 /*break*/, 4];
+                    if (!HAS_MSE)
+                        throw new Error('this device does not support DASH/DRM streams');
+                    return [4 /*yield*/, ensureShaka()];
+                case 2:
+                    _a.sent();
+                    if (token !== playToken)
+                        return [2 /*return*/];
+                    return [4 /*yield*/, playWithShaka(url, s.clearKey, token)];
+                case 3:
+                    _a.sent();
+                    return [3 /*break*/, 7];
+                case 4:
+                    if (!(isProgressive(s.url) || !HAS_MSE)) return [3 /*break*/, 5];
                     playNative(url);
-                } else {
-                    await ensureVideoJs();
-                    if (token !== playToken) return;
+                    return [3 /*break*/, 7];
+                case 5: return [4 /*yield*/, ensureVideoJs()];
+                case 6:
+                    _a.sent();
+                    if (token !== playToken)
+                        return [2 /*return*/];
                     showEngine('videojs');
                     playerInstance.src({ src: url, type: detectType(s.url) });
                     playerInstance.load();
-                    const pr = playerInstance.play();
-                    if (pr && pr.catch) pr.catch(() => { /* the user can tap the play button */ });
+                    pr = playerInstance.play();
+                    if (pr && pr.catch)
+                        pr.catch(function () { });
+                    _a.label = 7;
+                case 7:
+                    if (token === playToken)
+                        document.getElementById('playerLoading').style.display = 'none';
+                    return [3 /*break*/, 9];
+                case 8:
+                    e_1 = _a.sent();
+                    if (token !== playToken)
+                        return [2 /*return*/];
+                    document.getElementById('playerLoading').style.display = 'none';
+                    console.error(e_1);
+                    showToast(streamErrorText(e_1, s));
+                    return [3 /*break*/, 9];
+                case 9: return [2 /*return*/];
+            }
+        });
+    });
+}
+function playNative(url) {
+    showEngine('native');
+    var nv = document.getElementById('nativeVideo');
+    nv.src = url;
+    var pr = nv.play();
+    if (pr && pr.catch)
+        pr.catch(function () { });
+}
+function playWithShaka(url, clearKey, token) {
+    return __awaiter(this, void 0, void 0, function () {
+        var nv, sp, kv, keys, pr;
+        return __generator(this, function (_a) {
+            switch (_a.label) {
+                case 0:
+                    shaka.polyfill.installAll();
+                    if (!shaka.Player.isBrowserSupported())
+                        throw new Error('this browser is not supported');
+                    showEngine('native');
+                    nv = document.getElementById('nativeVideo');
+                    sp = new shaka.Player(nv);
+                    shakaPlayer = sp;
+                    sp.addEventListener('error', function (ev) {
+                        var d = ev.detail || {};
+                        console.error('Shaka error', d);
+                        if (playerOpen)
+                            showToast(streamErrorText({ message: 'code ' + (d.code || '?') }, lastSpec));
+                    });
+                    if (clearKey) {
+                        kv = clearKey.split(':');
+                        keys = {};
+                        keys[kv[0].toLowerCase()] = kv[1].toLowerCase();
+                        sp.configure({ drm: { clearKeys: keys } });
+                    }
+                    return [4 /*yield*/, sp.load(url)];
+                case 1:
+                    _a.sent();
+                    if (token !== playToken)
+                        return [2 /*return*/];
+                    pr = nv.play();
+                    if (pr && pr.catch)
+                        pr.catch(function () { });
+                    return [2 /*return*/];
+            }
+        });
+    });
+}
+function hidePlayer() {
+    playToken++;
+    playerOpen = false;
+    document.getElementById('playerModal').classList.remove('active');
+    document.getElementById('playerLoading').style.display = 'none';
+    stopAllPlayers();
+}
+function closePlayer() { popLayerUI('player'); hidePlayer(); }
+/* ---------------- CARDS ---------------- */
+/* ---- AUTO background colour: most common colour along the image edges ---- */
+var bgColorCache = {};
+function applyAutoBg(wrap, url) {
+    if (!url)
+        return;
+    var paint = function (rgb) {
+        wrap.style.backgroundColor = rgb;
+        var blurImg = wrap.querySelector('.thumb-bg');
+        if (blurImg)
+            blurImg.style.display = 'none'; // colour found, the blur is not needed
+    };
+    if (bgColorCache[url]) {
+        paint(bgColorCache[url]);
+        return;
+    }
+    var probe = new Image();
+    probe.crossOrigin = 'anonymous';
+    probe.onload = function () {
+        try {
+            var S_1 = 40;
+            var cv = document.createElement('canvas');
+            cv.width = S_1;
+            cv.height = S_1;
+            var ctx = cv.getContext('2d', { willReadFrequently: true });
+            ctx.drawImage(probe, 0, 0, S_1, S_1);
+            var d_1 = ctx.getImageData(0, 0, S_1, S_1).data;
+            var buckets_1 = {};
+            var best_1 = null, bestCount_1 = 0, opaque_1 = 0;
+            var take = function (x, y) {
+                var i = (y * S_1 + x) * 4;
+                if (d_1[i + 3] < 40)
+                    return; // transparent pixel ignore
+                opaque_1++;
+                var key = (d_1[i] >> 5) + ',' + (d_1[i + 1] >> 5) + ',' + (d_1[i + 2] >> 5);
+                var b = buckets_1[key] || (buckets_1[key] = { n: 0, r: 0, g: 0, b: 0 });
+                b.n++;
+                b.r += d_1[i];
+                b.g += d_1[i + 1];
+                b.b += d_1[i + 2];
+                if (b.n > bestCount_1) {
+                    bestCount_1 = b.n;
+                    best_1 = b;
                 }
-                if (token === playToken) document.getElementById('playerLoading').style.display = 'none';
-            } catch (e) {
-                if (token !== playToken) return;
-                document.getElementById('playerLoading').style.display = 'none';
-                console.error(e);
-                showToast(streamErrorText(e, s));
-            }
-        }
-
-        function playNative(url) {
-            showEngine('native');
-            const nv = document.getElementById('nativeVideo');
-            nv.src = url;
-            const pr = nv.play();
-            if (pr && pr.catch) pr.catch(() => {});
-        }
-
-        async function playWithShaka(url, clearKey, token) {
-            shaka.polyfill.installAll();
-            if (!shaka.Player.isBrowserSupported()) throw new Error('this browser is not supported');
-            showEngine('native');
-            const nv = document.getElementById('nativeVideo');
-            const sp = new shaka.Player(nv);
-            shakaPlayer = sp;
-            sp.addEventListener('error', ev => {
-                const d = ev.detail || {};
-                console.error('Shaka error', d);
-                if (playerOpen) showToast(streamErrorText({ message: 'code ' + (d.code || '?') }, lastSpec));
-            });
-            if (clearKey) {
-                const kv = clearKey.split(':');
-                const keys = {}; keys[kv[0].toLowerCase()] = kv[1].toLowerCase();
-                sp.configure({ drm: { clearKeys: keys } });
-            }
-            await sp.load(url);
-            if (token !== playToken) return;
-            const pr = nv.play();
-            if (pr && pr.catch) pr.catch(() => {});
-        }
-
-        function hidePlayer() {
-            playToken++;
-            playerOpen = false;
-            document.getElementById('playerModal').classList.remove('active');
-            document.getElementById('playerLoading').style.display = 'none';
-            stopAllPlayers();
-        }
-        function closePlayer() { popLayerUI('player'); hidePlayer(); }
-
-        /* ---------------- CARDS ---------------- */
-        /* ---- AUTO background colour: most common colour along the image edges ---- */
-        const bgColorCache = {};
-        function applyAutoBg(wrap, url) {
-            if (!url) return;
-            const paint = (rgb) => {
-                wrap.style.backgroundColor = rgb;
-                const blurImg = wrap.querySelector('.thumb-bg');
-                if (blurImg) blurImg.style.display = 'none'; // colour found, the blur is not needed
             };
-            if (bgColorCache[url]) { paint(bgColorCache[url]); return; }
-
-            const probe = new Image();
-            probe.crossOrigin = 'anonymous';
-            probe.onload = () => {
-                try {
-                    const S = 40;
-                    const cv = document.createElement('canvas');
-                    cv.width = S; cv.height = S;
-                    const ctx = cv.getContext('2d', { willReadFrequently: true });
-                    ctx.drawImage(probe, 0, 0, S, S);
-                    const d = ctx.getImageData(0, 0, S, S).data;
-                    const buckets = {};
-                    let best = null, bestCount = 0, opaque = 0;
-                    const take = (x, y) => {
-                        const i = (y * S + x) * 4;
-                        if (d[i + 3] < 40) return; // transparent pixel ignore
-                        opaque++;
-                        const key = (d[i] >> 5) + ',' + (d[i + 1] >> 5) + ',' + (d[i + 2] >> 5);
-                        const b = buckets[key] || (buckets[key] = { n: 0, r: 0, g: 0, b: 0 });
-                        b.n++; b.r += d[i]; b.g += d[i + 1]; b.b += d[i + 2];
-                        if (b.n > bestCount) { bestCount = b.n; best = b; }
-                    };
-                    for (let k = 0; k < S; k++) { take(k, 0); take(k, S - 1); take(0, k); take(S - 1, k); }
-                    if (!best || opaque < S) return; // transparent PNG: keep the default dark background
-                    const rgb = `rgb(${Math.round(best.r / best.n)},${Math.round(best.g / best.n)},${Math.round(best.b / best.n)})`;
-                    bgColorCache[url] = rgb;
-                    paint(rgb);
-                } catch (e) { /* CORS blocked: the blurred background is used instead */ }
-            };
-            probe.src = url;
+            for (var k = 0; k < S_1; k++) {
+                take(k, 0);
+                take(k, S_1 - 1);
+                take(0, k);
+                take(S_1 - 1, k);
+            }
+            if (!best_1 || opaque_1 < S_1)
+                return; // transparent PNG: keep the default dark background
+            var rgb = "rgb(".concat(Math.round(best_1.r / best_1.n), ",").concat(Math.round(best_1.g / best_1.n), ",").concat(Math.round(best_1.b / best_1.n), ")");
+            bgColorCache[url] = rgb;
+            paint(rgb);
         }
-
-        function buildCard(prefix, key, item, opts) {
-            const id = storeItem(prefix, key, item);
-            const name = item.name || item.title || 'Untitled';
-            const card = document.createElement(opts.link ? 'a' : 'div');
-            card.className = 'channel-card' + (opts.link ? ' explore-card' : '') + (favourites[key] ? ' saved' : '');
-            card.dataset.key = key;
-            card.dataset.id = id;
-            card.dataset.search = (name + ' ' + (item.category || '') + ' ' + (item.subtitle || '')).toLowerCase();
-            if (opts.link) {
-                card.dataset.action = 'link';
-            } else {
-                card.dataset.action = 'play';
-            }
-            card.innerHTML = `
-                <i class="fa-solid fa-heart save-heart" data-action="fav"></i>
-                <div class="thumb-wrap"><img src="${safeImg(item.image)}" class="thumb-bg" alt=""><img src="${safeImg(item.image)}" class="card-thumb" loading="lazy" alt=""></div>
-                <div class="channel-logo-text">${esc(name)}<span>${esc(opts.sub)}</span></div>
-                <div class="channel-footer">
-                    <span class="live-badge" style="${opts.badgeStyle || ''}">${esc(opts.badge)}</span>
-                    <span class="view-count"><i class="fa-solid ${opts.icon}"></i> ${esc(opts.right)}</span>
-                </div>`;
-            if (!opts.link) applyAutoBg(card.querySelector('.thumb-wrap'), item.image);
-            card.querySelectorAll('img.thumb-bg, img.card-thumb').forEach(im => { im.onerror = function () { this.onerror = null; this.src = PLACEHOLDER; }; });
-            return card;
+        catch (e) { /* CORS blocked: the blurred background is used instead */ }
+    };
+    probe.src = url;
+}
+function buildCard(prefix, key, item, opts) {
+    var id = storeItem(prefix, key, item);
+    var name = item.name || item.title || 'Untitled';
+    var card = document.createElement(opts.link ? 'a' : 'div');
+    card.className = 'channel-card' + (opts.link ? ' explore-card' : '') + (favourites[key] ? ' saved' : '');
+    card.dataset.key = key;
+    card.dataset.id = id;
+    card.dataset.search = (name + ' ' + (item.category || '') + ' ' + (item.subtitle || '')).toLowerCase();
+    if (opts.link) {
+        card.dataset.action = 'link';
+    }
+    else {
+        card.dataset.action = 'play';
+    }
+    card.innerHTML = "\n                <i class=\"fa-solid fa-heart save-heart\" data-action=\"fav\"></i>\n                <div class=\"thumb-wrap\"><img src=\"".concat(safeImg(item.image), "\" class=\"thumb-bg\" alt=\"\"><img src=\"").concat(safeImg(item.image), "\" class=\"card-thumb\" loading=\"lazy\" alt=\"\"></div>\n                <div class=\"channel-logo-text\">").concat(esc(name), "<span>").concat(esc(opts.sub), "</span></div>\n                <div class=\"channel-footer\">\n                    <span class=\"live-badge\" style=\"").concat(opts.badgeStyle || '', "\">").concat(esc(opts.badge), "</span>\n                    <span class=\"view-count\"><i class=\"fa-solid ").concat(opts.icon, "\"></i> ").concat(esc(opts.right), "</span>\n                </div>");
+    if (!opts.link)
+        applyAutoBg(card.querySelector('.thumb-wrap'), item.image);
+    card.querySelectorAll('img.thumb-bg, img.card-thumb').forEach(function (im) { im.onerror = function () { this.onerror = null; this.src = PLACEHOLDER; }; });
+    return card;
+}
+// One single click handler for every card (works for cloned cards too)
+function onDocumentClick(e) {
+    var card = e.target.closest('.channel-card');
+    if (!card)
+        return;
+    var item = itemStore[card.dataset.id];
+    if (!item)
+        return;
+    if (e.target.closest('[data-action="fav"]')) {
+        e.preventDefault();
+        e.stopPropagation();
+        toggleFavourite(card.dataset.key, item);
+        return;
+    }
+    var name = item.name || item.title || 'Live Stream';
+    var url = (item.url || '').trim();
+    if (card.dataset.action === 'link') {
+        e.preventDefault();
+        if (!url) {
+            showToast('Link not available!');
+            return;
         }
-
-        // One single click handler for every card (works for cloned cards too)
-        function onDocumentClick(e) {
-            const card = e.target.closest('.channel-card');
-            if (!card) return;
-            const item = itemStore[card.dataset.id];
-            if (!item) return;
-
-            if (e.target.closest('[data-action="fav"]')) {
-                e.preventDefault();
-                e.stopPropagation();
-                toggleFavourite(card.dataset.key, item);
-                return;
-            }
-
-            const name = item.name || item.title || 'Live Stream';
-            const url = (item.url || '').trim();
-
-            if (card.dataset.action === 'link') {
-                e.preventDefault();
-                if (!url) { showToast('Link not available!'); return; }
-                // playlist items that are streams play in-app, other links open normally
-                if (/\.(m3u8|mp4|mpd)$/.test(cleanPath(parseStreamSpec(url).url))) playStream(url, name);
-                else window.open(url, '_blank');
-                return;
-            }
+        // playlist items that are streams play in-app, other links open normally
+        if (/\.(m3u8|mp4|mpd)$/.test(cleanPath(parseStreamSpec(url).url)))
             playStream(url, name);
+        else
+            window.open(url, '_blank');
+        return;
+    }
+    playStream(url, name);
+}
+function emptyMsg(text) { return "<div class=\"empty-msg\">".concat(text, "</div>"); }
+function fetchDatabaseData() {
+    database.ref('settings').on('value', function (snap) {
+        if (snap.exists()) {
+            globalSettings = snap.val();
+            updateTicker();
         }
-
-        function emptyMsg(text) { return `<div class="empty-msg">${text}</div>`; }
-
-        function fetchDatabaseData() {
-            database.ref('settings').on('value', snap => {
-                if (snap.exists()) { globalSettings = snap.val(); updateTicker(); }
-            });
-
-            // Live Events (Admin Panel -> Live Events)
-            database.ref('events').on('value', snap => {
-                const data = snap.val();
-                allEvents = data ? Object.values(data).map(normalizeEvent) : [];
-                eventsLoaded = true;
-                renderMatches();
-            });
-
-            // Notifications (popup when the app opens; not shown again after Skip)
-            database.ref('notifications').on('value', snap => checkNotifications(snap.val()));
-
-            // Trending Live
-            database.ref('liveChannels').on('value', snap => {
-                const container = document.getElementById('trendingLiveContainer');
-                container.innerHTML = '';
-                const data = snap.val();
-                if (!data) { container.innerHTML = emptyMsg('No channels yet.'); return; }
-                Object.keys(data).forEach(key => {
-                    const item = data[key];
-                    container.appendChild(buildCard('live', key, item, { sub: item.subtitle || '', badge: 'LIVE', icon: 'fa-eye', right: item.views || '1K' }));
-                });
-            });
-
-            // Live TV Screen
-            database.ref('liveTvScreen').on('value', snap => {
-                const grid = document.getElementById('liveTvGrid');
-                grid.innerHTML = '';
-                const data = snap.val();
-                if (!data) { grid.innerHTML = emptyMsg('No channels yet.'); return; }
-                Object.keys(data).forEach(key => {
-                    const item = data[key];
-                    grid.appendChild(buildCard('tv', key, item, { sub: item.category || 'LIVE TV', badge: 'HD', icon: 'fa-signal', right: 'Online' }));
-                });
-            });
-
-            // News
-            database.ref('newsUpdates').on('value', snap => {
-                const homeNews = document.getElementById('homeNewsContainer');
-                const newsGrid = document.getElementById('newsGrid');
-                homeNews.innerHTML = '';
-                newsGrid.innerHTML = '';
-                const data = snap.val();
-                if (!data) { homeNews.innerHTML = emptyMsg('No news yet.'); newsGrid.innerHTML = emptyMsg('No news yet.'); return; }
-                Object.keys(data).forEach(key => {
-                    const item = data[key];
-                    const o = { sub: item.category || 'NEWS', badge: 'NEWS', badgeStyle: 'background:#00f2fe; color:#030712;', icon: 'fa-broadcast-tower', right: '24/7' };
-                    homeNews.appendChild(buildCard('news', key, item, o));
-                    newsGrid.appendChild(buildCard('news', key, item, o));
-                });
-            });
-
-            // Explore / Playlist
-            database.ref('playlist').on('value', snap => {
-                const grid = document.getElementById('exploreGrid');
-                grid.innerHTML = '';
-                const data = snap.val();
-                if (!data) { grid.innerHTML = emptyMsg('Nothing here yet.'); return; }
-                Object.keys(data).forEach(key => {
-                    const item = data[key];
-                    grid.appendChild(buildCard('exp', key, item, { link: true, sub: item.category || 'EXPLORE', badge: 'GO', badgeStyle: 'background:#7000ff;', icon: 'fa-link', right: 'Link' }));
-                });
-            });
-
-            // Worldwide (categories, same as Explore)
-            database.ref('worldwide').on('value', snap => {
-                const grid = document.getElementById('worldwideGrid');
-                grid.innerHTML = '';
-                const data = snap.val();
-                if (!data) { grid.innerHTML = emptyMsg('Nothing here yet.'); return; }
-                Object.keys(data).forEach(key => {
-                    const item = data[key];
-                    grid.appendChild(buildCard('ww', key, item, { link: true, sub: item.category || 'WORLDWIDE', badge: 'GO', badgeStyle: 'background:#7000ff;', icon: 'fa-link', right: 'Link' }));
-                });
-            });
-
-            renderFavourites();
+    });
+    // Live Events (Admin Panel -> Live Events)
+    database.ref('events').on('value', function (snap) {
+        var data = snap.val();
+        allEvents = data ? Object.values(data).map(normalizeEvent) : [];
+        eventsLoaded = true;
+        renderMatches();
+    });
+    // Notifications (popup when the app opens; not shown again after Skip)
+    database.ref('notifications').on('value', function (snap) { return checkNotifications(snap.val()); });
+    // Trending Live
+    database.ref('liveChannels').on('value', function (snap) {
+        var container = document.getElementById('trendingLiveContainer');
+        container.innerHTML = '';
+        var data = snap.val();
+        if (!data) {
+            container.innerHTML = emptyMsg('No channels yet.');
+            return;
         }
-
-        /* ---------------- NAV / SLIDER ---------------- */
-        function showScreen(screenName) {
-            document.querySelectorAll('.screen').forEach(sc => sc.classList.remove('active-screen'));
-            document.querySelectorAll('.nav-item').forEach(n => n.classList.toggle('active', n.dataset.screen === screenName));
-            const target = document.getElementById(screenName + 'Screen');
-            if (target) { target.classList.add('active-screen'); target.scrollTop = 0; }
-            if (screenName === 'saved') renderFavourites();
-        }
-        function switchScreen(screenName) {
-            if (screenName === 'home') popLayerUI('screen');
-            else if (!layers.some(l => l.name === 'screen')) openLayer('screen', () => showScreen('home'));   // Back returns to the home screen
-            showScreen(screenName);
-        }
-
-        function refreshData() {
-            const icon = document.getElementById('refreshIcon');
-            icon.classList.add('spin');
-            Promise.all(dataLoaders.map(f => f())).finally(() => {
-                icon.classList.remove('spin');
-                showToast('Data refreshed');
-            });
-        }
-
-        /* ---------------- FAVOURITES ---------------- */
-        function toggleFavourite(key, item) {
-            if (favourites[key]) {
-                delete favourites[key];
-                showToast('Removed from Favourites');
-            } else {
-                favourites[key] = item;
-                showToast('Added to Favourites');
-            }
-            try { localStorage.setItem('sprtix_favs', JSON.stringify(favourites)); } catch (e) {}
-            // update heart colour on every card with this key
-            document.querySelectorAll('.channel-card').forEach(c => {
-                if (c.dataset.key === key) c.classList.toggle('saved', !!favourites[key]);
-            });
-            renderFavourites();
-        }
-
-        function renderFavourites() {
-            const favContainer = document.getElementById('favouritesContainer');
-            const savedGrid = document.getElementById('savedGrid');
-            favContainer.innerHTML = '';
-            savedGrid.innerHTML = '';
-            const keys = Object.keys(favourites);
-            if (keys.length === 0) {
-                favContainer.innerHTML = emptyMsg('No favourites added yet.');
-                savedGrid.innerHTML = emptyMsg('No saved items found.');
-                return;
-            }
-            keys.forEach(key => {
-                const item = favourites[key];
-                const o = { sub: item.category || item.subtitle || 'FAVOURITE', badge: 'SAVED', icon: 'fa-play', right: 'Play' };
-                const c1 = buildCard('fav', key, item, o); c1.classList.add('saved');
-                const c2 = buildCard('fav', key, item, o); c2.classList.add('saved');
-                favContainer.appendChild(c1);
-                savedGrid.appendChild(c2);
-            });
-        }
-
-        /* ---------------- SEARCH / MISC ---------------- */
-        function hideSearch() {
-            document.getElementById('searchContainer').classList.remove('active');
-            const inp = document.getElementById('searchInput');
-            inp.value = ''; inp.blur();
-            filterCategories('');
-        }
-        function toggleSearch() {
-            const bar = document.getElementById('searchContainer');
-            if (!bar.classList.contains('active')) {
-                bar.classList.add('active');
-                document.getElementById('searchInput').focus();
-                openLayer('search', hideSearch);
-            } else { popLayerUI('search'); hideSearch(); }
-        }
-
-        function filterCategories(query) {
-            const q = (query || '').trim().toLowerCase();
-            document.querySelectorAll('.channel-card, .match-card').forEach(c => {
-                c.style.display = (!q || (c.dataset.search || '').includes(q)) ? '' : 'none';
-            });
-        }
-
-
-        /* ============ LIVE EVENTS (added from the Admin Panel) ============ */
-        const FINISHED_KEEP_MS = 48 * 3600 * 1000;   // finished matches disappear from the list 48 hours after they end
-        const SPORT_META = {
-            cricket: ['Cricket', 'fa-baseball-bat-ball'], football: ['Football', 'fa-futbol'], boxing: ['Boxing', 'fa-hand-fist'],
-            wrestling: ['Wrestling', 'fa-hand-fist'], motorsport: ['Motorsport', 'fa-flag-checkered'], tennis: ['Tennis', 'fa-table-tennis-paddle-ball'],
-            basketball: ['Basketball', 'fa-basketball'], hockey: ['Hockey', 'fa-hockey-puck'], baseball: ['Baseball', 'fa-baseball'],
-            rugby: ['Rugby', 'fa-football'], volleyball: ['Volleyball', 'fa-volleyball'], golf: ['Golf', 'fa-golf-ball-tee'], other: ['Other', 'fa-trophy']
-        };
-        let allEvents = [], sportFilter = 'all', statusFilter = 'all', eventsLoaded = false;
-        let currentChannels = [], currentEventTitle = '';
-
-        function cleanText(x) { return String(x == null ? '' : x).replace(/\s+/g, ' ').trim(); }
-        function hashColor(str) { let h = 0; for (let i = 0; i < str.length; i++) h = (h * 31 + str.charCodeAt(i)) >>> 0; return `hsl(${h % 360}, 45%, 38%)`; }
-        function initialsOf(name) {
-            const w = cleanText(name).split(' ').filter(Boolean);
-            return (w.length > 1 ? w.map(x => x[0]).join('') : (w[0] || '?').slice(0, 3)).toUpperCase().slice(0, 3);
-        }
-        function sportMeta(k) { return SPORT_META[k] || [k.charAt(0).toUpperCase() + k.slice(1), 'fa-trophy']; }
-        function apiHeaders() { const k = globalSettings && globalSettings.apiKey; return k ? { 'x-api-key': k } : {}; }  // API key from the Admin Panel settings
-
-        // One channel per line:  [Name |] url [| Referer=... | User-Agent=... | kid:key]
-        function parseChannels(v) {
-            const lines = Array.isArray(v) ? v : String(v || '').split(/\r?\n/);
-            const out = [];
-            lines.forEach(line => {
-                line = String(line).trim();
-                if (!line) return;
-                const first = line.split('|')[0].trim();
-                let name = '', spec = line;
-                if (line.indexOf('|') > -1 && !/^https?:\/\//i.test(first)) { name = first; spec = line.slice(line.indexOf('|') + 1).trim(); }
-                if (spec) out.push({ name: name || 'Channel ' + (out.length + 1), url: spec });
-            });
-            return out;
-        }
-
-        function normalizeEvent(r) {
-            const sport = cleanText(r.sport || 'other').toLowerCase();
-            const e = {
-                id: String(r.id), sport, league: cleanText(r.league || r.title), leagueLogo: cleanText(r.leagueLogo || r.image),
-                t1: { name: cleanText(r.team1), logo: cleanText(r.team1Logo) }, t2: { name: cleanText(r.team2), logo: cleanText(r.team2Logo) },
-                startMs: Date.parse(r.start), durMs: (parseFloat(r.duration) || 180) * 60000,
-                manual: (r.status && r.status !== 'auto') ? r.status : '', hot: r.hot === 'yes' || r.hot === true,
-                channels: parseChannels(r.channels)
-            };
-            e.title = e.t1.name && e.t2.name ? e.t1.name + ' vs ' + e.t2.name : (e.t1.name || e.league);
-            e.search = (e.t1.name + ' ' + e.t2.name + ' ' + e.league + ' ' + sport).toLowerCase();
-            return e;
-        }
-
-        function statusOf(e, now) {
-            if (e.manual) return e.manual;
-            if (isNaN(e.startMs)) return 'upcoming';
-            if (now < e.startMs) return 'upcoming';
-            return now < e.startMs + e.durMs ? 'live' : 'finished';
-        }
-
-        const p2 = n => String(n).padStart(2, '0');
-        function fmtDur(sec) { sec = Math.max(0, Math.floor(sec)); return p2(Math.floor(sec / 3600)) + ':' + p2(Math.floor(sec % 3600 / 60)) + ':' + p2(sec % 60); }
-        function fmtTime(ms) { const d = new Date(ms); let h = d.getHours(); const ap = h >= 12 ? 'PM' : 'AM'; h = h % 12 || 12; return p2(h) + ':' + p2(d.getMinutes()) + ' ' + ap; }
-        function fmtDate(ms) { const d = new Date(ms); return p2(d.getDate()) + '/' + p2(d.getMonth() + 1) + '/' + d.getFullYear(); }
-        function startsIn(ms) {
-            const diff = ms - Date.now();
-            if (diff < 60000) return 'Starting soon';
-            const d = Math.floor(diff / 86400000), h = Math.floor(diff / 3600000), m = Math.floor(diff / 60000);
-            if (d >= 1) return 'Starts in ' + d + (d === 1 ? ' day' : ' days');
-            if (h >= 1) return 'Starts in ' + h + (h === 1 ? ' hour' : ' hours');
-            return 'Starts in ' + m + (m === 1 ? ' minute' : ' minutes');
-        }
-
-        function tickTimers() {
-            const now = Date.now();
-            document.querySelectorAll('.m-timer[data-ms]').forEach(el => { el.textContent = fmtDur((now - +el.dataset.ms) / 1000); });
-            document.querySelectorAll('.m-starts[data-ms]').forEach(el => { el.textContent = startsIn(+el.dataset.ms); });
-        }
-
-        function logoHTML(t, cls) {
-            const init = esc(initialsOf(t.name)), col = hashColor(t.name || '?');
-            if (t.logo) return `<img class="m-logo ${cls || ''}" src="${esc(t.logo)}" alt="" loading="lazy" data-i="${init}" data-c="${col}">`;
-            return `<div class="m-logo ph" style="background:${col}">${init}</div>`;
-        }
-
-        function eventCardHTML(e, st) {
-            const sm = sportMeta(e.sport);
-            let mid, bottom = '';
-            const ok = !isNaN(e.startMs);
-            if (st === 'live') {
-                mid = '<div class="m-status live">Live</div>';
-                bottom = `<div class="m-timer" data-ms="${ok ? Math.min(e.startMs, Date.now()) : Date.now()}">00:00:00</div>`;
-            } else if (st === 'upcoming') {
-                mid = ok ? `<div class="m-time">${fmtTime(e.startMs)}</div><div class="m-date">${fmtDate(e.startMs)}</div>` : '<div class="m-time">Time TBA</div>';
-                if (ok) bottom = `<div class="m-starts" data-ms="${e.startMs}">${startsIn(e.startMs)}</div>`;
-            } else {
-                mid = '<div class="m-time done">Finished</div>' + (ok ? `<div class="m-date">${fmtDate(e.startMs)}</div>` : '');
-            }
-            const head = (e.leagueLogo ? `<img src="${esc(e.leagueLogo)}" alt="" onerror="this.style.display='none'">` : '') + `<span>${esc(sm[0])}${e.league ? ' | ' + esc(e.league) : ''}</span>`;
-            return `<div class="match-card" data-eid="${esc(e.id)}" data-search="${esc(e.search)}">
-                ${e.hot ? '<div class="m-hot">HOT</div>' : ''}
-                <div class="m-head">${head}</div>
-                <div class="m-body">
-                    <div class="m-team">${logoHTML(e.t1)}<div class="m-name">${esc(e.t1.name)}</div></div>
-                    <div class="m-mid">${mid}</div>
-                    <div class="m-team right">${logoHTML(e.t2)}<div class="m-name">${esc(e.t2.name)}</div></div>
-                </div>
-                ${bottom}
-            </div>`;
-        }
-
-        function renderMatches() {
-            const now = Date.now();
-            const evs = allEvents.map(e => ({ e, st: statusOf(e, now) }))
-                .filter(x => !(x.st === 'finished' && !isNaN(x.e.startMs) && now - (x.e.startMs + x.e.durMs) > FINISHED_KEEP_MS));
-
-            // sport chips (only sports that have events)
-            const counts = {};
-            evs.forEach(x => { counts[x.e.sport] = (counts[x.e.sport] || 0) + 1; });
-            if (sportFilter !== 'all' && !counts[sportFilter]) sportFilter = 'all';
-            const sports = Object.keys(counts).sort((a, b) => counts[b] - counts[a]);
-            const chipHTML = (k, label, icon, n) => `<div class="sport-chip ${k === sportFilter ? 'active' : ''}" data-sport="${esc(k)}"><span class="badge">${n}</span><i class="fa-solid ${icon}"></i>${k === sportFilter ? `<span>${esc(label)}</span>` : ''}</div>`;
-            document.getElementById('catChips').innerHTML = chipHTML('all', 'All', 'fa-layer-group', evs.length)
-                + sports.map(k => { const m = sportMeta(k); return chipHTML(k, m[0], m[1], counts[k]); }).join('');
-
-            // status pills (counts for the selected sport)
-            const inSport = evs.filter(x => sportFilter === 'all' || x.e.sport === sportFilter);
-            const cnt = { all: inSport.length, live: 0, upcoming: 0, finished: 0 };
-            inSport.forEach(x => cnt[x.st]++);
-            const PILLS = [['all', 'All'], ['live', 'Live'], ['upcoming', 'Upcoming'], ['finished', 'Finished']];
-            document.getElementById('statusPills').innerHTML = PILLS.map(p =>
-                `<div class="pill ${p[0] === statusFilter ? 'active' : ''}" data-st="${p[0]}">${p[0] === statusFilter ? '<i class="fa-solid fa-check"></i>' : ''}${p[1]} (${cnt[p[0]]})</div>`).join('');
-
-            // list
-            const order = { live: 0, upcoming: 1, finished: 2 };
-            const t = x => isNaN(x.e.startMs) ? Infinity : x.e.startMs;
-            const list = inSport.filter(x => statusFilter === 'all' || x.st === statusFilter).sort((a, b) => {
-                if (order[a.st] !== order[b.st]) return order[a.st] - order[b.st];
-                return a.st === 'finished' ? (t(b) === Infinity ? 0 : t(b)) - (t(a) === Infinity ? 0 : t(a)) : t(a) - t(b);
-            });
-            const box = document.getElementById('matchList');
-            box.innerHTML = list.length ? list.map(x => eventCardHTML(x.e, x.st)).join('')
-                : `<div class="empty-msg" style="text-align:center;padding:30px 0;">${eventsLoaded ? 'No matches right now.' : 'Loading matches...'}</div>`;
-            tickTimers();
-            const q = document.getElementById('searchInput').value;
-            if (q) filterCategories(q);
-        }
-
-        function openEvent(id) {
-            const e = allEvents.find(x => x.id === id);
-            if (!e) return;
-            if (!e.channels.length) { showToast('No channel link has been added for this match yet'); return; }
-            if (e.channels.length === 1) { playStream(e.channels[0].url, e.title); return; }
-            currentChannels = e.channels; currentEventTitle = e.title;
-            openPopup(`
-                <div class="popup-head"><i class="fa-solid fa-tv"></i> ${esc(e.title)}</div>
-                <div class="popup-body">${e.channels.map((c, i) => `
-                    <a class="connect-row" data-ch="${i}"><i class="fa-solid fa-circle-play" style="color:#00f2fe"></i><span>${esc(c.name)}</span><i class="fa-solid fa-chevron-right arrow"></i></a>`).join('')}</div>
-                <div class="popup-btns"><button class="popup-btn secondary" onclick="closePopup()">Close</button></div>`, 'channels');
-        }
-
-        function updateTicker() {
-            const bar = document.getElementById('tickerBar'), tx = document.getElementById('tickerText');
-            const text = cleanText(globalSettings && globalSettings.ticker);
-            if (!text) { bar.style.display = 'none'; return; }
-            tx.textContent = text;
-            tx.style.setProperty('--dur', Math.max(10, text.length * 0.22) + 's');
-            bar.style.display = '';
-        }
-
-        document.addEventListener('click', e => {
-            const chip = e.target.closest('#catChips .sport-chip');
-            if (chip) { sportFilter = chip.dataset.sport; renderMatches(); return; }
-            const pill = e.target.closest('#statusPills .pill');
-            if (pill) { statusFilter = pill.dataset.st; renderMatches(); return; }
-            const ch = e.target.closest('#popupBox [data-ch]');
-            if (ch) { const c = currentChannels[+ch.dataset.ch]; closeLayerForNext('popup', hidePopup); if (c) playStream(c.url, currentEventTitle); return; }
-            const card = e.target.closest('#matchList .match-card');
-            if (card) openEvent(card.dataset.eid);
+        Object.keys(data).forEach(function (key) {
+            var item = data[key];
+            container.appendChild(buildCard('live', key, item, { sub: item.subtitle || '', badge: 'LIVE', icon: 'fa-eye', right: item.views || '1K' }));
         });
-        // if a logo fails to load, show a round circle with initials
-        document.addEventListener('error', e => {
-            const el = e.target;
-            if (el && el.classList && el.classList.contains('m-logo') && el.tagName === 'IMG') {
-                const d = document.createElement('div');
-                d.className = 'm-logo ph'; d.style.background = el.dataset.c || '#334155'; d.textContent = el.dataset.i || '?';
-                el.replaceWith(d);
-            }
-        }, true);
-
-        /* ============ POPUPS ============ */
-        let popupType = '';
-        let popupIds = [];
-        function openPopup(html, type) {
-            const overlay = document.getElementById('popupOverlay');
-            document.getElementById('popupBox').innerHTML = html;
-            if (!overlay.classList.contains('active')) { overlay.classList.add('active'); openLayer('popup', hidePopup); }
-            popupType = type || '';
+    });
+    // Live TV Screen
+    database.ref('liveTvScreen').on('value', function (snap) {
+        var grid = document.getElementById('liveTvGrid');
+        grid.innerHTML = '';
+        var data = snap.val();
+        if (!data) {
+            grid.innerHTML = emptyMsg('No channels yet.');
+            return;
         }
-        function hidePopup() {
-            if (popupType === 'notif') markNotifsSeen();   // closing the notification popup (Skip or Back) marks it as seen
-            document.getElementById('popupOverlay').classList.remove('active');
-            popupType = '';
+        Object.keys(data).forEach(function (key) {
+            var item = data[key];
+            grid.appendChild(buildCard('tv', key, item, { sub: item.category || 'LIVE TV', badge: 'HD', icon: 'fa-signal', right: 'Online' }));
+        });
+    });
+    // News
+    database.ref('newsUpdates').on('value', function (snap) {
+        var homeNews = document.getElementById('homeNewsContainer');
+        var newsGrid = document.getElementById('newsGrid');
+        homeNews.innerHTML = '';
+        newsGrid.innerHTML = '';
+        var data = snap.val();
+        if (!data) {
+            homeNews.innerHTML = emptyMsg('No news yet.');
+            newsGrid.innerHTML = emptyMsg('No news yet.');
+            return;
         }
-        function closePopup() { popLayerUI('popup'); hidePopup(); }
-
-        /* ============ NOTIFICATIONS ============ */
-        let notifIds = [];
-        function getSeen() { try { return JSON.parse(localStorage.getItem('sprtix_seen_notifs') || '[]'); } catch (e) { return []; } }
-
-        function checkNotifications(obj) {
-            const items = Object.values(obj || {});
-            notifIds = items.map(n => String(n.id));
-            const seen = getSeen();
-            const unseen = items.filter(n => !seen.includes(String(n.id))).reverse(); // newest first
-            if (!unseen.length) return;
-            const overlayOpen = document.getElementById('popupOverlay').classList.contains('active');
-            if (overlayOpen && popupType !== 'notif') return;
-            popupIds = unseen.map(n => String(n.id));
-            openPopup(`
-                <div class="popup-head"><i class="fa-solid fa-bell"></i> Notification</div>
-                <div class="popup-body">${unseen.map(n => `
-                    <div class="notif-item">
-                        ${n.title ? `<div class="notif-title">${esc(n.title)}</div>` : ''}
-                        <div class="notif-msg">${esc(n.message || '')}</div>
-                    </div>`).join('')}</div>
-                <div class="popup-btns"><button class="popup-btn" onclick="skipNotifications()">Skip</button></div>`, 'notif');
+        Object.keys(data).forEach(function (key) {
+            var item = data[key];
+            var o = { sub: item.category || 'NEWS', badge: 'NEWS', badgeStyle: 'background:#00f2fe; color:#030712;', icon: 'fa-broadcast-tower', right: '24/7' };
+            homeNews.appendChild(buildCard('news', key, item, o));
+            newsGrid.appendChild(buildCard('news', key, item, o));
+        });
+    });
+    // Explore / Playlist
+    database.ref('playlist').on('value', function (snap) {
+        var grid = document.getElementById('exploreGrid');
+        grid.innerHTML = '';
+        var data = snap.val();
+        if (!data) {
+            grid.innerHTML = emptyMsg('Nothing here yet.');
+            return;
         }
-
-        function markNotifsSeen() {
-            // everything that exists right now counts as "seen"; the popup only returns when a NEW notification is added
-            const seen = getSeen();
-            notifIds.concat(popupIds).forEach(id => { if (seen.indexOf(id) < 0) seen.push(id); });
-            try { localStorage.setItem('sprtix_seen_notifs', JSON.stringify(seen)); } catch (e) {}
+        Object.keys(data).forEach(function (key) {
+            var item = data[key];
+            grid.appendChild(buildCard('exp', key, item, { link: true, sub: item.category || 'EXPLORE', badge: 'GO', badgeStyle: 'background:#7000ff;', icon: 'fa-link', right: 'Link' }));
+        });
+    });
+    // Worldwide (categories, same as Explore)
+    database.ref('worldwide').on('value', function (snap) {
+        var grid = document.getElementById('worldwideGrid');
+        grid.innerHTML = '';
+        var data = snap.val();
+        if (!data) {
+            grid.innerHTML = emptyMsg('Nothing here yet.');
+            return;
         }
-        function skipNotifications() { closePopup(); }
-
-        /* ============ CONNECT US ============ */
-        const CONNECT_LINKS = [
-            ['whatsapp', 'WhatsApp', 'fa-brands fa-whatsapp', '#25d366'],
-            ['telegram', 'Telegram', 'fa-brands fa-telegram', '#29a9eb'],
-            ['facebook', 'Facebook', 'fa-brands fa-facebook', '#4c8bf5'],
-            ['instagram', 'Instagram', 'fa-brands fa-instagram', '#e1306c'],
-            ['youtube', 'YouTube', 'fa-brands fa-youtube', '#ff0033'],
-            ['email', 'Email', 'fa-solid fa-envelope', '#f59e0b']
-        ];
-
-        function openConnectUs() {
-            const links = CONNECT_LINKS.filter(l => globalSettings && globalSettings[l[0]]);
-            if (!links.length) { showToast('No contact links have been set yet'); return; }
-            openPopup(`
-                <div class="popup-head"><i class="fa-solid fa-headset"></i> Connect Us</div>
-                <div class="popup-body">${links.map(l => `
-                    <a class="connect-row" data-link="${l[0]}"><i class="${l[2]}" style="color:${l[3]}"></i><span>${l[1]}</span><i class="fa-solid fa-chevron-right arrow"></i></a>`).join('')}</div>
-                <div class="popup-btns"><button class="popup-btn secondary" onclick="closePopup()">Close</button></div>`, 'connect');
+        Object.keys(data).forEach(function (key) {
+            var item = data[key];
+            grid.appendChild(buildCard('ww', key, item, { link: true, sub: item.category || 'WORLDWIDE', badge: 'GO', badgeStyle: 'background:#7000ff;', icon: 'fa-link', right: 'Link' }));
+        });
+    });
+    renderFavourites();
+}
+/* ---------------- NAV / SLIDER ---------------- */
+function showScreen(screenName) {
+    document.querySelectorAll('.screen').forEach(function (sc) { return sc.classList.remove('active-screen'); });
+    document.querySelectorAll('.nav-item').forEach(function (n) { return n.classList.toggle('active', n.dataset.screen === screenName); });
+    var target = document.getElementById(screenName + 'Screen');
+    if (target) {
+        target.classList.add('active-screen');
+        target.scrollTop = 0;
+    }
+    if (screenName === 'saved')
+        renderFavourites();
+}
+function switchScreen(screenName) {
+    if (screenName === 'home')
+        popLayerUI('screen');
+    else if (!layers.some(function (l) { return l.name === 'screen'; }))
+        openLayer('screen', function () { return showScreen('home'); }); // Back returns to the home screen
+    showScreen(screenName);
+}
+function refreshData() {
+    var icon = document.getElementById('refreshIcon');
+    icon.classList.add('spin');
+    Promise.all(dataLoaders.map(function (f) { return f(); })).finally(function () {
+        icon.classList.remove('spin');
+        showToast('Data refreshed');
+    });
+}
+/* ---------------- FAVOURITES ---------------- */
+function toggleFavourite(key, item) {
+    if (favourites[key]) {
+        delete favourites[key];
+        showToast('Removed from Favourites');
+    }
+    else {
+        favourites[key] = item;
+        showToast('Added to Favourites');
+    }
+    try {
+        localStorage.setItem('sprtix_favs', JSON.stringify(favourites));
+    }
+    catch (e) { }
+    // update heart colour on every card with this key
+    document.querySelectorAll('.channel-card').forEach(function (c) {
+        if (c.dataset.key === key)
+            c.classList.toggle('saved', !!favourites[key]);
+    });
+    renderFavourites();
+}
+function renderFavourites() {
+    var favContainer = document.getElementById('favouritesContainer');
+    var savedGrid = document.getElementById('savedGrid');
+    favContainer.innerHTML = '';
+    savedGrid.innerHTML = '';
+    var keys = Object.keys(favourites);
+    if (keys.length === 0) {
+        favContainer.innerHTML = emptyMsg('No favourites added yet.');
+        savedGrid.innerHTML = emptyMsg('No saved items found.');
+        return;
+    }
+    keys.forEach(function (key) {
+        var item = favourites[key];
+        var o = { sub: item.category || item.subtitle || 'FAVOURITE', badge: 'SAVED', icon: 'fa-play', right: 'Play' };
+        var c1 = buildCard('fav', key, item, o);
+        c1.classList.add('saved');
+        var c2 = buildCard('fav', key, item, o);
+        c2.classList.add('saved');
+        favContainer.appendChild(c1);
+        savedGrid.appendChild(c2);
+    });
+}
+/* ---------------- SEARCH / MISC ---------------- */
+function hideSearch() {
+    document.getElementById('searchContainer').classList.remove('active');
+    var inp = document.getElementById('searchInput');
+    inp.value = '';
+    inp.blur();
+    filterCategories('');
+}
+function toggleSearch() {
+    var bar = document.getElementById('searchContainer');
+    if (!bar.classList.contains('active')) {
+        bar.classList.add('active');
+        document.getElementById('searchInput').focus();
+        openLayer('search', hideSearch);
+    }
+    else {
+        popLayerUI('search');
+        hideSearch();
+    }
+}
+function filterCategories(query) {
+    var q = (query || '').trim().toLowerCase();
+    document.querySelectorAll('.channel-card, .match-card').forEach(function (c) {
+        c.style.display = (!q || (c.dataset.search || '').includes(q)) ? '' : 'none';
+    });
+}
+/* ============ LIVE EVENTS (added from the Admin Panel) ============ */
+var FINISHED_KEEP_MS = 48 * 3600 * 1000; // finished matches disappear from the list 48 hours after they end
+var SPORT_META = {
+    cricket: ['Cricket', 'fa-baseball-bat-ball'], football: ['Football', 'fa-futbol'], boxing: ['Boxing', 'fa-hand-fist'],
+    wrestling: ['Wrestling', 'fa-hand-fist'], motorsport: ['Motorsport', 'fa-flag-checkered'], tennis: ['Tennis', 'fa-table-tennis-paddle-ball'],
+    basketball: ['Basketball', 'fa-basketball'], hockey: ['Hockey', 'fa-hockey-puck'], baseball: ['Baseball', 'fa-baseball'],
+    rugby: ['Rugby', 'fa-football'], volleyball: ['Volleyball', 'fa-volleyball'], golf: ['Golf', 'fa-golf-ball-tee'], other: ['Other', 'fa-trophy']
+};
+var allEvents = [], sportFilter = 'all', statusFilter = 'all', eventsLoaded = false;
+var currentChannels = [], currentEventTitle = '';
+function cleanText(x) { return String(x == null ? '' : x).replace(/\s+/g, ' ').trim(); }
+function hashColor(str) { var h = 0; for (var i = 0; i < str.length; i++)
+    h = (h * 31 + str.charCodeAt(i)) >>> 0; return "hsl(".concat(h % 360, ", 45%, 38%)"); }
+function initialsOf(name) {
+    var w = cleanText(name).split(' ').filter(Boolean);
+    return (w.length > 1 ? w.map(function (x) { return x[0]; }).join('') : (w[0] || '?').slice(0, 3)).toUpperCase().slice(0, 3);
+}
+function sportMeta(k) { return SPORT_META[k] || [k.charAt(0).toUpperCase() + k.slice(1), 'fa-trophy']; }
+function apiHeaders() { var k = globalSettings && globalSettings.apiKey; return k ? { 'x-api-key': k } : {}; } // API key from the Admin Panel settings
+// One channel per line:  [Name |] url [| Referer=... | User-Agent=... | kid:key]
+function parseChannels(v) {
+    var lines = Array.isArray(v) ? v : String(v || '').split(/\r?\n/);
+    var out = [];
+    lines.forEach(function (line) {
+        line = String(line).trim();
+        if (!line)
+            return;
+        var first = line.split('|')[0].trim();
+        var name = '', spec = line;
+        if (line.indexOf('|') > -1 && !/^https?:\/\//i.test(first)) {
+            name = first;
+            spec = line.slice(line.indexOf('|') + 1).trim();
         }
-
-        function openContactLink(key) {
-            let v = String((globalSettings && globalSettings[key]) || '').trim();
-            if (!v) return;
-            if (!/^(https?:|mailto:|tel:)/i.test(v)) {
-                if (key === 'email') v = 'mailto:' + v;
-                else if (key === 'whatsapp' && /^[+\d\s-]+$/.test(v)) v = 'https://wa.me/' + v.replace(/\D/g, '');
-                else if (key === 'telegram') v = 'https://t.me/' + v.replace(/^@/, '');
-                else v = 'https://' + v;
-            }
-            window.open(v, '_blank');
-        }
-
-        /* ============ CHECK UPDATE ============ */
-        function versionGreater(a, b) {
-            const pa = String(a).split('.').map(x => parseInt(x, 10) || 0);
-            const pb = String(b).split('.').map(x => parseInt(x, 10) || 0);
-            for (let i = 0; i < Math.max(pa.length, pb.length); i++) {
-                const x = pa[i] || 0, y = pb[i] || 0;
-                if (x > y) return true;
-                if (x < y) return false;
-            }
+        if (spec)
+            out.push({ name: name || 'Channel ' + (out.length + 1), url: spec });
+    });
+    return out;
+}
+function normalizeEvent(r) {
+    var sport = cleanText(r.sport || 'other').toLowerCase();
+    var e = {
+        id: String(r.id),
+        sport: sport,
+        league: cleanText(r.league || r.title), leagueLogo: cleanText(r.leagueLogo || r.image),
+        t1: { name: cleanText(r.team1), logo: cleanText(r.team1Logo) }, t2: { name: cleanText(r.team2), logo: cleanText(r.team2Logo) },
+        startMs: Date.parse(r.start), durMs: (parseFloat(r.duration) || 180) * 60000,
+        manual: (r.status && r.status !== 'auto') ? r.status : '', hot: r.hot === 'yes' || r.hot === true,
+        channels: parseChannels(r.channels)
+    };
+    e.title = e.t1.name && e.t2.name ? e.t1.name + ' vs ' + e.t2.name : (e.t1.name || e.league);
+    e.search = (e.t1.name + ' ' + e.t2.name + ' ' + e.league + ' ' + sport).toLowerCase();
+    return e;
+}
+function statusOf(e, now) {
+    if (e.manual)
+        return e.manual;
+    if (isNaN(e.startMs))
+        return 'upcoming';
+    if (now < e.startMs)
+        return 'upcoming';
+    return now < e.startMs + e.durMs ? 'live' : 'finished';
+}
+var p2 = function (n) { return String(n).padStart(2, '0'); };
+function fmtDur(sec) { sec = Math.max(0, Math.floor(sec)); return p2(Math.floor(sec / 3600)) + ':' + p2(Math.floor(sec % 3600 / 60)) + ':' + p2(sec % 60); }
+function fmtTime(ms) { var d = new Date(ms); var h = d.getHours(); var ap = h >= 12 ? 'PM' : 'AM'; h = h % 12 || 12; return p2(h) + ':' + p2(d.getMinutes()) + ' ' + ap; }
+function fmtDate(ms) { var d = new Date(ms); return p2(d.getDate()) + '/' + p2(d.getMonth() + 1) + '/' + d.getFullYear(); }
+function startsIn(ms) {
+    var diff = ms - Date.now();
+    if (diff < 60000)
+        return 'Starting soon';
+    var d = Math.floor(diff / 86400000), h = Math.floor(diff / 3600000), m = Math.floor(diff / 60000);
+    if (d >= 1)
+        return 'Starts in ' + d + (d === 1 ? ' day' : ' days');
+    if (h >= 1)
+        return 'Starts in ' + h + (h === 1 ? ' hour' : ' hours');
+    return 'Starts in ' + m + (m === 1 ? ' minute' : ' minutes');
+}
+function tickTimers() {
+    var now = Date.now();
+    document.querySelectorAll('.m-timer[data-ms]').forEach(function (el) { el.textContent = fmtDur((now - +el.dataset.ms) / 1000); });
+    document.querySelectorAll('.m-starts[data-ms]').forEach(function (el) { el.textContent = startsIn(+el.dataset.ms); });
+}
+function logoHTML(t, cls) {
+    var init = esc(initialsOf(t.name)), col = hashColor(t.name || '?');
+    if (t.logo)
+        return "<img class=\"m-logo ".concat(cls || '', "\" src=\"").concat(esc(t.logo), "\" alt=\"\" loading=\"lazy\" data-i=\"").concat(init, "\" data-c=\"").concat(col, "\">");
+    return "<div class=\"m-logo ph\" style=\"background:".concat(col, "\">").concat(init, "</div>");
+}
+function eventCardHTML(e, st) {
+    var sm = sportMeta(e.sport);
+    var mid, bottom = '';
+    var ok = !isNaN(e.startMs);
+    if (st === 'live') {
+        mid = '<div class="m-status live">Live</div>';
+        bottom = "<div class=\"m-timer\" data-ms=\"".concat(ok ? Math.min(e.startMs, Date.now()) : Date.now(), "\">00:00:00</div>");
+    }
+    else if (st === 'upcoming') {
+        mid = ok ? "<div class=\"m-time\">".concat(fmtTime(e.startMs), "</div><div class=\"m-date\">").concat(fmtDate(e.startMs), "</div>") : '<div class="m-time">Time TBA</div>';
+        if (ok)
+            bottom = "<div class=\"m-starts\" data-ms=\"".concat(e.startMs, "\">").concat(startsIn(e.startMs), "</div>");
+    }
+    else {
+        mid = '<div class="m-time done">Finished</div>' + (ok ? "<div class=\"m-date\">".concat(fmtDate(e.startMs), "</div>") : '');
+    }
+    var head = (e.leagueLogo ? "<img src=\"".concat(esc(e.leagueLogo), "\" alt=\"\" onerror=\"this.style.display='none'\">") : '') + "<span>".concat(esc(sm[0])).concat(e.league ? ' | ' + esc(e.league) : '', "</span>");
+    return "<div class=\"match-card\" data-eid=\"".concat(esc(e.id), "\" data-search=\"").concat(esc(e.search), "\">\n                ").concat(e.hot ? '<div class="m-hot">HOT</div>' : '', "\n                <div class=\"m-head\">").concat(head, "</div>\n                <div class=\"m-body\">\n                    <div class=\"m-team\">").concat(logoHTML(e.t1), "<div class=\"m-name\">").concat(esc(e.t1.name), "</div></div>\n                    <div class=\"m-mid\">").concat(mid, "</div>\n                    <div class=\"m-team right\">").concat(logoHTML(e.t2), "<div class=\"m-name\">").concat(esc(e.t2.name), "</div></div>\n                </div>\n                ").concat(bottom, "\n            </div>");
+}
+function renderMatches() {
+    var now = Date.now();
+    var evs = allEvents.map(function (e) { return ({ e: e, st: statusOf(e, now) }); })
+        .filter(function (x) { return !(x.st === 'finished' && !isNaN(x.e.startMs) && now - (x.e.startMs + x.e.durMs) > FINISHED_KEEP_MS); });
+    // sport chips (only sports that have events)
+    var counts = {};
+    evs.forEach(function (x) { counts[x.e.sport] = (counts[x.e.sport] || 0) + 1; });
+    if (sportFilter !== 'all' && !counts[sportFilter])
+        sportFilter = 'all';
+    var sports = Object.keys(counts).sort(function (a, b) { return counts[b] - counts[a]; });
+    var chipHTML = function (k, label, icon, n) { return "<div class=\"sport-chip ".concat(k === sportFilter ? 'active' : '', "\" data-sport=\"").concat(esc(k), "\"><span class=\"badge\">").concat(n, "</span><i class=\"fa-solid ").concat(icon, "\"></i>").concat(k === sportFilter ? "<span>".concat(esc(label), "</span>") : '', "</div>"); };
+    document.getElementById('catChips').innerHTML = chipHTML('all', 'All', 'fa-layer-group', evs.length)
+        + sports.map(function (k) { var m = sportMeta(k); return chipHTML(k, m[0], m[1], counts[k]); }).join('');
+    // status pills (counts for the selected sport)
+    var inSport = evs.filter(function (x) { return sportFilter === 'all' || x.e.sport === sportFilter; });
+    var cnt = { all: inSport.length, live: 0, upcoming: 0, finished: 0 };
+    inSport.forEach(function (x) { return cnt[x.st]++; });
+    var PILLS = [['all', 'All'], ['live', 'Live'], ['upcoming', 'Upcoming'], ['finished', 'Finished']];
+    document.getElementById('statusPills').innerHTML = PILLS.map(function (p) {
+        return "<div class=\"pill ".concat(p[0] === statusFilter ? 'active' : '', "\" data-st=\"").concat(p[0], "\">").concat(p[0] === statusFilter ? '<i class="fa-solid fa-check"></i>' : '').concat(p[1], " (").concat(cnt[p[0]], ")</div>");
+    }).join('');
+    // list
+    var order = { live: 0, upcoming: 1, finished: 2 };
+    var t = function (x) { return isNaN(x.e.startMs) ? Infinity : x.e.startMs; };
+    var list = inSport.filter(function (x) { return statusFilter === 'all' || x.st === statusFilter; }).sort(function (a, b) {
+        if (order[a.st] !== order[b.st])
+            return order[a.st] - order[b.st];
+        return a.st === 'finished' ? (t(b) === Infinity ? 0 : t(b)) - (t(a) === Infinity ? 0 : t(a)) : t(a) - t(b);
+    });
+    var box = document.getElementById('matchList');
+    box.innerHTML = list.length ? list.map(function (x) { return eventCardHTML(x.e, x.st); }).join('')
+        : "<div class=\"empty-msg\" style=\"text-align:center;padding:30px 0;\">".concat(eventsLoaded ? 'No matches right now.' : 'Loading matches...', "</div>");
+    tickTimers();
+    var q = document.getElementById('searchInput').value;
+    if (q)
+        filterCategories(q);
+}
+function openEvent(id) {
+    var e = allEvents.find(function (x) { return x.id === id; });
+    if (!e)
+        return;
+    if (!e.channels.length) {
+        showToast('No channel link has been added for this match yet');
+        return;
+    }
+    if (e.channels.length === 1) {
+        playStream(e.channels[0].url, e.title);
+        return;
+    }
+    currentChannels = e.channels;
+    currentEventTitle = e.title;
+    openPopup("\n                <div class=\"popup-head\"><i class=\"fa-solid fa-tv\"></i> ".concat(esc(e.title), "</div>\n                <div class=\"popup-body\">").concat(e.channels.map(function (c, i) { return "\n                    <a class=\"connect-row\" data-ch=\"".concat(i, "\"><i class=\"fa-solid fa-circle-play\" style=\"color:#00f2fe\"></i><span>").concat(esc(c.name), "</span><i class=\"fa-solid fa-chevron-right arrow\"></i></a>"); }).join(''), "</div>\n                <div class=\"popup-btns\"><button class=\"popup-btn secondary\" onclick=\"closePopup()\">Close</button></div>"), 'channels');
+}
+function updateTicker() {
+    var bar = document.getElementById('tickerBar'), tx = document.getElementById('tickerText');
+    var text = cleanText(globalSettings && globalSettings.ticker);
+    if (!text) {
+        bar.style.display = 'none';
+        return;
+    }
+    tx.textContent = text;
+    tx.style.setProperty('--dur', Math.max(10, text.length * 0.22) + 's');
+    bar.style.display = '';
+}
+document.addEventListener('click', function (e) {
+    var chip = e.target.closest('#catChips .sport-chip');
+    if (chip) {
+        sportFilter = chip.dataset.sport;
+        renderMatches();
+        return;
+    }
+    var pill = e.target.closest('#statusPills .pill');
+    if (pill) {
+        statusFilter = pill.dataset.st;
+        renderMatches();
+        return;
+    }
+    var ch = e.target.closest('#popupBox [data-ch]');
+    if (ch) {
+        var c = currentChannels[+ch.dataset.ch];
+        closeLayerForNext('popup', hidePopup);
+        if (c)
+            playStream(c.url, currentEventTitle);
+        return;
+    }
+    var card = e.target.closest('#matchList .match-card');
+    if (card)
+        openEvent(card.dataset.eid);
+});
+// if a logo fails to load, show a round circle with initials
+document.addEventListener('error', function (e) {
+    var el = e.target;
+    if (el && el.classList && el.classList.contains('m-logo') && el.tagName === 'IMG') {
+        var d = document.createElement('div');
+        d.className = 'm-logo ph';
+        d.style.background = el.dataset.c || '#334155';
+        d.textContent = el.dataset.i || '?';
+        el.replaceWith(d);
+    }
+}, true);
+/* ============ POPUPS ============ */
+var popupType = '';
+var popupIds = [];
+function openPopup(html, type) {
+    var overlay = document.getElementById('popupOverlay');
+    document.getElementById('popupBox').innerHTML = html;
+    if (!overlay.classList.contains('active')) {
+        overlay.classList.add('active');
+        openLayer('popup', hidePopup);
+    }
+    popupType = type || '';
+}
+function hidePopup() {
+    if (popupType === 'notif')
+        markNotifsSeen(); // closing the notification popup (Skip or Back) marks it as seen
+    document.getElementById('popupOverlay').classList.remove('active');
+    popupType = '';
+}
+function closePopup() { popLayerUI('popup'); hidePopup(); }
+/* ============ NOTIFICATIONS ============ */
+var notifIds = [];
+function getSeen() { try {
+    return JSON.parse(localStorage.getItem('sprtix_seen_notifs') || '[]');
+}
+catch (e) {
+    return [];
+} }
+function checkNotifications(obj) {
+    var items = Object.values(obj || {});
+    notifIds = items.map(function (n) { return String(n.id); });
+    var seen = getSeen();
+    var unseen = items.filter(function (n) { return !seen.includes(String(n.id)); }).reverse(); // newest first
+    if (!unseen.length)
+        return;
+    var overlayOpen = document.getElementById('popupOverlay').classList.contains('active');
+    if (overlayOpen && popupType !== 'notif')
+        return;
+    popupIds = unseen.map(function (n) { return String(n.id); });
+    openPopup("\n                <div class=\"popup-head\"><i class=\"fa-solid fa-bell\"></i> Notification</div>\n                <div class=\"popup-body\">".concat(unseen.map(function (n) { return "\n                    <div class=\"notif-item\">\n                        ".concat(n.title ? "<div class=\"notif-title\">".concat(esc(n.title), "</div>") : '', "\n                        <div class=\"notif-msg\">").concat(esc(n.message || ''), "</div>\n                    </div>"); }).join(''), "</div>\n                <div class=\"popup-btns\"><button class=\"popup-btn\" onclick=\"skipNotifications()\">Skip</button></div>"), 'notif');
+}
+function markNotifsSeen() {
+    // everything that exists right now counts as "seen"; the popup only returns when a NEW notification is added
+    var seen = getSeen();
+    notifIds.concat(popupIds).forEach(function (id) { if (seen.indexOf(id) < 0)
+        seen.push(id); });
+    try {
+        localStorage.setItem('sprtix_seen_notifs', JSON.stringify(seen));
+    }
+    catch (e) { }
+}
+function skipNotifications() { closePopup(); }
+/* ============ CONNECT US ============ */
+var CONNECT_LINKS = [
+    ['whatsapp', 'WhatsApp', 'fa-brands fa-whatsapp', '#25d366'],
+    ['telegram', 'Telegram', 'fa-brands fa-telegram', '#29a9eb'],
+    ['facebook', 'Facebook', 'fa-brands fa-facebook', '#4c8bf5'],
+    ['instagram', 'Instagram', 'fa-brands fa-instagram', '#e1306c'],
+    ['youtube', 'YouTube', 'fa-brands fa-youtube', '#ff0033'],
+    ['email', 'Email', 'fa-solid fa-envelope', '#f59e0b']
+];
+function openConnectUs() {
+    var links = CONNECT_LINKS.filter(function (l) { return globalSettings && globalSettings[l[0]]; });
+    if (!links.length) {
+        showToast('No contact links have been set yet');
+        return;
+    }
+    openPopup("\n                <div class=\"popup-head\"><i class=\"fa-solid fa-headset\"></i> Connect Us</div>\n                <div class=\"popup-body\">".concat(links.map(function (l) { return "\n                    <a class=\"connect-row\" data-link=\"".concat(l[0], "\"><i class=\"").concat(l[2], "\" style=\"color:").concat(l[3], "\"></i><span>").concat(l[1], "</span><i class=\"fa-solid fa-chevron-right arrow\"></i></a>"); }).join(''), "</div>\n                <div class=\"popup-btns\"><button class=\"popup-btn secondary\" onclick=\"closePopup()\">Close</button></div>"), 'connect');
+}
+function openContactLink(key) {
+    var v = String((globalSettings && globalSettings[key]) || '').trim();
+    if (!v)
+        return;
+    if (!/^(https?:|mailto:|tel:)/i.test(v)) {
+        if (key === 'email')
+            v = 'mailto:' + v;
+        else if (key === 'whatsapp' && /^[+\d\s-]+$/.test(v))
+            v = 'https://wa.me/' + v.replace(/\D/g, '');
+        else if (key === 'telegram')
+            v = 'https://t.me/' + v.replace(/^@/, '');
+        else
+            v = 'https://' + v;
+    }
+    window.open(v, '_blank');
+}
+/* ============ CHECK UPDATE ============ */
+function versionGreater(a, b) {
+    var pa = String(a).split('.').map(function (x) { return parseInt(x, 10) || 0; });
+    var pb = String(b).split('.').map(function (x) { return parseInt(x, 10) || 0; });
+    for (var i = 0; i < Math.max(pa.length, pb.length); i++) {
+        var x = pa[i] || 0, y = pb[i] || 0;
+        if (x > y)
+            return true;
+        if (x < y)
             return false;
-        }
-
-        async function checkUpdate() {
-            showToast('Checking for updates...');
-            try {
-                const st = JSON.parse(await fetchText(DATA_BASE + 'settings.json?t=' + Date.now(), 10000));
-                globalSettings = st;
-                const latest = String(st.latestVersion || '').trim();
-                if (latest && versionGreater(latest, APP_VERSION)) {
-                    if (!st.updateUrl) { showToast('Version ' + latest + ' is available'); return; }
-                    openPopup(`
-                        <div class="popup-head"><i class="fa-solid fa-cloud-arrow-down"></i> Update Available</div>
-                        <div class="popup-body"><div class="notif-item">
-                            <div class="notif-title">Version ${esc(latest)}</div>
-                            <div class="notif-msg">${esc(st.updateMessage || 'A new update is available. Please update for the best experience.')}</div>
-                        </div></div>
-                        <div class="popup-btns">
-                            <button class="popup-btn secondary" onclick="closePopup()">Later</button>
-                            <button class="popup-btn" onclick="window.open(globalSettings.updateUrl, '_blank'); closePopup();">Update Now</button>
-                        </div>`, 'update');
-                } else {
-                    showToast('You are on the latest version (v' + APP_VERSION + ') ✔');
-                }
-            } catch (e) { showToast('Could not check for updates. Please check your internet connection.'); }
-        }
-
-        document.addEventListener('click', e => {
-            const a = e.target.closest('#popupBox [data-link]');
-            if (a) openContactLink(a.dataset.link);
-        });
-
-        function shareApp() {
-            const text = globalSettings.shareMessage || 'Download SPRtix App now!';
-            if (navigator.share) {
-                navigator.share({ title: 'SPRtix Live TV & Movies', text: text, url: window.location.href }).catch(() => {});
-            } else {
-                prompt("Copy and share link:", text);
+    }
+    return false;
+}
+function checkUpdate() {
+    return __awaiter(this, void 0, void 0, function () {
+        var st, _a, _b, latest, e_2;
+        return __generator(this, function (_c) {
+            switch (_c.label) {
+                case 0:
+                    showToast('Checking for updates...');
+                    _c.label = 1;
+                case 1:
+                    _c.trys.push([1, 3, , 4]);
+                    _b = (_a = JSON).parse;
+                    return [4 /*yield*/, fetchText(DATA_BASE + 'settings.json?t=' + Date.now(), 10000)];
+                case 2:
+                    st = _b.apply(_a, [_c.sent()]);
+                    globalSettings = st;
+                    latest = String(st.latestVersion || '').trim();
+                    if (latest && versionGreater(latest, APP_VERSION)) {
+                        if (!st.updateUrl) {
+                            showToast('Version ' + latest + ' is available');
+                            return [2 /*return*/];
+                        }
+                        openPopup("\n                        <div class=\"popup-head\"><i class=\"fa-solid fa-cloud-arrow-down\"></i> Update Available</div>\n                        <div class=\"popup-body\"><div class=\"notif-item\">\n                            <div class=\"notif-title\">Version ".concat(esc(latest), "</div>\n                            <div class=\"notif-msg\">").concat(esc(st.updateMessage || 'A new update is available. Please update for the best experience.'), "</div>\n                        </div></div>\n                        <div class=\"popup-btns\">\n                            <button class=\"popup-btn secondary\" onclick=\"closePopup()\">Later</button>\n                            <button class=\"popup-btn\" onclick=\"window.open(globalSettings.updateUrl, '_blank'); closePopup();\">Update Now</button>\n                        </div>"), 'update');
+                    }
+                    else {
+                        showToast('You are on the latest version (v' + APP_VERSION + ') ✔');
+                    }
+                    return [3 /*break*/, 4];
+                case 3:
+                    e_2 = _c.sent();
+                    showToast('Could not check for updates. Please check your internet connection.');
+                    return [3 /*break*/, 4];
+                case 4: return [2 /*return*/];
             }
-        }
+        });
+    });
+}
+document.addEventListener('click', function (e) {
+    var a = e.target.closest('#popupBox [data-link]');
+    if (a)
+        openContactLink(a.dataset.link);
+});
+function shareApp() {
+    var text = globalSettings.shareMessage || 'Download SPRtix App now!';
+    if (navigator.share) {
+        navigator.share({ title: 'SPRtix Live TV & Movies', text: text, url: window.location.href }).catch(function () { });
+    }
+    else {
+        prompt("Copy and share link:", text);
+    }
+}
+function showToast(message) {
+    var toast = document.getElementById('toastPopup');
+    toast.innerText = message;
+    toast.classList.add('show');
+    clearTimeout(showToast._t);
+    showToast._t = setTimeout(function () { return toast.classList.remove('show'); }, 2500);
+}
 
-        function showToast(message) {
-            const toast = document.getElementById('toastPopup');
-            toast.innerText = message;
-            toast.classList.add('show');
-            clearTimeout(showToast._t);
-            showToast._t = setTimeout(() => toast.classList.remove('show'), 2500);
-        }
     </script>
 </body>
 </html>
