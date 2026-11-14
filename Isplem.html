@@ -4,17 +4,67 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>SPRtix - Live TV & Movies</title>
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&family=Jost:wght@500;600&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link href="https://vjs.zencdn.net/8.10.0/video-js.css" rel="stylesheet" />
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="preconnect" href="https://cdnjs.cloudflare.com">
+    <!-- Fonts and icons load without blocking the first paint -->
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&family=Jost:wght@500;600&display=swap" media="print" onload="this.media='all'">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" media="print" onload="this.media='all'">
+    <noscript>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&family=Jost:wght@500;600&display=swap">
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    </noscript>
+    <script>
+    /* Compatibility layer for older Android WebViews (plain ES5 on purpose) */
+    (function () {
+        var ok = !!(window.Promise && window.XMLHttpRequest && document.querySelector && Array.prototype.forEach && window.JSON);
+        if (!ok) {
+            window.__oldBrowser = true;
+            document.addEventListener('DOMContentLoaded', function () {
+                document.body.innerHTML = '<div style="padding:32px 24px;font:14px/1.6 sans-serif;color:#fff;text-align:center">Your device\'s web engine is too old to run this app.<br>Please update <b>Android System WebView</b> and <b>Google Chrome</b> from the Play Store, then reopen the app.</div>';
+            });
+            return;
+        }
+        if (!Object.assign) Object.assign = function (t) { for (var i = 1; i < arguments.length; i++) { var s = arguments[i]; if (s) for (var k in s) if (Object.prototype.hasOwnProperty.call(s, k)) t[k] = s[k]; } return t; };
+        if (!Object.values) Object.values = function (o) { return Object.keys(o).map(function (k) { return o[k]; }); };
+        if (!Object.entries) Object.entries = function (o) { return Object.keys(o).map(function (k) { return [k, o[k]]; }); };
+        if (!Array.prototype.includes) Array.prototype.includes = function (x) { return this.indexOf(x) > -1; };
+        if (!Array.prototype.find) Array.prototype.find = function (f, t) { for (var i = 0; i < this.length; i++) { if (f.call(t, this[i], i, this)) return this[i]; } };
+        if (!String.prototype.includes) String.prototype.includes = function (s, i) { return this.indexOf(s, i || 0) > -1; };
+        if (!String.prototype.startsWith) String.prototype.startsWith = function (s, i) { i = i || 0; return this.substr(i, s.length) === s; };
+        if (!String.prototype.endsWith) String.prototype.endsWith = function (s, l) { var t = l === undefined || l > this.length ? this.length : l; return this.substring(t - s.length, t) === s; };
+        if (!String.prototype.padStart) String.prototype.padStart = function (n, p) { var s = String(this); p = p === undefined ? ' ' : String(p); while (s.length < n) s = p + s; return s.length > n ? s.slice(s.length - n) : s; };
+        if (window.Element) {
+            if (!Element.prototype.matches) Element.prototype.matches = Element.prototype.webkitMatchesSelector || Element.prototype.msMatchesSelector;
+            if (!Element.prototype.closest) Element.prototype.closest = function (sel) { var el = this; while (el && el.nodeType === 1) { if (el.matches(sel)) return el; el = el.parentElement || el.parentNode; } return null; };
+            if (!Element.prototype.replaceWith) Element.prototype.replaceWith = function (n) { if (this.parentNode) this.parentNode.replaceChild(n, this); };
+        }
+        if (!Promise.prototype.finally) Promise.prototype.finally = function (f) { var P = this.constructor; return this.then(function (v) { return P.resolve(f()).then(function () { return v; }); }, function (e) { return P.resolve(f()).then(function () { throw e; }); }); };
+        if (window.NodeList && !NodeList.prototype.forEach) NodeList.prototype.forEach = Array.prototype.forEach;
+        // Flexbox "gap" fallback for WebViews older than Chrome 84
+        try {
+            var d = document.createElement('div');
+            d.style.cssText = 'display:flex;flex-direction:column;row-gap:1px;position:absolute;visibility:hidden';
+            d.appendChild(document.createElement('i')); d.appendChild(document.createElement('i'));
+            document.documentElement.appendChild(d);
+            var gapOk = d.scrollHeight === 1;
+            document.documentElement.removeChild(d);
+            if (!gapOk) document.documentElement.className += ' no-flex-gap';
+        } catch (e) {}
+        // Real viewport height (100vh is wrong in some mobile browsers)
+        function setVh() { try { document.documentElement.style.setProperty('--vh', (window.innerHeight * 0.01) + 'px'); } catch (e) {} }
+        setVh();
+        window.addEventListener('resize', setVh);
+    })();
+    </script>
 
     <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Poppins', sans-serif; user-select: none; -webkit-tap-highlight-color: transparent; }
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Poppins', sans-serif; -webkit-user-select: none; user-select: none; -webkit-tap-highlight-color: transparent; }
         body { background-color: #070b14; color: #ffffff; display: flex; justify-content: center; align-items: center; min-height: 100vh; }
-        .app-container { width: 100%; max-width: 420px; height: 100vh; max-height: 890px; background: #0e1525; display: flex; flex-direction: column; position: relative; overflow: hidden; box-shadow: 0 0 30px rgba(0, 242, 254, 0.15); }
+        .app-container { width: 100%; max-width: 420px; height: 100vh; height: calc(var(--vh, 1vh) * 100); background: #0e1525; display: flex; flex-direction: column; position: relative; overflow: hidden; box-shadow: 0 0 30px rgba(0, 242, 254, 0.15); }
         .search-container { position: absolute; top: -60px; left: 0; width: 100%; background: #212839; padding: 12px 16px; display: flex; align-items: center; gap: 10px; z-index: 50; border-bottom: 1px solid rgba(0, 242, 254, 0.3); transition: top 0.3s ease; }
         .search-container.active { top: 0; }
-        .search-input { flex: 1; background: #0f172a; border: 1px solid #00f2fe; border-radius: 20px; padding: 6px 14px; color: #fff; font-size: 11px; outline: none; user-select: text; }
+        .search-input { flex: 1; background: #0f172a; border: 1px solid #00f2fe; border-radius: 20px; padding: 6px 14px; color: #fff; font-size: 11px; outline: none; -webkit-user-select: text; user-select: text; }
         .search-close { color: #ff0055; cursor: pointer; font-size: 14px; padding: 4px; }
         .screen { display: none; flex: 1; flex-direction: column; overflow-y: auto; padding-bottom: 104px; scrollbar-width: none; }
         .screen::-webkit-scrollbar { display: none; }
@@ -30,16 +80,16 @@
         .view-all:hover { text-decoration: underline; }
         .card-row { display: flex; gap: 10px; overflow-x: auto; padding: 2px 16px 4px 16px; scrollbar-width: none; }
         .card-row::-webkit-scrollbar { display: none; }
-        .card-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; padding: 16px; }
+        .card-grid { display: grid; grid-template-columns: repeat(2, 1fr); grid-gap: 12px; gap: 12px; padding: 16px; }
         .channel-card { min-width: 115px; height: 135px; background: linear-gradient(145deg, #1a2338, #141b2d); border: 1px solid rgba(0, 242, 254, 0.2); border-radius: 12px; display: flex; flex-direction: column; align-items: center; justify-content: space-between; padding: 8px; position: relative; cursor: pointer; flex-shrink: 0; text-decoration: none; color: #fff; transition: transform 0.2s, border-color 0.2s; overflow: hidden; }
         .card-grid .channel-card { width: 100%; height: 155px; min-width: unset; }
         .channel-card:hover { transform: translateY(-2px); border-color: #00f2fe; }
         /* Circle thumbnail: poori image circle ke andar, bg colour auto match */
         .thumb-wrap { position: relative; width: 70px; height: 70px; border-radius: 50%; overflow: hidden; background: #111827; flex-shrink: 0; margin: 0 auto; border: 2px solid rgba(0, 242, 254, 0.55); box-shadow: 0 0 10px rgba(0, 242, 254, 0.25); transition: background-color 0.25s; }
         .card-grid .thumb-wrap { width: 82px; height: 82px; }
-        .thumb-bg { position: absolute; inset: -12px; width: calc(100% + 24px); height: calc(100% + 24px); object-fit: cover; filter: blur(12px) brightness(0.55) saturate(1.3); }
+        .thumb-bg { position: absolute; top: -12px; right: -12px; bottom: -12px; left: -12px; width: calc(100% + 24px); height: calc(100% + 24px); object-fit: cover; filter: blur(12px) brightness(0.55) saturate(1.3); }
         .card-thumb { position: relative; z-index: 1; width: 100%; height: 100%; object-fit: contain; object-position: center; padding: 15%; display: block; }
-        /* Explore categories: purana original design (rounded rectangle, full width image) */
+        /* Explore categories: original design (rounded rectangle, full-width image) */
         .card-grid .channel-card.explore-card { height: 145px; }
         .card-grid .explore-card .thumb-wrap { width: 100%; height: 70px; border-radius: 8px; border: none; box-shadow: none; background: #030712; margin: 0; }
         .explore-card .thumb-bg { display: none; }
@@ -53,13 +103,13 @@
         .view-count { color: #94a3b8; display: flex; align-items: center; gap: 2px; }
         .empty-msg { padding: 10px 16px; font-size: 10px; color: #94a3b8; grid-column: 1 / -1; }
 
-        .player-modal { position: absolute; inset: 0; background: #000; z-index: 150; display: none; flex-direction: column; }
+        .player-modal { position: absolute; top: 0; right: 0; bottom: 0; left: 0; background: #000; z-index: 150; display: none; flex-direction: column; }
         .player-modal.active { display: flex; }
         .player-header { display: flex; justify-content: space-between; align-items: center; padding: 12px 16px; background: rgba(3, 7, 18, 0.95); border-bottom: 1px solid rgba(0, 242, 254, 0.2); flex-shrink: 0; }
         .player-title { font-size: 13px; font-weight: 700; color: #00f2fe; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 80%; }
         .player-close { color: #fff; font-size: 16px; cursor: pointer; background: #ff0055; width: 26px; height: 26px; border-radius: 50%; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
         .player-body { flex: 1; position: relative; background: #000; min-height: 0; }
-        .player-body .video-js { position: absolute; inset: 0; width: 100%; height: 100%; background-color: #000; }
+        .player-body .video-js { position: absolute; top: 0; right: 0; bottom: 0; left: 0; width: 100%; height: 100%; background-color: #000; }
 
         .toast-popup { position: absolute; top: 76px; left: 50%; transform: translateX(-50%) translateY(-15px); background: rgba(15, 23, 42, 0.95); border: 1px solid #00f2fe; color: #fff; padding: 6px 14px; border-radius: 20px; font-size: 10px; box-shadow: 0 5px 15px rgba(0,0,0,0.5); z-index: 200; opacity: 0; pointer-events: none; transition: all 0.3s ease; max-width: 90%; text-align: center; }
         .toast-popup.show { opacity: 1; transform: translateX(-50%) translateY(0); }
@@ -89,7 +139,7 @@
         .menu-item .arrow { color: #64748b; font-size: 11px; }
 
         /* ===== POPUPS (Notification / Connect Us / Update) ===== */
-        .popup-overlay { position: absolute; inset: 0; background: rgba(3,7,18,.78); backdrop-filter: blur(4px); z-index: 180; display: none; align-items: center; justify-content: center; padding: 22px; }
+        .popup-overlay { position: absolute; top: 0; right: 0; bottom: 0; left: 0; background: rgba(3,7,18,.78); backdrop-filter: blur(4px); z-index: 180; display: none; align-items: center; justify-content: center; padding: 22px; }
         .popup-overlay.active { display: flex; }
         .popup-box { width: 100%; max-height: 78%; display: flex; flex-direction: column; background: #212839; border: 1px solid rgba(0,242,254,.3); border-radius: 18px; padding: 18px; box-shadow: 0 12px 40px rgba(0,0,0,.6); }
         .popup-head { font-size: 15px; font-weight: 700; color: #00f2fe; display: flex; align-items: center; gap: 8px; margin-bottom: 12px; }
@@ -97,7 +147,7 @@
         .popup-body::-webkit-scrollbar { display: none; }
         .notif-item { background: #0e1525; border-radius: 12px; padding: 11px 12px; }
         .notif-title { font-size: 12.5px; font-weight: 700; margin-bottom: 3px; }
-        .notif-msg { font-size: 11.5px; color: #cbd5e1; line-height: 1.45; white-space: pre-wrap; word-break: break-word; user-select: text; }
+        .notif-msg { font-size: 11.5px; color: #cbd5e1; line-height: 1.45; white-space: pre-wrap; word-break: break-word; -webkit-user-select: text; user-select: text; }
         .popup-btns { display: flex; gap: 8px; }
         .popup-btn { flex: 1; border: none; border-radius: 24px; padding: 10px; font-size: 12.5px; font-weight: 600; color: #fff; background: linear-gradient(135deg, #00f2fe, #7000ff); cursor: pointer; }
         .popup-btn.secondary { background: #334155; }
@@ -141,6 +191,38 @@
         @keyframes pulse { 0%,100% { opacity: 1; transform: scale(1); } 50% { opacity: .35; transform: scale(.7); } }
         .m-timer { text-align: center; margin-top: 4px; font-size: 13px; font-weight: 600; font-variant-numeric: tabular-nums; }
         .m-starts { text-align: center; margin-top: 4px; font-size: 11.5px; font-weight: 600; color: #e2e8f0; }
+
+        /* ===== PLAYER EXTRAS ===== */
+        .player-body video#nativeVideo { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: #000; display: none; }
+        .player-loading { position: absolute; top: 0; right: 0; bottom: 0; left: 0; display: none; align-items: center; justify-content: center; color: #94a3b8; font-size: 12px; z-index: 5; pointer-events: none; }
+        .player-loading i { margin-right: 8px; }
+
+        /* ===== OLD WEBVIEW FALLBACKS ===== */
+        @supports not (display: grid) {
+            .card-grid { display: flex; flex-wrap: wrap; }
+            .card-grid .channel-card { width: calc(50% - 6px); margin: 3px; }
+        }
+        /* flex "gap" fallback (class is added by the compatibility script) */
+        .no-flex-gap .search-container > * + * { margin-left: 10px; }
+        .no-flex-gap .section-title-wrapper > * + * { margin-left: 6px; }
+        .no-flex-gap .view-all > * + * { margin-left: 3px; }
+        .no-flex-gap .card-row > * + * { margin-left: 10px; }
+        .no-flex-gap .view-count > * + * { margin-left: 2px; }
+        .no-flex-gap .header-icons > * + * { margin-left: 26px; }
+        .no-flex-gap .menu-item > * + * { margin-left: 12px; }
+        .no-flex-gap .popup-head > * + * { margin-left: 8px; }
+        .no-flex-gap .popup-btns > * + * { margin-left: 8px; }
+        .no-flex-gap .connect-row > * + * { margin-left: 12px; }
+        .no-flex-gap .chip-row > * + * { margin-left: 10px; }
+        .no-flex-gap .sport-chip > * + * { margin-left: 8px; }
+        .no-flex-gap .pill-row > * + * { margin-left: 10px; }
+        .no-flex-gap .pill > * + * { margin-left: 6px; }
+        .no-flex-gap .m-head > * + * { margin-left: 6px; }
+        .no-flex-gap .m-body > * + * { margin-left: 6px; }
+        .no-flex-gap .m-team > * + * { margin-left: 9px; }
+        .no-flex-gap .m-team.right > * + * { margin-left: 0; margin-right: 9px; }
+        .no-flex-gap .nav-item > * + * { margin-top: 3px; }
+        .no-flex-gap .menu-list > * + *, .no-flex-gap .popup-body > * + *, .no-flex-gap .match-list > * + * { margin-top: 10px; }
     </style>
 </head>
 <body>
@@ -173,6 +255,8 @@
             </div>
             <div class="player-body">
                 <video id="videoPlayer" class="video-js vjs-default-skin vjs-big-play-centered" controls preload="auto" playsinline webkit-playsinline></video>
+                <video id="nativeVideo" controls playsinline webkit-playsinline preload="auto"></video>
+                <div id="playerLoading" class="player-loading"><i class="fa-solid fa-spinner fa-spin"></i> Loading player...</div>
             </div>
         </div>
 
@@ -183,7 +267,7 @@
             <div id="statusPills" class="pill-row"></div>
             <div id="matchList" class="match-list"></div>
 
-            <!-- purana home content (Trending/News/Favourites): abhi hidden, data/JS ke liye rakha hai -->
+            <!-- Old home content (Trending/News/Favourites): hidden for now, kept so the data/JS still works -->
             <div style="display:none;">
             <div class="section-block">
                 <div class="section-header">
@@ -268,26 +352,24 @@
         </div>
     </div>
 
-    <!-- Video.js 8 already includes HLS (m3u8) support, so hls.js is not needed -->
-    <script src="https://vjs.zencdn.net/8.10.0/video.min.js"></script>
 
     <script>
         /* ============================================================
-           GITHUB DATA (Firebase ki jagah)
-           Data repo ke  data/  folder ki JSON files se aata hai:
+           GITHUB DATA (replaces Firebase)
+           Data comes from the JSON files in the repo's data/ folder:
            settings, events, notifications, liveChannels, liveTvScreen, newsUpdates, playlist
            ============================================================ */
-        const GH_USER   = 'qlsopamensuqzfbenwkaid';   // <- apna GitHub username
-        const GH_REPO   = 'Mwowjxjdlp';               // <- jis repo mein data/ folder hai
+        const GH_USER   = 'qlsopamensuqzfbenwkaid';   // <- your GitHub username
+        const GH_REPO   = 'Mwowjxjdlp';               // <- the repo that contains the data/ folder
         const GH_BRANCH = 'main';
-        const REFRESH_MS = 120000;                    // har 2 minute mein naya data check
+        const REFRESH_MS = 120000;                    // check for new data every 2 minutes
 
-        // GitHub Pages par ho to relative path, warna (APK/WebView) raw link
+        // On GitHub Pages use a relative path, otherwise (APK/WebView) use the raw link
         const DATA_BASE = location.hostname.endsWith('github.io')
             ? 'data/'
             : `https://raw.githubusercontent.com/${GH_USER}/${GH_REPO}/${GH_BRANCH}/data/`;
 
-        // JSON array [{id,...}] ko {id: {...}} object mein badalta hai (purana code same chalega)
+        // Converts a JSON array [{id,...}] into an object {id: {...}} so the rest of the code works unchanged
         function normalize(data) {
             if (Array.isArray(data)) {
                 const o = {};
@@ -298,6 +380,21 @@
         }
 
         const dataLoaders = [];
+        // Screens that are not visible at start are loaded a little later so the first screen opens faster
+        const LOW_PRIORITY = { liveChannels: 1, liveTvScreen: 1, newsUpdates: 1, playlist: 1, worldwide: 1 };
+
+        // XMLHttpRequest works on every Android WebView (fetch/AbortController do not)
+        function fetchText(url, ms) {
+            return new Promise((resolve, reject) => {
+                const xhr = new XMLHttpRequest();
+                xhr.open('GET', url, true);
+                xhr.timeout = ms || 10000;
+                xhr.onload = () => (xhr.status >= 200 && xhr.status < 300) ? resolve(xhr.responseText) : reject(new Error('HTTP ' + xhr.status));
+                xhr.onerror = () => reject(new Error('network'));
+                xhr.ontimeout = () => reject(new Error('timeout'));
+                xhr.send();
+            });
+        }
 
         const database = {
             ref(name) {
@@ -306,30 +403,25 @@
                         const cacheKey = 'sprtix_data_' + name;
                         let lastText = null;
                         const deliver = (text) => {
-                            if (text === lastText) return;       // data badla nahi to dobara draw nahi
+                            if (text === lastText) return;       // unchanged data: do not redraw
                             lastText = text;
                             let val = null;
                             try { val = normalize(JSON.parse(text)); } catch (e) {}
                             const empty = !val || (typeof val === 'object' && Object.keys(val).length === 0);
                             cb({ val: () => (empty ? null : val), exists: () => !empty });
                         };
-                        // 1) pehle phone mein saved data foran dikhao (tez + offline)
+                        // 1) show the data saved on the phone immediately (fast + works offline)
                         try { const c = localStorage.getItem(cacheKey); if (c) deliver(c); } catch (e) {}
-                        // 2) phir GitHub se naya lo
-                        const load = async () => {
-                            try {
-                                const r = await fetch(DATA_BASE + name + '.json?t=' + Date.now(), { cache: 'no-store' });
-                                if (!r.ok) throw new Error(r.status);
-                                const text = await r.text();
-                                JSON.parse(text); // sahi JSON hai ya nahi
-                                try { localStorage.setItem(cacheKey, text); } catch (e) {}
-                                deliver(text);
-                            } catch (e) {
-                                if (lastText === null) deliver('null'); // pehli baar aur kuch nahi mila
-                            }
-                        };
+                        // 2) then fetch the latest data from GitHub
+                        const load = () => fetchText(DATA_BASE + name + '.json?t=' + Date.now(), 10000).then(text => {
+                            JSON.parse(text); // make sure it is valid JSON
+                            try { localStorage.setItem(cacheKey, text); } catch (e) {}
+                            deliver(text);
+                        }).catch(() => {
+                            if (lastText === null) deliver('null'); // first run and nothing could be loaded
+                        });
                         dataLoaders.push(load);
-                        load();
+                        setTimeout(load, LOW_PRIORITY[name] ? 1500 : 0);
                         setInterval(load, REFRESH_MS);
                     }
                 };
@@ -341,7 +433,7 @@
         );
 
         let globalSettings = { shareMessage: "Download SPRtix App now!" };
-        const APP_VERSION = '4.8.1';   // <- apni APK ka versionName yahan likhein (Check Update isi se compare karta hai)
+        const APP_VERSION = '4.8.1';   // <- put your APK's versionName here (Check Update compares against it)
         let favourites = {};
         try { favourites = JSON.parse(localStorage.getItem('sprtix_favs') || '{}'); } catch (e) { favourites = {}; }
         let playerInstance = null;
@@ -361,80 +453,283 @@
         }
 
         window.addEventListener('DOMContentLoaded', () => {
-            try { initPlayer(); } catch (e) { console.error('Player load nahi hua', e); } // player na bhi load ho to data phir bhi aaye
             fetchDatabaseData();
             document.addEventListener('click', onDocumentClick);
             renderMatches();
-            setInterval(tickTimers, 1000);     // har second live timer / countdown
-            setInterval(renderMatches, 30000); // status (upcoming -> live -> finished) badalne ke liye
+            setInterval(tickTimers, 1000);      // live timers / countdowns every second
+            setInterval(renderMatches, 30000);  // refresh status (upcoming -> live -> finished)
+            document.getElementById('nativeVideo').addEventListener('error', () => {
+                if (playerOpen) showToast('Stream error: the link may be offline or not supported on this device.');
+            });
+            // Download the player library in the background, after the app is already visible
+            setTimeout(() => { if (HAS_MSE) ensureVideoJs().catch(() => {}); }, 2500);
         });
 
-        /* ---------------- PLAYER ---------------- */
+        /* ---------------- BACK BUTTON ----------------
+           Everything that can be "opened" (player, popup, search, a non-home screen) is a layer.
+           The phone's Back button closes the top layer instead of closing the whole app.
+           Native apps can also call  window.handleBack()  (returns true when it handled the press). */
+        const layers = [];
+        let ignorePops = 0;
+        let historyOK = true;
+        let reuseEntry = false;
+        function openLayer(name, closeFn) {
+            layers.push({ name: name, closeFn: closeFn });
+            if (reuseEntry) { reuseEntry = false; return; }   // re-uses the history entry of the layer that was just closed
+            try { history.pushState({ sprtix: layers.length }, ''); } catch (e) { historyOK = false; }
+        }
+        // Close a layer but keep its history entry for the layer that opens right after it
+        // (history.back() followed by pushState() in the same moment is unreliable)
+        function closeLayerForNext(name, hideFn) {
+            const i = layers.map(l => l.name).lastIndexOf(name);
+            if (i > -1) layers.splice(i, 1);
+            hideFn();
+            reuseEntry = true;
+            setTimeout(() => {
+                if (!reuseEntry) return;       // the next layer used the entry
+                reuseEntry = false;
+                if (historyOK) { ignorePops++; try { history.back(); } catch (e) { ignorePops--; } }
+            }, 100);
+        }
+        function popLayerUI(name) {            // closed from the UI (X button, nav tap, ...)
+            let i = -1;
+            layers.forEach((l, idx) => { if (l.name === name) i = idx; });
+            if (i === -1) return;
+            layers.splice(i, 1);
+            if (historyOK) { ignorePops++; try { history.back(); } catch (e) { ignorePops--; } }
+        }
+        window.addEventListener('popstate', () => {
+            if (ignorePops > 0) { ignorePops--; return; }
+            const l = layers.pop();
+            if (l) l.closeFn();
+        });
+        window.handleBack = function () {
+            const l = layers.pop();
+            if (!l) return false;
+            l.closeFn();
+            if (historyOK) { ignorePops++; try { history.back(); } catch (e) { ignorePops--; } }
+            return true;
+        };
+
+        /* ---------------- PLAYER ----------------
+           Engines (libraries are downloaded only when needed, so the app opens fast):
+             - Video.js  : HLS (.m3u8)           - Shaka Player : DASH (.mpd) and ClearKey DRM
+             - native <video> : mp4/webm, and HLS on devices without MSE
+           Stream spec format (everywhere a stream link is accepted):
+             URL | Referer=https://site | User-Agent=Mozilla/5.0 ... | Origin=https://site | kid:key
+           - "kid:key" (32 hex : 32 hex) or  drmLicense=kid:key  = ClearKey DRM key
+           - Referer / User-Agent / Origin cannot be set from JavaScript, so they are sent through
+               1) the native Android player  (window.SPRtixNative.play), or
+               2) the proxy URL from Admin -> Settings. */
+        const VJS_CSS = 'https://vjs.zencdn.net/8.10.0/video-js.css';
+        const VJS_JS = 'https://vjs.zencdn.net/8.10.0/video.min.js';
+        const SHAKA_JS = 'https://cdn.jsdelivr.net/npm/shaka-player@4.7.11/dist/shaka-player.compiled.js';
+        const HAS_MSE = !!(window.MediaSource || window.WebKitMediaSource);
+        const HEX_KEY = /^[0-9a-f]{32}:[0-9a-f]{32}$/i;
+        const KNOWN_HEADERS = { 'user-agent': 'User-Agent', 'referer': 'Referer', 'referrer': 'Referer', 'origin': 'Origin', 'cookie': 'Cookie', 'authorization': 'Authorization', 'accept': 'Accept', 'accept-language': 'Accept-Language', 'host': 'Host' };
+        const KEY_NAMES = ['key', 'clearkey', 'drm', 'drmlicense', 'license_key', 'licensekey'];
+        const IGNORED_NAMES = ['drmscheme', 'drmversion', 'drm_scheme'];
+        let playerOpen = false, playToken = 0, shakaPlayer = null, vjsPromise = null;
+        const loadCache = {};
+
+        function loadScriptOnce(src) {
+            if (loadCache[src]) return loadCache[src];
+            loadCache[src] = new Promise((resolve, reject) => {
+                const sc = document.createElement('script');
+                sc.src = src; sc.async = true;
+                sc.onload = () => resolve();
+                sc.onerror = () => { delete loadCache[src]; reject(new Error('Could not download the player. Check your internet connection.')); };
+                document.head.appendChild(sc);
+            });
+            return loadCache[src];
+        }
+        function loadCssOnce(href) {
+            if (loadCache[href]) return;
+            loadCache[href] = true;
+            const l = document.createElement('link');
+            l.rel = 'stylesheet'; l.href = href;
+            document.head.appendChild(l);
+        }
+        function ensureVideoJs() {
+            if (playerInstance) return Promise.resolve();
+            if (!vjsPromise) {
+                loadCssOnce(VJS_CSS);
+                vjsPromise = loadScriptOnce(VJS_JS).then(initPlayer).catch(e => { vjsPromise = null; throw e; });
+            }
+            return vjsPromise;
+        }
+        function ensureShaka() {
+            return window.shaka ? Promise.resolve() : loadScriptOnce(SHAKA_JS);
+        }
+
         function initPlayer() {
             playerInstance = videojs('videoPlayer', {
-                fill: true,
-                controls: true,
-                autoplay: false,
-                preload: 'auto',
-                playsinline: true,
+                fill: true, controls: true, autoplay: false, preload: 'auto', playsinline: true,
                 html5: {
-                    vhs: { overrideNative: true, enableLowInitialPlaylist: true, smoothQualityChange: true, withCredentials: false },
-                    nativeAudioTracks: false,
-                    nativeVideoTracks: false
+                    vhs: { overrideNative: HAS_MSE, enableLowInitialPlaylist: true, smoothQualityChange: true, withCredentials: false },
+                    nativeAudioTracks: false, nativeVideoTracks: false
                 }
             });
-
             playerInstance.on('error', () => {
                 const err = playerInstance.error();
-                if (err) {
-                    console.error('Player error:', err);
-                    showToast('Stream error: link may be offline, blocked (CORS) or http on https');
-                }
+                if (err && playerOpen) { console.error('Player error:', err); showToast(streamErrorText(null, lastSpec)); }
             });
         }
 
+        let lastSpec = null;
+        // "url|Header=value&Header2=value|kid:key"  ->  { url, headers, clearKey, hasHeaders }
+        function parseStreamSpec(raw) {
+            const parts = String(raw || '').split('|');
+            const out = { url: (parts[0] || '').trim(), headers: {}, clearKey: '', hasHeaders: false };
+            for (let i = 1; i < parts.length; i++) {
+                const part = parts[i].trim();
+                if (!part) continue;
+                if (HEX_KEY.test(part)) { out.clearKey = part; continue; }
+                if (part.indexOf('=') < 0) continue;
+                let last = null;
+                part.split('&').forEach(tok => {
+                    const eq = tok.indexOf('=');
+                    const k = eq > -1 ? tok.slice(0, eq).trim().toLowerCase() : '';
+                    const v = eq > -1 ? tok.slice(eq + 1).trim() : '';
+                    if (eq > -1 && IGNORED_NAMES.indexOf(k) > -1) { last = null; return; }
+                    if (eq > -1 && KEY_NAMES.indexOf(k) > -1) { if (HEX_KEY.test(v)) out.clearKey = v; last = null; return; }
+                    if (eq > -1 && (KNOWN_HEADERS[k] || /^x-[a-z0-9-]+$/.test(k))) { last = KNOWN_HEADERS[k] || k; out.headers[last] = v; return; }
+                    if (last) out.headers[last] += '&' + tok;   // the "&" was part of the previous value
+                });
+            }
+            out.hasHeaders = Object.keys(out.headers).length > 0;
+            return out;
+        }
+        function cleanPath(url) { return url.split('#')[0].split('?')[0].toLowerCase(); }
+        function isProgressive(url) { return /\.(mp4|m4v|webm|ogv|ogg|mkv)$/.test(cleanPath(url)); }
         function detectType(url) {
-            const u = url.split('?')[0].split('#')[0].toLowerCase();
-            if (u.endsWith('.mp4') || u.endsWith('.m4v')) return 'video/mp4';
-            if (u.endsWith('.webm')) return 'video/webm';
-            if (u.endsWith('.ogv') || u.endsWith('.ogg')) return 'video/ogg';
-            if (u.endsWith('.mkv')) return 'video/webm';
-            // .m3u8, and also links with no extension (most live TV / IPTV links) are treated as HLS
+            const u = cleanPath(url);
+            if (/\.(mp4|m4v)$/.test(u)) return 'video/mp4';
+            if (/\.(webm|mkv)$/.test(u)) return 'video/webm';
+            if (/\.(ogv|ogg)$/.test(u)) return 'video/ogg';
+            // .m3u8, and links with no extension (most live TV / IPTV links) are treated as HLS
             return 'application/x-mpegURL';
         }
 
-        function playStream(url, title) {
-            url = (url || '').trim();
-            if (!url) { showToast('Stream URL not available!'); return; }
+        function hasNativePlayer() { return !!(window.SPRtixNative && window.SPRtixNative.play); }
+        function streamErrorText(err, spec) {
+            if (spec && spec.hasHeaders && !hasNativePlayer() && !String((globalSettings && globalSettings.proxyUrl) || '').trim()) {
+                return 'This stream needs special headers (Referer / User-Agent). Use the native player or set a proxy URL in the Admin Panel settings.';
+            }
+            const m = err && err.message ? ' (' + err.message + ')' : '';
+            return 'Stream error: the link may be offline, blocked (CORS) or http on https.' + m;
+        }
 
-            if (!playerInstance) { showToast('Player load nahi hua, internet check karke dobara kholein'); return; }
+        function showEngine(name) {
+            const v = document.getElementById('videoPlayer');
+            if (v) v.style.display = name === 'videojs' ? '' : 'none';
+            document.getElementById('nativeVideo').style.display = name === 'videojs' ? 'none' : 'block';
+        }
+        function stopAllPlayers() {
+            if (playerInstance) { try { playerInstance.pause(); playerInstance.reset(); } catch (e) {} }
+            if (shakaPlayer) { try { shakaPlayer.destroy(); } catch (e) {} shakaPlayer = null; }
+            const nv = document.getElementById('nativeVideo');
+            try { nv.pause(); nv.removeAttribute('src'); nv.load(); } catch (e) {}
+        }
+
+        async function playStream(spec, title) {
+            const s = parseStreamSpec(spec);
+            if (!s.url) { showToast('Stream URL not available!'); return; }
+            lastSpec = s;
+
+            // Native Android player (ExoPlayer) for streams that need headers or a DRM key
+            if (hasNativePlayer() && (s.hasHeaders || s.clearKey)) {
+                try { window.SPRtixNative.play(s.url, JSON.stringify(s.headers), s.clearKey, title || ''); return; } catch (e) { console.error(e); }
+            }
+
+            const token = ++playToken;
             document.getElementById('playerTitle').innerText = title || 'Live Stream';
             document.getElementById('playerModal').classList.add('active');
+            document.getElementById('playerLoading').style.display = 'flex';
+            if (!playerOpen) { playerOpen = true; openLayer('player', hidePlayer); }
+            stopAllPlayers();
 
-            playerInstance.pause();
-            playerInstance.reset();
-            playerInstance.src({ src: url, type: detectType(url) });
-            playerInstance.load();
+            let url = s.url;
+            const proxy = String((globalSettings && globalSettings.proxyUrl) || '').trim();
+            if (s.hasHeaders && proxy) {
+                url = proxy + (proxy.indexOf('?') > -1 ? '&' : '?') + 'url=' + encodeURIComponent(s.url) + '&h=' + encodeURIComponent(JSON.stringify(s.headers));
+            }
 
-            const p = playerInstance.play();
-            if (p && p.catch) p.catch(() => { /* user can tap the big play button */ });
+            try {
+                if (/\.mpd$/.test(cleanPath(s.url)) || s.clearKey) {
+                    if (!HAS_MSE) throw new Error('this device does not support DASH/DRM streams');
+                    await ensureShaka();
+                    if (token !== playToken) return;
+                    await playWithShaka(url, s.clearKey, token);
+                } else if (isProgressive(s.url) || !HAS_MSE) {
+                    playNative(url);
+                } else {
+                    await ensureVideoJs();
+                    if (token !== playToken) return;
+                    showEngine('videojs');
+                    playerInstance.src({ src: url, type: detectType(s.url) });
+                    playerInstance.load();
+                    const pr = playerInstance.play();
+                    if (pr && pr.catch) pr.catch(() => { /* the user can tap the play button */ });
+                }
+                if (token === playToken) document.getElementById('playerLoading').style.display = 'none';
+            } catch (e) {
+                if (token !== playToken) return;
+                document.getElementById('playerLoading').style.display = 'none';
+                console.error(e);
+                showToast(streamErrorText(e, s));
+            }
         }
 
-        function closePlayer() {
+        function playNative(url) {
+            showEngine('native');
+            const nv = document.getElementById('nativeVideo');
+            nv.src = url;
+            const pr = nv.play();
+            if (pr && pr.catch) pr.catch(() => {});
+        }
+
+        async function playWithShaka(url, clearKey, token) {
+            shaka.polyfill.installAll();
+            if (!shaka.Player.isBrowserSupported()) throw new Error('this browser is not supported');
+            showEngine('native');
+            const nv = document.getElementById('nativeVideo');
+            const sp = new shaka.Player(nv);
+            shakaPlayer = sp;
+            sp.addEventListener('error', ev => {
+                const d = ev.detail || {};
+                console.error('Shaka error', d);
+                if (playerOpen) showToast(streamErrorText({ message: 'code ' + (d.code || '?') }, lastSpec));
+            });
+            if (clearKey) {
+                const kv = clearKey.split(':');
+                const keys = {}; keys[kv[0].toLowerCase()] = kv[1].toLowerCase();
+                sp.configure({ drm: { clearKeys: keys } });
+            }
+            await sp.load(url);
+            if (token !== playToken) return;
+            const pr = nv.play();
+            if (pr && pr.catch) pr.catch(() => {});
+        }
+
+        function hidePlayer() {
+            playToken++;
+            playerOpen = false;
             document.getElementById('playerModal').classList.remove('active');
-            playerInstance.pause();
-            playerInstance.reset(); // fully stops the stream so it stops downloading in background
+            document.getElementById('playerLoading').style.display = 'none';
+            stopAllPlayers();
         }
+        function closePlayer() { popLayerUI('player'); hidePlayer(); }
 
         /* ---------------- CARDS ---------------- */
-        /* ---- AUTO background colour: image ke kinaron ka sab se zyada aane wala rang ---- */
+        /* ---- AUTO background colour: most common colour along the image edges ---- */
         const bgColorCache = {};
         function applyAutoBg(wrap, url) {
             if (!url) return;
             const paint = (rgb) => {
                 wrap.style.backgroundColor = rgb;
                 const blurImg = wrap.querySelector('.thumb-bg');
-                if (blurImg) blurImg.style.display = 'none'; // colour mil gaya, blur ki zarurat nahi
+                if (blurImg) blurImg.style.display = 'none'; // colour found, the blur is not needed
             };
             if (bgColorCache[url]) { paint(bgColorCache[url]); return; }
 
@@ -460,11 +755,11 @@
                         if (b.n > bestCount) { bestCount = b.n; best = b; }
                     };
                     for (let k = 0; k < S; k++) { take(k, 0); take(k, S - 1); take(0, k); take(S - 1, k); }
-                    if (!best || opaque < S) return; // transparent PNG: default dark rehta hai
+                    if (!best || opaque < S) return; // transparent PNG: keep the default dark background
                     const rgb = `rgb(${Math.round(best.r / best.n)},${Math.round(best.g / best.n)},${Math.round(best.b / best.n)})`;
                     bgColorCache[url] = rgb;
                     paint(rgb);
-                } catch (e) { /* CORS block: blur wala background hi chalega */ }
+                } catch (e) { /* CORS blocked: the blurred background is used instead */ }
             };
             probe.src = url;
         }
@@ -516,7 +811,7 @@
                 e.preventDefault();
                 if (!url) { showToast('Link not available!'); return; }
                 // playlist items that are streams play in-app, other links open normally
-                if (/\.m3u8(\?|$)/i.test(url) || /\.mp4(\?|$)/i.test(url)) playStream(url, name);
+                if (/\.(m3u8|mp4|mpd)$/.test(cleanPath(parseStreamSpec(url).url))) playStream(url, name);
                 else window.open(url, '_blank');
                 return;
             }
@@ -538,7 +833,7 @@
                 renderMatches();
             });
 
-            // Notifications (app khulte hi popup, skip ke baad dobara nahi)
+            // Notifications (popup when the app opens; not shown again after Skip)
             database.ref('notifications').on('value', snap => checkNotifications(snap.val()));
 
             // Trending Live
@@ -593,7 +888,7 @@
                 });
             });
 
-            // Worldwide (Explore ki tarah categories)
+            // Worldwide (categories, same as Explore)
             database.ref('worldwide').on('value', snap => {
                 const grid = document.getElementById('worldwideGrid');
                 grid.innerHTML = '';
@@ -609,12 +904,17 @@
         }
 
         /* ---------------- NAV / SLIDER ---------------- */
-        function switchScreen(screenName) {
-            document.querySelectorAll('.screen').forEach(s => s.classList.remove('active-screen'));
+        function showScreen(screenName) {
+            document.querySelectorAll('.screen').forEach(sc => sc.classList.remove('active-screen'));
             document.querySelectorAll('.nav-item').forEach(n => n.classList.toggle('active', n.dataset.screen === screenName));
             const target = document.getElementById(screenName + 'Screen');
             if (target) { target.classList.add('active-screen'); target.scrollTop = 0; }
             if (screenName === 'saved') renderFavourites();
+        }
+        function switchScreen(screenName) {
+            if (screenName === 'home') popLayerUI('screen');
+            else if (!layers.some(l => l.name === 'screen')) openLayer('screen', () => showScreen('home'));   // Back returns to the home screen
+            showScreen(screenName);
         }
 
         function refreshData() {
@@ -622,7 +922,7 @@
             icon.classList.add('spin');
             Promise.all(dataLoaders.map(f => f())).finally(() => {
                 icon.classList.remove('spin');
-                showToast('Data refresh ho gaya');
+                showToast('Data refreshed');
             });
         }
 
@@ -665,11 +965,19 @@
         }
 
         /* ---------------- SEARCH / MISC ---------------- */
+        function hideSearch() {
+            document.getElementById('searchContainer').classList.remove('active');
+            const inp = document.getElementById('searchInput');
+            inp.value = ''; inp.blur();
+            filterCategories('');
+        }
         function toggleSearch() {
             const bar = document.getElementById('searchContainer');
-            bar.classList.toggle('active');
-            if (bar.classList.contains('active')) document.getElementById('searchInput').focus();
-            else { document.getElementById('searchInput').value = ''; filterCategories(''); }
+            if (!bar.classList.contains('active')) {
+                bar.classList.add('active');
+                document.getElementById('searchInput').focus();
+                openLayer('search', hideSearch);
+            } else { popLayerUI('search'); hideSearch(); }
         }
 
         function filterCategories(query) {
@@ -680,8 +988,8 @@
         }
 
 
-        /* ============ LIVE EVENTS (Admin Panel se add hote hain) ============ */
-        const FINISHED_KEEP_MS = 48 * 3600 * 1000;   // khatam hone ke 48 ghante baad match list se hat jata hai
+        /* ============ LIVE EVENTS (added from the Admin Panel) ============ */
+        const FINISHED_KEEP_MS = 48 * 3600 * 1000;   // finished matches disappear from the list 48 hours after they end
         const SPORT_META = {
             cricket: ['Cricket', 'fa-baseball-bat-ball'], football: ['Football', 'fa-futbol'], boxing: ['Boxing', 'fa-hand-fist'],
             wrestling: ['Wrestling', 'fa-hand-fist'], motorsport: ['Motorsport', 'fa-flag-checkered'], tennis: ['Tennis', 'fa-table-tennis-paddle-ball'],
@@ -698,19 +1006,21 @@
             return (w.length > 1 ? w.map(x => x[0]).join('') : (w[0] || '?').slice(0, 3)).toUpperCase().slice(0, 3);
         }
         function sportMeta(k) { return SPORT_META[k] || [k.charAt(0).toUpperCase() + k.slice(1), 'fa-trophy']; }
-        function apiHeaders() { const k = globalSettings && globalSettings.apiKey; return k ? { 'x-api-key': k } : {}; }  // admin panel wali API key
+        function apiHeaders() { const k = globalSettings && globalSettings.apiKey; return k ? { 'x-api-key': k } : {}; }  // API key from the Admin Panel settings
 
+        // One channel per line:  [Name |] url [| Referer=... | User-Agent=... | kid:key]
         function parseChannels(v) {
             const lines = Array.isArray(v) ? v : String(v || '').split(/\r?\n/);
             const out = [];
             lines.forEach(line => {
                 line = String(line).trim();
                 if (!line) return;
-                const i = line.indexOf('|');
-                if (i > -1) out.push({ name: line.slice(0, i).trim() || 'Channel ' + (out.length + 1), url: line.slice(i + 1).trim() });
-                else out.push({ name: 'Channel ' + (out.length + 1), url: line });
+                const first = line.split('|')[0].trim();
+                let name = '', spec = line;
+                if (line.indexOf('|') > -1 && !/^https?:\/\//i.test(first)) { name = first; spec = line.slice(line.indexOf('|') + 1).trim(); }
+                if (spec) out.push({ name: name || 'Channel ' + (out.length + 1), url: spec });
             });
-            return out.filter(c => c.url);
+            return out;
         }
 
         function normalizeEvent(r) {
@@ -790,7 +1100,7 @@
             const evs = allEvents.map(e => ({ e, st: statusOf(e, now) }))
                 .filter(x => !(x.st === 'finished' && !isNaN(x.e.startMs) && now - (x.e.startMs + x.e.durMs) > FINISHED_KEEP_MS));
 
-            // sport chips (jo sports maujood hain)
+            // sport chips (only sports that have events)
             const counts = {};
             evs.forEach(x => { counts[x.e.sport] = (counts[x.e.sport] || 0) + 1; });
             if (sportFilter !== 'all' && !counts[sportFilter]) sportFilter = 'all';
@@ -799,7 +1109,7 @@
             document.getElementById('catChips').innerHTML = chipHTML('all', 'All', 'fa-layer-group', evs.length)
                 + sports.map(k => { const m = sportMeta(k); return chipHTML(k, m[0], m[1], counts[k]); }).join('');
 
-            // status pills (chuni hui sport ke hisaab se ginti)
+            // status pills (counts for the selected sport)
             const inSport = evs.filter(x => sportFilter === 'all' || x.e.sport === sportFilter);
             const cnt = { all: inSport.length, live: 0, upcoming: 0, finished: 0 };
             inSport.forEach(x => cnt[x.st]++);
@@ -816,7 +1126,7 @@
             });
             const box = document.getElementById('matchList');
             box.innerHTML = list.length ? list.map(x => eventCardHTML(x.e, x.st)).join('')
-                : `<div class="empty-msg" style="text-align:center;padding:30px 0;">${eventsLoaded ? 'Abhi koi match nahi hai.' : 'Matches load ho rahe hain...'}</div>`;
+                : `<div class="empty-msg" style="text-align:center;padding:30px 0;">${eventsLoaded ? 'No matches right now.' : 'Loading matches...'}</div>`;
             tickTimers();
             const q = document.getElementById('searchInput').value;
             if (q) filterCategories(q);
@@ -825,7 +1135,7 @@
         function openEvent(id) {
             const e = allEvents.find(x => x.id === id);
             if (!e) return;
-            if (!e.channels.length) { showToast('Is match ka channel link abhi add nahi hua'); return; }
+            if (!e.channels.length) { showToast('No channel link has been added for this match yet'); return; }
             if (e.channels.length === 1) { playStream(e.channels[0].url, e.title); return; }
             currentChannels = e.channels; currentEventTitle = e.title;
             openPopup(`
@@ -850,11 +1160,11 @@
             const pill = e.target.closest('#statusPills .pill');
             if (pill) { statusFilter = pill.dataset.st; renderMatches(); return; }
             const ch = e.target.closest('#popupBox [data-ch]');
-            if (ch) { const c = currentChannels[+ch.dataset.ch]; closePopup(); if (c) playStream(c.url, currentEventTitle); return; }
+            if (ch) { const c = currentChannels[+ch.dataset.ch]; closeLayerForNext('popup', hidePopup); if (c) playStream(c.url, currentEventTitle); return; }
             const card = e.target.closest('#matchList .match-card');
             if (card) openEvent(card.dataset.eid);
         });
-        // logo na khule to initials wala gol circle
+        // if a logo fails to load, show a round circle with initials
         document.addEventListener('error', e => {
             const el = e.target;
             if (el && el.classList && el.classList.contains('m-logo') && el.tagName === 'IMG') {
@@ -868,14 +1178,17 @@
         let popupType = '';
         let popupIds = [];
         function openPopup(html, type) {
+            const overlay = document.getElementById('popupOverlay');
             document.getElementById('popupBox').innerHTML = html;
-            document.getElementById('popupOverlay').classList.add('active');
+            if (!overlay.classList.contains('active')) { overlay.classList.add('active'); openLayer('popup', hidePopup); }
             popupType = type || '';
         }
-        function closePopup() {
+        function hidePopup() {
+            if (popupType === 'notif') markNotifsSeen();   // closing the notification popup (Skip or Back) marks it as seen
             document.getElementById('popupOverlay').classList.remove('active');
             popupType = '';
         }
+        function closePopup() { popLayerUI('popup'); hidePopup(); }
 
         /* ============ NOTIFICATIONS ============ */
         let notifIds = [];
@@ -885,7 +1198,7 @@
             const items = Object.values(obj || {});
             notifIds = items.map(n => String(n.id));
             const seen = getSeen();
-            const unseen = items.filter(n => !seen.includes(String(n.id))).reverse(); // naya sab se upar
+            const unseen = items.filter(n => !seen.includes(String(n.id))).reverse(); // newest first
             if (!unseen.length) return;
             const overlayOpen = document.getElementById('popupOverlay').classList.contains('active');
             if (overlayOpen && popupType !== 'notif') return;
@@ -900,14 +1213,13 @@
                 <div class="popup-btns"><button class="popup-btn" onclick="skipNotifications()">Skip</button></div>`, 'notif');
         }
 
-        function skipNotifications() {
-            // jo bhi abhi maujood hain unko "dekha hua" mark karo; naya add hoga tabhi popup aayega
-            const seen = new Set(getSeen());
-            notifIds.forEach(id => seen.add(id));
-            popupIds.forEach(id => seen.add(id));
-            try { localStorage.setItem('sprtix_seen_notifs', JSON.stringify([...seen])); } catch (e) {}
-            closePopup();
+        function markNotifsSeen() {
+            // everything that exists right now counts as "seen"; the popup only returns when a NEW notification is added
+            const seen = getSeen();
+            notifIds.concat(popupIds).forEach(id => { if (seen.indexOf(id) < 0) seen.push(id); });
+            try { localStorage.setItem('sprtix_seen_notifs', JSON.stringify(seen)); } catch (e) {}
         }
+        function skipNotifications() { closePopup(); }
 
         /* ============ CONNECT US ============ */
         const CONNECT_LINKS = [
@@ -921,7 +1233,7 @@
 
         function openConnectUs() {
             const links = CONNECT_LINKS.filter(l => globalSettings && globalSettings[l[0]]);
-            if (!links.length) { showToast('Contact links abhi set nahi hain'); return; }
+            if (!links.length) { showToast('No contact links have been set yet'); return; }
             openPopup(`
                 <div class="popup-head"><i class="fa-solid fa-headset"></i> Connect Us</div>
                 <div class="popup-body">${links.map(l => `
@@ -954,29 +1266,27 @@
         }
 
         async function checkUpdate() {
-            showToast('Update check ho raha hai...');
+            showToast('Checking for updates...');
             try {
-                const r = await fetch(DATA_BASE + 'settings.json?t=' + Date.now(), { cache: 'no-store' });
-                if (!r.ok) throw new Error(r.status);
-                const st = await r.json();
+                const st = JSON.parse(await fetchText(DATA_BASE + 'settings.json?t=' + Date.now(), 10000));
                 globalSettings = st;
                 const latest = String(st.latestVersion || '').trim();
                 if (latest && versionGreater(latest, APP_VERSION)) {
-                    if (!st.updateUrl) { showToast('Naya version ' + latest + ' available hai'); return; }
+                    if (!st.updateUrl) { showToast('Version ' + latest + ' is available'); return; }
                     openPopup(`
                         <div class="popup-head"><i class="fa-solid fa-cloud-arrow-down"></i> Update Available</div>
                         <div class="popup-body"><div class="notif-item">
                             <div class="notif-title">Version ${esc(latest)}</div>
-                            <div class="notif-msg">${esc(st.updateMessage || 'Naya update available hai. Behtar experience ke liye update karein.')}</div>
+                            <div class="notif-msg">${esc(st.updateMessage || 'A new update is available. Please update for the best experience.')}</div>
                         </div></div>
                         <div class="popup-btns">
                             <button class="popup-btn secondary" onclick="closePopup()">Later</button>
                             <button class="popup-btn" onclick="window.open(globalSettings.updateUrl, '_blank'); closePopup();">Update Now</button>
                         </div>`, 'update');
                 } else {
-                    showToast('Aap latest version (v' + APP_VERSION + ') use kar rahe hain ✔');
+                    showToast('You are on the latest version (v' + APP_VERSION + ') ✔');
                 }
-            } catch (e) { showToast('Update check nahi ho saka. Internet check karein.'); }
+            } catch (e) { showToast('Could not check for updates. Please check your internet connection.'); }
         }
 
         document.addEventListener('click', e => {
