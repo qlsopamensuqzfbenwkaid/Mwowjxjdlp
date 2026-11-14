@@ -761,6 +761,33 @@ function stopAllPlayers() {
     }
     catch (e) { }
 }
+var pendingPlays = {}, playGateSeq = 0;
+window.SPRtixPlayAllowed = function (token) {
+    try {
+        var fn = pendingPlays[token];
+        if (fn) {
+            delete pendingPlays[token];
+            fn();
+        }
+    }
+    catch (e) { }
+};
+function gatePlay(playFn) {
+    var token = null;
+    try {
+        if (window.SPRtixApp && typeof SPRtixApp.requestPlay === 'function') {
+            token = 'play_' + (++playGateSeq) + '_' + Date.now();
+            pendingPlays[token] = playFn;
+            SPRtixApp.requestPlay(token);
+            return;
+        }
+    }
+    catch (e) {
+        if (token)
+            delete pendingPlays[token];
+    }
+    playFn();
+}
 function playStream(spec, title) {
     return __awaiter(this, void 0, void 0, function () {
         var s, token, url, proxy, pr, e_1;
@@ -892,11 +919,19 @@ function playWithShaka(url, clearKey, token) {
     });
 }
 function hidePlayer() {
+    var wasOpen = playerOpen;
     playToken++;
     playerOpen = false;
     document.getElementById('playerModal').classList.remove('active');
     document.getElementById('playerLoading').style.display = 'none';
     stopAllPlayers();
+    if (wasOpen) {
+        try {
+            if (window.SPRtixApp && typeof SPRtixApp.onPlayerClosed === 'function')
+                SPRtixApp.onPlayerClosed();
+        }
+        catch (e) { }
+    }
 }
 function closePlayer() { popLayerUI('player'); hidePlayer(); }
 /* ---------------- CARDS ---------------- */
@@ -1004,12 +1039,12 @@ function onDocumentClick(e) {
         }
         // playlist items that are streams play in-app, other links open normally
         if (/\.(m3u8|mp4|mpd)$/.test(cleanPath(parseStreamSpec(url).url)))
-            playStream(url, name);
+            gatePlay(function () { playStream(url, name); });
         else
             window.open(url, '_blank');
         return;
     }
-    playStream(url, name);
+    gatePlay(function () { playStream(url, name); });
 }
 function emptyMsg(text) { return "<div class=\"empty-msg\">".concat(text, "</div>"); }
 function fetchDatabaseData() {
@@ -1354,7 +1389,7 @@ function openEvent(id) {
         return;
     }
     if (e.channels.length === 1) {
-        playStream(e.channels[0].url, e.title);
+        gatePlay(function () { playStream(e.channels[0].url, e.title); });
         return;
     }
     currentChannels = e.channels;
@@ -1390,7 +1425,7 @@ document.addEventListener('click', function (e) {
         var c = currentChannels[+ch.dataset.ch];
         closeLayerForNext('popup', hidePopup);
         if (c)
-            playStream(c.url, currentEventTitle);
+            gatePlay(function () { playStream(c.url, currentEventTitle); });
         return;
     }
     var card = e.target.closest('#matchList .match-card');
