@@ -1,0 +1,41 @@
+name: Send OneSignal Push
+on:
+  workflow_dispatch:
+    inputs:
+      title:
+        description: Title
+        required: true
+      message:
+        description: Message
+        required: true
+      url:
+        description: Open URL (optional)
+        required: false
+        default: ""
+      image:
+        description: Big image URL (optional)
+        required: false
+        default: ""
+permissions: {}
+jobs:
+  send:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Send push
+        env:
+          ONESIGNAL_APP_ID: 3a4a7c9f-13ad-4393-b554-4ed3d1b1db7d
+          ONESIGNAL_API_KEY: ${{ secrets.ONESIGNAL_REST_API_KEY }}
+          TITLE: ${{ inputs.title }}
+          MESSAGE: ${{ inputs.message }}
+          URL: ${{ inputs.url }}
+          IMAGE: ${{ inputs.image }}
+        run: |
+          set -euo pipefail
+          if [ -z "${ONESIGNAL_API_KEY:-}" ]; then echo "Secret ONESIGNAL_REST_API_KEY set nahi hai"; exit 1; fi
+          body=$(jq -n --arg app "$ONESIGNAL_APP_ID" --arg t "$TITLE" --arg m "$MESSAGE" --arg u "$URL" --arg i "$IMAGE" \
+            '{app_id:$app, included_segments:["Subscribed Users"], headings:{en:$t}, contents:{en:$m}} + (if $u != "" then {url:$u} else {} end) + (if $i != "" then {big_picture:$i} else {} end)')
+          code=$(curl -sS -o resp.json -w '%{http_code}' -X POST https://api.onesignal.com/notifications \
+            -H "Content-Type: application/json" -H "Authorization: Key $ONESIGNAL_API_KEY" -d "$body")
+          echo "HTTP $code"
+          jq -r 'if .id then "Notification ID: " + .id else (.errors | tostring) end' resp.json
+          [ "$code" -lt 300 ]
