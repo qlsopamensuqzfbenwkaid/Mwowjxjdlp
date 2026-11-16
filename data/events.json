@@ -12,5 +12,18 @@
     "status": "live",
     "hot": "yes",
     "channels": "SKY TOP EVENT ALT | https://otte.live.fly.ww.aiv-cdn.net/iad-nitro/live/clients/dash/enc/ymojggb3li/out/v1/4e528b82e63f499c886b3a34e89eaf9b/cenc.mpd|e8d550a86ee5c31e6b62f5fa287db43d:11184b37c42d384033b966dbea535b4f\nbeIN ENGLISH FHD | https://otte.cache.aiv-cdn.net/bom-nitro/live/clients/dash/enc/ghwcl6hv68/out/v1/83536910d8034e9b9895a20fbe1c1687/cenc.mpd|335dad778109954503dcbb21dc92015f:24bfd75d436cbf73168a2a2dccd40281\nSKY TOP EVENT FHD | https://otte.live.fly.ww.aiv-cdn.net/iad-nitro/live/clients/dash/enc/gjsukewpxp/out/v1/ef14aacf858248839b9867eec5caf563/cenc.mpd|368bd4ebe301406897324bc777650411:69d27c2c2b7de927d67aacc973259901\nTENNIS 2 FHD | https://otte.cache.aiv-cdn.net/iad-nitro/live/clients/dash/enc/bfigtl960n/out/v1/5ba5484550e84681bff2e8ca994266c1/cenc.mpd|59f50679c9e60963bd0cb6640992aaaa:8685817c4d31f322e08940feeae2855a"
+  },
+  {
+    "id": "imwj1b86unaz",
+    "sport": "cricket",
+    "league": "ICC World Test Championship",
+    "team1": "NZ",
+    "team1Logo": "https://img.sofascore.com/api/v1/team/187755/image",
+    "team2": "IND",
+    "team2Logo": "https://img.sofascore.com/api/v1/team/187765/image",
+    "start": "2026-11-19T10:00:00.000Z",
+    "status": "auto",
+    "hot": "yes",
+    "channels": "WILLOW - AdFree | https://dash-ott.bia-cf.live.pv-cdn.net/iad-nitro/live/clients/dash/enc/kun3tuq8ds/out/v1/2888a4861ca042d1a01fc66e65c44981/cenc.mpd|User-Agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/149.0.0.0 Safari/537.36"
   }
 ]
