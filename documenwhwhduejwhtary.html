@@ -1,0 +1,432 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="referrer" content="no-referrer">
+<title>SPRtix - Documentary CHANNELS</title>
+<link href="https://vjs.zencdn.net/8.10.0/video-js.css" rel="stylesheet" />
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<style>
+*{margin:0;padding:0;box-sizing:border-box;font-family:'Poppins',sans-serif;-webkit-tap-highlight-color:transparent}
+body{background:radial-gradient(circle at top,#0f172a 0%,#030712 70%) fixed;background-color:#030712;color:#fff;min-height:100vh}
+.page{max-width:1100px;margin:0 auto;padding-bottom:40px}
+
+.top{position:sticky;top:0;z-index:30;background:rgba(3,7,18,.95);backdrop-filter:blur(10px);border-bottom:1px solid rgba(0,242,254,.2);padding:12px 16px 8px}
+.brand{display:flex;align-items:baseline;gap:10px;margin-bottom:10px}
+.brand b{font-size:20px;font-weight:700;letter-spacing:.5px}
+.brand span{font-size:9px;letter-spacing:1.5px;color:#94a3b8}
+.loadbtn{margin-left:auto;background:transparent;border:1px solid rgba(0,242,254,.5);color:#00f2fe;border-radius:999px;padding:4px 12px;font-size:11px;cursor:pointer}
+.loader{grid-column:1/-1;max-width:520px;margin:20px auto;text-align:center;display:flex;flex-direction:column;gap:12px;align-items:center}
+.loader h3{font-size:16px}.loader p{font-size:12px;color:#94a3b8;line-height:1.6}
+.loader textarea{width:100%;height:110px;background:#0f172a;border:1px solid rgba(0,242,254,.4);border-radius:10px;color:#fff;padding:10px;font-size:11px;resize:vertical;outline:none}
+.loader .go{background:#00f2fe;color:#030712;border:0;border-radius:999px;padding:8px 22px;font-weight:600;font-size:12px;cursor:pointer}
+.loader .go.alt{background:transparent;color:#00f2fe;border:1px solid #00f2fe}
+.search{width:100%;max-width:460px;background:#0f172a;border:1px solid #00f2fe;border-radius:20px;padding:8px 16px;color:#fff;font-size:13px;outline:none}
+.search::placeholder{color:#64748b}
+.chips{display:flex;gap:8px;overflow-x:auto;padding:10px 0 4px;scrollbar-width:none}
+.chips::-webkit-scrollbar{display:none}
+.chip{flex:none;background:transparent;border:1px solid rgba(255,255,255,.15);color:#94a3b8;border-radius:999px;padding:4px 13px;font-size:11px;cursor:pointer}
+.chip[aria-pressed=true]{background:#00f2fe;border-color:#00f2fe;color:#030712;font-weight:600}
+.count{font-size:10px;color:#64748b;padding:2px 2px 0}
+
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(104px,1fr));gap:10px;padding:14px 16px}
+.channel-card{position:relative;background:rgba(15,23,42,.7);border:1px solid rgba(255,255,255,.08);border-radius:12px;padding:12px 6px 8px;display:flex;flex-direction:column;align-items:center;gap:7px;cursor:pointer;transition:transform .2s,border-color .2s;min-width:0}
+.channel-card:hover{transform:translateY(-2px);border-color:#00f2fe}
+.channel-card.dead{opacity:.4}
+.thumb-wrap{position:relative;width:76px;height:76px;border-radius:50%;overflow:hidden;background:#111827;flex-shrink:0;border:2px solid rgba(0,242,254,.55);box-shadow:0 0 10px rgba(0,242,254,.25)}
+.thumb-bg{position:absolute;inset:-12px;width:calc(100% + 24px);height:calc(100% + 24px);object-fit:cover;filter:blur(12px) brightness(.55) saturate(1.3)}
+.card-thumb{position:relative;z-index:1;width:100%;height:100%;object-fit:contain;object-position:center;padding:15%;display:block}
+.ini{position:relative;z-index:1;width:100%;height:100%;display:grid;place-items:center;font-weight:700;font-size:20px;color:#00f2fe}
+.channel-logo-text{font-size:10.5px;font-weight:600;text-align:center;line-height:1.2;width:100%;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;padding:0 4px}
+.channel-footer{width:100%;display:flex;justify-content:space-between;align-items:center;font-size:8px;padding:0 4px}
+.live-badge{background:#ff0055;color:#fff;padding:2px 5px;border-radius:3px;font-weight:700;font-size:7px}
+.view-count{color:#94a3b8}
+.empty-msg{padding:30px 16px;font-size:13px;color:#94a3b8;grid-column:1/-1}
+
+/* ---- player modal: same as index.html ---- */
+.player-modal{position:sticky;top:0;background:#000;z-index:150;display:none;flex-direction:column;border-bottom:1px solid rgba(0,242,254,.3)}
+.player-modal.active{display:flex}
+.player-header{display:flex;justify-content:space-between;align-items:center;padding:12px 16px;background:rgba(3,7,18,.95);border-bottom:1px solid rgba(0,242,254,.2);flex-shrink:0}
+.player-title{font-size:13px;font-weight:700;color:#00f2fe;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:80%}
+.player-close{color:#fff;font-size:16px;cursor:pointer;background:#ff0055;width:26px;height:26px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.player-body{position:relative;background:#000;width:100%;aspect-ratio:16/9;max-height:45vh}
+body.playing .top{position:static}
+.channel-card.playing{border-color:#00f2fe;box-shadow:0 0 12px rgba(0,242,254,.45)}
+.player-body>video{position:absolute;inset:0;width:100%;height:100%;background:#000}
+.player-body .video-js{position:absolute;inset:0;width:100%;height:100%;background-color:#000}
+
+.toast-popup{position:fixed;top:70px;left:50%;transform:translateX(-50%) translateY(-15px);background:rgba(15,23,42,.95);border:1px solid #00f2fe;color:#fff;padding:8px 16px;border-radius:20px;font-size:11px;box-shadow:0 5px 15px rgba(0,0,0,.5);opacity:0;pointer-events:none;transition:.3s;z-index:300;max-width:90vw;text-align:center}
+.toast-popup.show{opacity:1;transform:translateX(-50%) translateY(0)}
+:focus-visible{outline:2px solid #00f2fe;outline-offset:2px}
+@media (min-width:700px){.thumb-wrap{width:88px;height:88px}.grid{grid-template-columns:repeat(auto-fill,minmax(124px,1fr))}}
+</style>
+</head>
+<body>
+
+<div class="page">
+<!-- Video Player Modal -->
+<div id="playerModal" class="player-modal">
+  <div class="player-header">
+    <div id="playerTitle" class="player-title">Playing Content</div>
+    <div class="player-close" onclick="closePlayer()"><i class="fa-solid fa-xmark"></i></div>
+  </div>
+  <div class="player-body">
+    <video id="videoPlayer" class="video-js vjs-default-skin vjs-big-play-centered" controls preload="auto" playsinline webkit-playsinline></video>
+  </div>
+</div>
+
+<script>let CHANNELS = [{"n":"30A Loomered TV","l":"https://cbs12.com/resources/media/0c1ecad8-fb09-4bb2-beaa-fc561dfe624a-small21x9_LoomerStill.jpg?1603419052801","g":["Documentary","News"],"q":"","u":"https://30a-tv.com/loomer.m3u8"},{"n":"365 days TV","l":"https://i.imgur.com/NfnAiTR.png","g":["Documentary"],"q":"576p","u":"http://stream.mcquack.net/70/index.m3u8"},{"n":"Adventure Earth","l":"https://d3b6luslimvglo.cloudfront.net/images/79/rlaxximages/channels-rescaled/icon-white/adventureearth_white.png","g":["Documentary"],"q":"1080p","u":"https://a57e9c69976649b582a8d7604c00e69a.mediatailor.us-east-1.amazonaws.com/v1/master/44f73ba4d03e9607dcd9bebdcb8494d86964f1d8/RlaxxTV-eu_AdventureEarth/playlist.m3u8"},{"n":"Al Arabiya Programs","l":"https://i.imgur.com/Hoc3cfO.png","g":["Documentary","News"],"q":"1280p","u":"https://live.alarabiya.net/alarabiapublish/aaprograms.smil/playlist.m3u8"},{"n":"Al Jazeera Documentary","l":"https://i.imgur.com/5dNJlLo.png","g":["Documentary"],"q":"Geo-blocked","u":"https://live-hls-apps-ajd-fa.getaj.net/AJD/index.m3u8"},{"n":"AlternaTV","l":"https://tv.alterna.ar/alternatv.png","g":["Culture","Documentary","Entertainment","General","Movies","Music"],"q":"720p","u":"https://tv.alterna.ar/stream/hls/live.m3u8"},{"n":"American Heroes Channel","l":"https://upload.wikimedia.org/wikipedia/commons/thumb/7/75/American_Heroes_Channel_logo.svg/960px-American_Heroes_Channel_logo.svg.png","g":["Documentary"],"q":"720p","u":"http://23.237.104.106:8080/USA_AMERICAN_HEROES/index.m3u8"},{"n":"Animal Planet (Russia)","l":"https://upload.wikimedia.org/wikipedia/commons/thumb/2/20/2018_Animal_Planet_logo.svg/960px-2018_Animal_Planet_logo.svg.png","g":["Documentary"],"q":"1080p","u":"http://stream.mcquack.net/114/index.m3u8"},{"n":"Animal Planet (United Kingdom)","l":"https://upload.wikimedia.org/wikipedia/commons/thumb/2/20/2018_Animal_Planet_logo.svg/960px-2018_Animal_Planet_logo.svg.png","g":["Documentary"],"q":"","u":"http://37.49.224.5/stream/10/index.m3u8"},{"n":"Animal Planet (United States)","l":"https://upload.wikimedia.org/wikipedia/commons/thumb/2/20/2018_Animal_Planet_logo.svg/960px-2018_Animal_Planet_logo.svg.png","g":["Documentary"],"q":"720p","u":"http://23.237.104.106:8080/USA_ANIMAL_PLANET/index.m3u8"},{"n":"Animal Planet Latin America","l":"https://upload.wikimedia.org/wikipedia/commons/thumb/2/20/2018_Animal_Planet_logo.svg/960px-2018_Animal_Planet_logo.svg.png","g":["Documentary"],"q":"1080p","u":"http://190.128.214.97:64333/play/a01n/index.m3u8"},{"n":"Animal Planet Latin America HD","l":"https://upload.wikimedia.org/wikipedia/commons/thumb/2/20/2018_Animal_Planet_logo.svg/960px-2018_Animal_Planet_logo.svg.png","g":["Documentary"],"q":"Geo-blocked","u":"http://15.204.246.24:8080/AnimalPlanetHD/index.m3u8"},{"n":"Archivos Forenses","l":"https://i.imgur.com/Pxrl9Ug.png","g":["Documentary"],"q":"","u":"https://jmp2.uk/plu-5f984f4a09e92d0007d74647.m3u8"},{"n":"Arsenal","l":"https://i.imgur.com/DBpVeb0.png","g":["Documentary"],"q":"576p","u":"https://stream8.cinerama.uz/1414/tracks-v1a1/mono.m3u8"},{"n":"Asharq Discovery","l":"https://i.imgur.com/Czxi7yk.png","g":["Documentary","Education"],"q":"1080p","u":"https://svs.itworkscdn.net/asharqdiscoverylive/asharqd.smil/playlist_dvr.m3u8"},{"n":"Asharq Documentary","l":"https://i.imgur.com/v6VsFEt.png","g":["Documentary"],"q":"1080p","u":"https://svs.itworkscdn.net/asharqdocumentarylive/asharqdocumentary.smil/playlist_dvr.m3u8"},{"n":"Atlas","l":"https://whiplash.cc/assets/img/channels/atlas.png","g":["Documentary"],"q":"480p","u":"https://cdn.whiplash.cc/whiplash-atlas/index.m3u8"},{"n":"Autentic History","l":"https://d3b6luslimvglo.cloudfront.net/images/79/rlaxximages/channels-rescaled/icon-white/autentichistory_white.png","g":["Documentary"],"q":"1080p","u":"https://9e754fa707344ccca6d84955c8fcaf36.mediatailor.us-east-1.amazonaws.com/v1/master/44f73ba4d03e9607dcd9bebdcb8494d86964f1d8/RlaxxTV-eu_AutenticHistory/playlist.m3u8"},{"n":"Backstage","l":"https://i.imgur.com/qcTNvNU.png","g":["Documentary"],"q":"1080p","u":"https://d2ah48mnofquik.cloudfront.net/Backstage.m3u8"},{"n":"BBC Earth Czechia","l":"https://i.imgur.com/nGSsUd4.png","g":["Documentary"],"q":"","u":"http://88.212.7.14/live/test_bbc_eartch_hevc/playlist.m3u8"},{"n":"BBC Earth Hungary","l":"https://i.imgur.com/nGSsUd4.png","g":["Documentary"],"q":"","u":"http://88.212.7.14/live/bbce_hun/index.m3u8"},{"n":"BBC Earth Turkiye","l":"https://i.imgur.com/nGSsUd4.png","g":["Documentary"],"q":"","u":"https://nord.ayakkabiparti.lol/bbc/index.m3u8"},{"n":"BBC Earth US","l":"https://i.imgur.com/nGSsUd4.png","g":["Documentary"],"q":"1080p","u":"https://amg00793-amg00793c6-xumo-us-2669.playouts.now.amagi.tv/BBCStudios-BBCEarthA-hls/playlist.m3u8"},{"n":"BBC Four","l":"https://upload.wikimedia.org/wikipedia/commons/thumb/6/6d/BBC_Four_logo_2021.svg/960px-BBC_Four_logo_2021.svg.png","g":["Culture","Documentary"],"q":"","u":"https://cdn.stmify.com/bbc/stream/BBC_FOUR/hevc_iptv_mse_v0.mpd"},{"n":"Bloomberg Originals","l":"https://jiotvimages.cdn.jio.com/dare_images/images/Bloomberg_Originals.png","g":["Business","Documentary"],"q":"1080p","u":"https://bloomberg.com/media-manifest/streams/qt.m3u8"},{"n":"Bloomberg Originals SD","l":"https://jiotvimages.cdn.jio.com/dare_images/images/Bloomberg_Originals.png","g":["Business","Documentary"],"q":"1080p","u":"https://86fdc85a.wurl.com/master/f36d25e7e52f1ba8d7e56eb859c636563214f541/TEctZ2JfQmxvb21iZXJnT3JpZ2luYWxzX0hMUw/playlist.m3u8"},{"n":"BritBox Mysteries","l":"https://i.imgur.com/PJdzoLN.png","g":["Documentary"],"q":"1080p","u":"https://aegis-cloudfront-1.tubi.video/c95700f8-e51c-4a36-ad46-56f70fc9f1d9/playlist.m3u8"},{"n":"BTB Info","l":"https://btb.j00r.us/img.php?id=87fa06e1418604cb096a0bb3f24e4371&type=Primary&w=400&t=BTB+Info","g":["Documentary","News"],"q":"1080p","u":"https://emisja2.btb.j00r.us/iptv/session/4/hls.m3u8"},{"n":"Cazador de Homicidas","l":"https://i.imgur.com/hy6FJLe.png","g":["Documentary"],"q":"","u":"https://jmp2.uk/plu-60ed5fb9c4716d0007d180c5.m3u8"},{"n":"CCTV-9","l":"https://i.imgur.com/3tivvMm.png","g":["Documentary"],"q":"576i","u":"https://xykt-fix.github.io/Y77.m3u8"},{"n":"CCTV-Weapon & Technology","l":"https://i.imgur.com/QlF96eS.png","g":["Documentary"],"q":"1080p","u":"http://38.75.136.137:98/gslb/dsdqpub/gfjs.m3u8?auth=testpub"},{"n":"CGTN Documentary","l":"https://i.imgur.com/JHv0WxM.png","g":["Documentary"],"q":"1080p","u":"https://amg00405-rakutentv-cgtndocumentary-rakuten-0ql8j.amagi.tv/master.m3u8"},{"n":"Chemodan TV","l":"https://i.imgur.com/1WjGN8u.png","g":["Documentary","Education"],"q":"1080p","u":"http://stream.mcquack.net/399/index.m3u8"},{"n":"China Travel","l":"https://i.imgur.com/vSgY3CD.png","g":["Culture","Documentary","Travel"],"q":"1080p","u":"https://fastlive.cctvplus.com/out/v1/ca6f9297b7314a63959435028af287fc/index.m3u8"},{"n":"City Eden KinoDok","l":"https://i.imgur.com/itRbMX3.png","g":["Documentary","Series"],"q":"","u":"https://cityeden.catcast.tv/content/38354/index.m3u8"},{"n":"CNA Originals","l":"https://upload.wikimedia.org/wikipedia/commons/thumb/8/83/CNA_new_logo.svg/500px-CNA_new_logo.svg.png","g":["Documentary"],"q":"1080p","u":"https://amg01082-cna-amg01082c1-rlaxx-us-11304.playouts.now.amagi.tv/playlist.m3u8"},{"n":"CND Film Discovery Channel","l":"https://i.imgur.com/2FJfPDx.png","g":["Documentary"],"q":"576p","u":"http://125.210.152.18:9090/live/FXZL_750.m3u8"},{"n":"Court TV","l":"https://i.imgur.com/jOKA735.png","g":["Documentary"],"q":"1080p","u":"https://cdn-uw2-prod.tsv2.amagi.tv/linear/amg01438-ewscrippscompan-courttv-tablo/playlist.m3u8"},{"n":"Crime 360","l":"https://i.imgur.com/IjtaG1m.png","g":["Documentary"],"q":"720p","u":"https://jmp2.uk/plu-657880c46e4f6a00087404d0.m3u8"},{"n":"Crimen & Historia","l":"https://images.pluto.tv/channels/64ddcbb14c5ed80008fad416/colorLogoPNG.png","g":["Documentary"],"q":"720p","u":"https://jmp2.uk/plu-64ddcbb14c5ed80008fad416.m3u8"},{"n":"CT2","l":"https://upload.wikimedia.org/wikipedia/commons/thumb/0/08/%C4%8CT2_logo_2012.svg/960px-%C4%8CT2_logo_2012.svg.png","g":["Documentary"],"q":"","u":"http://88.212.15.50/live/test_ct2_25p/playlist.m3u8"},{"n":"Curiosity NOW EN","l":"https://i.imgur.com/gJ9eMaG.png","g":["Documentary"],"q":"1080p","u":"https://amg00170-amg00170c4-samsung-gb-4232.playouts.now.amagi.tv/playlist.m3u8"},{"n":"Danger TV","l":"https://i.imgur.com/4aTk45R.png","g":["Documentary"],"q":"720p","u":"https://dk0n7jh428tzj.cloudfront.net/v1/dangertv/samsungheadend_us/latest/main/hls/playlist.m3u8"},{"n":"Dateline 24/7","l":"https://i.imgur.com/8mAJuut.png","g":["Documentary"],"q":"1080p","u":"https://d1si3n1st4nkgb.cloudfront.net/10502/88896029/hls/master.m3u8?ads.xumo_channelId=88896029"},{"n":"Deadly Women","l":"https://i.imgur.com/dDVZ5Vd.png","g":["Documentary"],"q":"1080p","u":"https://d1mgh147xpmgs8.cloudfront.net/DeadlyWomen_GB.m3u8"},{"n":"Detetives Medicos","l":"https://images.pluto.tv/channels/638df93ae2f2a3000737c168/colorLogoPNG.png","g":["Documentary"],"q":"","u":"https://jmp2.uk/plu-638df93ae2f2a3000737c168.m3u8"},{"n":"Discovering China","l":"https://i.imgur.com/wr2bLaA.png","g":["Culture","Documentary"],"q":"1080p","u":"https://fastlive.cctvplus.com/out/v1/8442c3bfd4c64a3984389328f6087879/index.m3u8"},{"n":"Discovery History","l":"https://d2n0069hmnqmmx.cloudfront.net/epgdata/1.0/newchanlogos/512/512/skychb2407.png","g":["Documentary"],"q":"","u":"http://37.49.224.5/stream/12/index.m3u8"},{"n":"DocuBay TV","l":"https://i.imgur.com/OGyeLLR.png","g":["Documentary"],"q":"1080p","u":"https://cc-mgr91yrk4pehy.akamaized.net/v1/master/3722c60a815c199d9c0ef36c5b73da68a62b09d1/cc-mgr91yrk4pehy/playlist.m3u8"},{"n":"DocuBox","l":"https://i.imgur.com/pX4U9OG.png","g":["Documentary"],"q":"","u":"https://dash3.antik.sk/live/test_docubox_medium_atk/playlist.m3u8"},{"n":"DocuBox Russia","l":"https://i.imgur.com/pX4U9OG.png","g":["Documentary"],"q":"","u":"http://dtv.vol.net.ua/DOCUBOX-HD/index.m3u8"},{"n":"Documentary+","l":"https://i.imgur.com/x57klfS.png","g":["Documentary"],"q":"1080p","u":"https://ef79b15c8c7c46c7a9de9d33001dbd07.mediatailor.us-west-2.amazonaws.com/v1/master/ba62fe743df0fe93366eba3a257d792884136c7f/LINEAR-859-DOCUMENTARYPLUS-DOCUMENTARYPLUS/mt/documentaryplus/859/hls/master/playlist.m3u8"},{"n":"Documentary+ International","l":"https://i.imgur.com/x57klfS.png","g":["Documentary"],"q":"1080p","u":"https://1d153317c8db4250b3789601274e2402.mediatailor.us-west-2.amazonaws.com/v1/master/ba62fe743df0fe93366eba3a257d792884136c7f/LINEAR-887-DOCUMENTARYINTERNATIONAL-DOCUMENTARYPLUS/mt/documentaryplus/887/hls/master/playlist.m3u8"},{"n":"Docurama","l":"https://i.imgur.com/2248nxX.png","g":["Documentary"],"q":"1080p","u":"https://docurama-plex-ingest.cinedigm.com/playlist.m3u8"},{"n":"Dokusat","l":"https://i.imgur.com/GadfTwF.png","g":["Documentary"],"q":"1080p","u":"https://muc3.iptv-playoutcenter.de/dokusat/dokusat1/playlist.m3u8"},{"n":"Dossiers FBI","l":"https://i.imgur.com/8Zx6dA7.png","g":["Documentary"],"q":"","u":"https://jmp2.uk/plu-5f8edad922b10b000753bc37.m3u8"},{"n":"Dvojka","l":"https://i.imgur.com/ft10wQn.png","g":["Documentary"],"q":"","u":"http://88.212.15.50/live/test_dvojka_25p/playlist.m3u8"},{"n":"Ecovision","l":"https://imgur.com/Y4ahiYu.png","g":["Documentary"],"q":"720p","u":"https://streaming.grupomediosdelnorte.com:19360/ecovision/ecovision.m3u8"},{"n":"Epic Crimes","l":"https://i.imgur.com/a5kaqDc.png","g":["Documentary"],"q":"1080p","u":"https://cc-wsuyg2uxeak04.akamaized.net/v1/master/3722c60a815c199d9c0ef36c5b73da68a62b09d1/cc-wsuyg2uxeak04/master.m3u8"},{"n":"EPlanet TV","l":"","g":["Documentary"],"q":"","u":"https://eplhls.wns.live/hls/stream.m3u8"},{"n":"FBI Files","l":"https://i.imgur.com/vzYDSLo.png","g":["Documentary"],"q":"","u":"https://jmp2.uk/plu-62bdaa32a1b2fd00076693e8.m3u8"},{"n":"Forensic Files","l":"https://i.imgur.com/V5vvuLK.png","g":["Documentary"],"q":"","u":"https://jmp2.uk/plu-62e92392a3e6270007f562e8.m3u8"},{"n":"Francophonie24","l":"https://i.imgur.com/uM1v1sd.png","g":["Documentary"],"q":"1080p","u":"https://5421175365ea3.streamlock.net/live/smil:switch.smil/playlist.m3u8"},{"n":"GEM Nature","l":"https://i.imgur.com/ENvOMDQ.png","g":["Documentary"],"q":"","u":"https://ca-rt.onetv.app/gemnature/index-0.m3u8?token=onetv202"},{"n":"Get.factual","l":"https://i.imgur.com/4oVcjLd.png","g":["Documentary"],"q":"720p","u":"https://d1nhni5l2n8hjt.cloudfront.net/gf.m3u8"},{"n":"GZT","l":"https://upload.wikimedia.org/wikipedia/commons/thumb/e/ef/GZT_logo.svg/960px-GZT_logo.svg.png","g":["Documentary","Series"],"q":"1080p","u":"https://gzttv-live.lg.mncdn.com/gzttv/gzttv/playlist.m3u8"},{"n":"H2","l":"https://upload.wikimedia.org/wikipedia/commons/thumb/c/c9/History2_logo_%282022%29.svg/500px-History2_logo_%282022%29.svg.png","g":["Documentary"],"q":"","u":"http://213.91.179.28:8000/play/a03r"},{"n":"H2 HD","l":"https://upload.wikimedia.org/wikipedia/commons/thumb/c/c9/History2_logo_%282022%29.svg/500px-History2_logo_%282022%29.svg.png","g":["Documentary"],"q":"","u":"https://lb.dstvmultimedia.com/HistoryChannel2/index.m3u8"},{"n":"Histoire TV","l":"https://i.imgur.com/hxuJXll.png","g":["Documentary"],"q":"720p","u":"https://r.eu.cdn-redge.media/livehls/oeu/mt/live/histoire/live.livx/playlist.m3u8"},{"n":"Historia Y Vida","l":"https://i.imgur.com/56ZtCA1.png","g":["Documentary"],"q":"720p","u":"https://jmp2.uk/plu-67517f923a61d40008c451f0.m3u8"},{"n":"History 2 Latin America","l":"https://upload.wikimedia.org/wikipedia/commons/thumb/c/c9/History2_logo_%282022%29.svg/500px-History2_logo_%282022%29.svg.png","g":["Documentary"],"q":"1080p","u":"http://138.121.15.230:9002/HISTORY-2/index.m3u8"},{"n":"History 2 Latin America Brazil","l":"https://upload.wikimedia.org/wikipedia/commons/thumb/c/c9/History2_logo_%282022%29.svg/500px-History2_logo_%282022%29.svg.png","g":["Documentary"],"q":"720p","u":"http://45.177.114.114/HISTORY_2/index.m3u8"},{"n":"History2 Ukraine","l":"https://upload.wikimedia.org/wikipedia/commons/thumb/c/c9/History2_logo_%282022%29.svg/960px-History2_logo_%282022%29.svg.png","g":["Documentary"],"q":"360p","u":"http://dtv.vol.net.ua/H2-HD/index.m3u8"},{"n":"History (Brazil)","l":"https://upload.wikimedia.org/wikipedia/commons/thumb/0/01/History_%282021%29.svg/500px-History_%282021%29.svg.png","g":["Documentary"],"q":"720p","u":"http://45.177.114.114/HISTORY/index.m3u8"},{"n":"History (Bulgaria)","l":"","g":["Documentary"],"q":"","u":"http://213.91.179.28:8000/play/a0c1"},{"n":"History (Czech Republic)","l":"https://upload.wikimedia.org/wikipedia/commons/thumb/0/01/History_%282021%29.svg/500px-History_%282021%29.svg.png","g":["Documentary"],"q":"","u":"http://88.212.15.50/live/test_history/playlist.m3u8"},{"n":"History (Hungary)","l":"https://i.imgur.com/OWIK7FJ.png","g":["Documentary"],"q":"","u":"http://88.212.7.14/live/history_hun/index.m3u8"},{"n":"History (Netherlands)","l":"https://upload.wikimedia.org/wikipedia/commons/thumb/0/01/History_%282021%29.svg/500px-History_%282021%29.svg.png","g":["Documentary"],"q":"360p","u":"https://lb.iptvnetwork.net/ls28/10022/playlist.m3u8"},{"n":"History (Poland)","l":"https://upload.wikimedia.org/wikipedia/commons/thumb/0/01/History_%282021%29.svg/500px-History_%282021%29.svg.png","g":["Documentary"],"q":"576i","u":"http://92.114.85.87:8015/play/a00c/index.m3u8"},{"n":"History (Slovenia)","l":"https://upload.wikimedia.org/wikipedia/commons/thumb/0/01/History_%282021%29.svg/500px-History_%282021%29.svg.png","g":["Documentary"],"q":"1080p","u":"https://streamer12.xploretv.si/__cl/cg:prod/__c/A1_SI_HISTORYHD_ott/__op/dash-default/__dci/__f/index.m3u8?admin=xploreTv_test_user&redirect=true"},{"n":"History (United States)","l":"https://upload.wikimedia.org/wikipedia/commons/thumb/0/01/History_%282021%29.svg/500px-History_%282021%29.svg.png","g":["Documentary"],"q":"720p","u":"http://212.5.144.156:8080/history/index.m3u8"},{"n":"History Asia","l":"https://upload.wikimedia.org/wikipedia/commons/thumb/0/01/History_%282021%29.svg/500px-History_%282021%29.svg.png","g":["Documentary"],"q":"720p","u":"https://freem3u.xyz/api/live/play.m3u8?vid=9856"},{"n":"History Hit","l":"https://i.imgur.com/ulHoqlP.png","g":["Documentary"],"q":"1080p","u":"https://lds-timeline-rakuten.amagi.tv/playlist.m3u8"},{"n":"History Latin America","l":"https://upload.wikimedia.org/wikipedia/commons/thumb/0/01/History_%282021%29.svg/500px-History_%282021%29.svg.png","g":["Documentary"],"q":"1080p","u":"http://15.204.246.24:8080/HistoryHD/index.m3u8"},{"n":"History Latin America South","l":"https://upload.wikimedia.org/wikipedia/commons/thumb/0/01/History_%282021%29.svg/500px-History_%282021%29.svg.png","g":["Documentary"],"q":"","u":"http://45.184.109.10/live/69393EAE6ADBC65A68F942022362A202/37.m3u8"},{"n":"History TV18 HD","l":"https://dtil.tmsimg.com/assets/s143133_ld_h15_aa.png?lock=720x540","g":["Documentary"],"q":"Geo-blocked","u":"https://amg01448-amg01448c16-samsung-in-3495.playouts.now.amagi.tv/playlist/amg01448-samsungindia-historychannelenglish-samsungin/playlist.m3u8"},{"n":"History Ukraine","l":"https://upload.wikimedia.org/wikipedia/commons/thumb/0/01/History_%282021%29.svg/960px-History_%282021%29.svg.png","g":["Documentary"],"q":"","u":"http://dtv.vol.net.ua/History_HD/index.m3u8"},{"n":"HRT 3","l":"https://i.imgur.com/4OrOJRx.png","g":["Culture","Documentary"],"q":"720p","u":"https://webtvstream.bhtelecom.ba/hrt3.m3u8"},{"n":"HRT 3 HD","l":"https://i.imgur.com/4OrOJRx.png","g":["Culture","Documentary"],"q":"Geo-blocked","u":"https://bpcdnmanprod.nexttv.ht.hr/bpk-tv/HRT3/default/index.mpd"},{"n":"ID","l":"","g":["Documentary"],"q":"","u":"http://213.91.179.28:8000/play/a0c0"},{"n":"Ink Master","l":"https://images.pluto.tv/channels/655f2d713944b60008bc7e90/colorLogoPNG.png","g":["Documentary"],"q":"","u":"https://jmp2.uk/plu-60807fd5db701400078219c2.m3u8"},{"n":"Ink Master CA","l":"https://images.pluto.tv/channels/655f2d713944b60008bc7e90/colorLogoPNG.png","g":["Documentary"],"q":"","u":"https://jmp2.uk/plu-655f2d713944b60008bc7e90.m3u8"},{"n":"Into Crime","l":"https://i.imgur.com/43at4M2.png","g":["Documentary"],"q":"1080p","u":"https://amg00711-zylo-amg00711c10-rakuten-fr-6731.playouts.now.amagi.tv/playlist.m3u8"},{"n":"Investigation Discovery (France)","l":"https://upload.wikimedia.org/wikipedia/commons/thumb/3/35/InvestigationDiscoveryLogo2020.svg/960px-InvestigationDiscoveryLogo2020.svg.png","g":["Documentary"],"q":"","u":"http://192.99.186.30/stream/81/index.m3u8"},{"n":"Investigation Discovery (Hungary)","l":"https://upload.wikimedia.org/wikipedia/commons/thumb/3/35/InvestigationDiscoveryLogo2020.svg/960px-InvestigationDiscoveryLogo2020.svg.png","g":["Documentary"],"q":"","u":"http://88.212.7.14/live/id_hun/index.m3u8"},{"n":"Investigation Discovery (Russia)","l":"https://upload.wikimedia.org/wikipedia/commons/thumb/3/35/InvestigationDiscoveryLogo2020.svg/960px-InvestigationDiscoveryLogo2020.svg.png","g":["Documentary"],"q":"1080p","u":"http://stream.mcquack.net/205/index.m3u8"},{"n":"Investigation Discovery (United States)","l":"https://upload.wikimedia.org/wikipedia/commons/thumb/3/35/InvestigationDiscoveryLogo2020.svg/960px-InvestigationDiscoveryLogo2020.svg.png","g":["Documentary"],"q":"Geo-blocked","u":"http://212.5.144.156:8080/id/index.m3u8"},{"n":"Investigation Discovery Latin America South","l":"https://upload.wikimedia.org/wikipedia/commons/thumb/3/35/InvestigationDiscoveryLogo2020.svg/960px-InvestigationDiscoveryLogo2020.svg.png","g":["Documentary"],"q":"","u":"http://45.184.109.10/live/69393EAE6ADBC65A68F942022362A202/41.m3u8"},{"n":"INWILD","l":"https://cdn.uc.assets.prezly.com/92770c71-9d6f-400f-8311-38e9cfec52c2/InWild_landscape-green.png","g":["Documentary"],"q":"1080p","u":"https://amg00861-terninternation-inwild-samsunguk-w5wic.amagi.tv/playlist/amg00861-terninternation-inwild-samsunguk/playlist.m3u8"},{"n":"Istoriya","l":"https://i.imgur.com/eEjPail.png","g":["Documentary"],"q":"576p","u":"https://fs.uplink.kz/istoriya/mono.m3u8?token=onlinetv"},{"n":"Italiana","l":"https://static.wikia.nocookie.net/logopedia/images/9/98/Italiana_%282026%29.svg/revision/latest?cb=20260824144626","g":["Documentary"],"q":"1080p","u":"https://d3k8wzt41aflvx.cloudfront.net/RAIScuola/Live.m3u8"},{"n":"kabel eins Doku","l":"https://upload.wikimedia.org/wikipedia/commons/thumb/0/07/Kabel_eins_Doku_Logo_2016.svg/960px-Kabel_eins_Doku_Logo_2016.svg.png","g":["Documentary"],"q":"720p","u":"https://s6.hopslan.com/dokuX/index.m3u8"},{"n":"Karbala Documentary","l":"https://www.karbala-tv.iq/documentary/static/img/logo.png","g":["Documentary","Religious"],"q":"","u":"https://ktvlive.online/stream/hls/ch3.m3u8"},{"n":"Law & Crime","l":"https://yt3.googleusercontent.com/CRP3YudPa55QypbDnIvuh3erLZTsn2HK8ESR-2fJFFiLJVf7US2CKQELCKK_UowmHA3wCjAdxg=s512-c-k-c0x00ffffff-no-rj","g":["Documentary"],"q":"720p","u":"https://a-cdn.klowdtv.com/live3/law_720p/playlist.m3u8"},{"n":"Love Pets","l":"https://lovepetstv.com/wp-content/uploads/2022/12/LovePets_Logo_SecondaryColor.png","g":["Documentary"],"q":"1080p","u":"https://amg01576-blueskyeenterta-lovepetsemea-samsungse-ctamh.amagi.tv/playlist/amg01576-blueskyeenterta-lovepetsemea-samsungse/playlist.m3u8"},{"n":"Love The Planet","l":"https://i.imgur.com/RBcD49X.png","g":["Documentary"],"q":"1080p","u":"https://amg01821-lovetvchannels-lovetheplanetuksamsung-samsunguk-apopw.amagi.tv/playlist/amg01821-lovetvchannels-lovetheplanetuksamsung-samsunguk/playlist.m3u8"},{"n":"Love The Planet DE","l":"https://i.imgur.com/RBcD49X.png","g":["Documentary"],"q":"Geo-blocked","u":"https://amg01821-amg01821c12-rlaxx-gb-10461.playouts.now.amagi.tv/playlist.m3u8"},{"n":"Love The Planet ES","l":"https://i.imgur.com/RBcD49X.png","g":["Documentary"],"q":"Geo-blocked","u":"https://amg01821-lovetv-amg01821c9-rlaxx-gb-10458.playouts.now.amagi.tv/playlist.m3u8"},{"n":"Love The Planet IT","l":"https://i.imgur.com/RBcD49X.png","g":["Documentary"],"q":"Geo-blocked","u":"https://amg01821-amg01821c11-rlaxx-gb-10459.playouts.now.amagi.tv/playlist.m3u8"},{"n":"Lucky Dog","l":"https://i.imgur.com/1j4gwL3.png","g":["Documentary"],"q":"720p","u":"https://d3j95sejv6mybj.cloudfront.net/Lucky_Dog.m3u8"},{"n":"MagellanTV Now","l":"https://i.imgur.com/gEraSp5.png","g":["Documentary"],"q":"1080p","u":"https://amg00376-magellan-amg00376c5-samsung-au-1708.playouts.now.amagi.tv/playlist/amg00376-magellantv-magellantvnowww-samsungau/playlist.m3u8"},{"n":"Military History","l":"https://i.imgur.com/S1SnpoA.png","g":["Documentary"],"q":"720p","u":"https://frndly.keralive.workers.dev/v1/master/840a24ccd7c75076211d060179b3ad0c64fdc6ca/militaryhistory_live_nr/ab44a8245afe413db1169317ee5cda08/index.m3u8?type=ae2"},{"n":"MRTV Farmer","l":"https://i.imgur.com/f4PWvrW.jpg","g":["Documentary","Lifestyle"],"q":"","u":"https://mrtvott.com/cache/MRTV-FARMER/master.m3u8"},{"n":"MWD Documentary","l":"https://i.imgur.com/4XV7cjU.png","g":["Documentary"],"q":"Geo-blocked","u":"http://203.81.84.130/hls/mwd_document/index.m3u8"},{"n":"N24 Doku","l":"https://upload.wikimedia.org/wikipedia/commons/thumb/3/3f/N24Doku.svg/960px-N24Doku.svg.png","g":["Documentary"],"q":"","u":"https://jmp2.uk/plu-60080e8a4bf36000076a81b1.m3u8"},{"n":"Nano","l":"https://i.imgur.com/dYj3XDa.png","g":["Documentary"],"q":"576p","u":"http://stream.mcquack.net/419/index.m3u8"},{"n":"Nano HD","l":"https://i.imgur.com/dYj3XDa.png","g":["Documentary"],"q":"1080p","u":"http://185.23.80.23:8080/NANO_HD/index.m3u8"},{"n":"National Geographic (Bulgaria)","l":"https://upload.wikimedia.org/wikipedia/commons/thumb/f/fc/Natgeologo.svg/960px-Natgeologo.svg.png","g":["Documentary"],"q":"","u":"http://213.91.179.28:8000/play/a0ct"},{"n":"National Geographic (Croatia)","l":"https://upload.wikimedia.org/wikipedia/commons/thumb/f/fc/Natgeologo.svg/960px-Natgeologo.svg.png","g":["Documentary"],"q":"1080p","u":"http://176.61.157.250/NationalGeographic/index.m3u8"},{"n":"National Geographic (Czech Republic)","l":"https://upload.wikimedia.org/wikipedia/commons/thumb/f/fc/Natgeologo.svg/960px-Natgeologo.svg.png","g":["Documentary"],"q":"","u":"http://88.212.15.50/live/test_ngc/playlist.m3u8"},{"n":"National Geographic (Finland)","l":"https://upload.wikimedia.org/wikipedia/commons/thumb/f/fc/Natgeologo.svg/960px-Natgeologo.svg.png","g":["Documentary"],"q":"Geo-blocked","u":"https://live-fi.tvkaista.net/national-geographic/live.m3u8?hd=true"},{"n":"National Geographic (Hungary)","l":"https://upload.wikimedia.org/wikipedia/commons/thumb/f/fc/Natgeologo.svg/960px-Natgeologo.svg.png","g":["Documentary"],"q":"","u":"http://88.212.7.14/live/ngc_hun/index.m3u8"},{"n":"National Geographic (Mexico)","l":"https://upload.wikimedia.org/wikipedia/commons/thumb/f/fc/Natgeologo.svg/960px-Natgeologo.svg.png","g":["Documentary"],"q":"1080p","u":"http://138.121.15.230:9002/NAT-GEO/index.m3u8"},{"n":"National Geographic (Netherlands)","l":"https://upload.wikimedia.org/wikipedia/commons/thumb/f/fc/Natgeologo.svg/960px-Natgeologo.svg.png","g":["Documentary"],"q":"360p","u":"https://lb.iptvnetwork.net/ls28/10016/playlist.m3u8"},{"n":"National Geographic (Netherlands) HD","l":"https://upload.wikimedia.org/wikipedia/commons/thumb/f/fc/Natgeologo.svg/960px-Natgeologo.svg.png","g":["Documentary"],"q":"1080p","u":"http://46.32.176.50/NationalGeographicHD/index.m3u8"},{"n":"National Geographic (Poland)","l":"https://upload.wikimedia.org/wikipedia/commons/thumb/f/fc/Natgeologo.svg/960px-Natgeologo.svg.png","g":["Documentary"],"q":"576i","u":"http://92.114.85.87:8006/play/a00a/index.m3u8"},{"n":"National Geographic (Russia)","l":"https://upload.wikimedia.org/wikipedia/commons/thumb/f/fc/Natgeologo.svg/960px-Natgeologo.svg.png","g":["Documentary"],"q":"1080p","u":"http://dtv.vol.net.ua/National_Geographic-HD/index.m3u8"},{"n":"National Geographic (Turkiye)","l":"https://upload.wikimedia.org/wikipedia/commons/thumb/f/fc/Natgeologo.svg/960px-Natgeologo.svg.png","g":["Documentary"],"q":"","u":"https://nord.ayakkabiparti.lol/natgeo/index.m3u8"},{"n":"National Geographic (United Kingdom)","l":"https://upload.wikimedia.org/wikipedia/commons/thumb/f/fc/Natgeologo.svg/960px-Natgeologo.svg.png","g":["Documentary"],"q":"","u":"http://82.47.42.44/stream/405/index.m3u8"},{"n":"National Geographic (United States)","l":"https://upload.wikimedia.org/wikipedia/commons/thumb/f/fc/Natgeologo.svg/960px-Natgeologo.svg.png","g":["Documentary"],"q":"720p","u":"http://212.5.144.156:8080/natgeo/index.m3u8"},{"n":"National Geographic (United States) HD East","l":"https://upload.wikimedia.org/wikipedia/commons/thumb/f/fc/Natgeologo.svg/960px-Natgeologo.svg.png","g":["Documentary"],"q":"720p","u":"http://198.58.104.90:8989/natgeo/index.m3u8"},{"n":"National Geographic Latin America","l":"https://upload.wikimedia.org/wikipedia/commons/thumb/f/fc/Natgeologo.svg/960px-Natgeologo.svg.png","g":["Documentary"],"q":"1080p","u":"http://15.204.246.24:8080/NatGeoHD/index.m3u8"},{"n":"National Geographic Wild (Bulgaria)","l":"https://upload.wikimedia.org/wikipedia/commons/thumb/2/27/National_Geographic_Wild_logo.svg/960px-National_Geographic_Wild_logo.svg.png","g":["Documentary"],"q":"","u":"http://213.91.179.28:8000/play/a0cu"},{"n":"National Geographic Wild (Czech Republic)","l":"https://upload.wikimedia.org/wikipedia/commons/thumb/2/27/National_Geographic_Wild_logo.svg/960px-National_Geographic_Wild_logo.svg.png","g":["Documentary"],"q":"","u":"http://88.212.15.50/live/test_ngw/playlist.m3u8"},{"n":"National Geographic Wild (Hungary)","l":"https://upload.wikimedia.org/wikipedia/commons/thumb/2/27/National_Geographic_Wild_logo.svg/960px-National_Geographic_Wild_logo.svg.png","g":["Documentary"],"q":"","u":"http://88.212.7.14/live/ngw_hun/index.m3u8"},{"n":"National Geographic Wild (Poland)","l":"https://upload.wikimedia.org/wikipedia/commons/thumb/2/27/National_Geographic_Wild_logo.svg/960px-National_Geographic_Wild_logo.svg.png","g":["Documentary"],"q":"576i","u":"http://92.114.85.87:8010/play/a005/index.m3u8"},{"n":"National Geographic Wild (Romania)","l":"https://upload.wikimedia.org/wikipedia/commons/thumb/2/27/National_Geographic_Wild_logo.svg/960px-National_Geographic_Wild_logo.svg.png","g":["Documentary"],"q":"","u":"https://flash1.bogulus1.cfd/wild/usergenr9qsi5gt.m3u8"},{"n":"National Geographic Wild (Russia)","l":"https://upload.wikimedia.org/wikipedia/commons/thumb/2/27/National_Geographic_Wild_logo.svg/960px-National_Geographic_Wild_logo.svg.png","g":["Documentary"],"q":"576p","u":"https://fs.uplink.kz/nat_geo_wild/mono.m3u8?token=onlinetv"},{"n":"National Geographic Wild (Russia) HD","l":"https://upload.wikimedia.org/wikipedia/commons/thumb/2/27/National_Geographic_Wild_logo.svg/960px-National_Geographic_Wild_logo.svg.png","g":["Documentary"],"q":"","u":"http://178.76.68.60:7442/50/mpegts"},{"n":"National Geographic Wild (Turkiye)","l":"https://upload.wikimedia.org/wikipedia/commons/thumb/2/27/National_Geographic_Wild_logo.svg/960px-National_Geographic_Wild_logo.svg.png","g":["Documentary"],"q":"","u":"https://nord.ayakkabiparti.lol/natgeowild/index.m3u8"},{"n":"National Geographic Wild (Ukraine)","l":"https://upload.wikimedia.org/wikipedia/commons/thumb/2/27/National_Geographic_Wild_logo.svg/960px-National_Geographic_Wild_logo.svg.png","g":["Documentary"],"q":"1080p","u":"http://dtv.vol.net.ua/Nat-Geo-Wild_HD/index.m3u8"},{"n":"National Geographic Wild (United States) HD East","l":"https://upload.wikimedia.org/wikipedia/commons/thumb/2/27/National_Geographic_Wild_logo.svg/960px-National_Geographic_Wild_logo.svg.png","g":["Documentary"],"q":"720p","u":"http://198.58.104.90:8989/natgeowild/index.m3u8"},{"n":"NatureTime","l":"https://i.imgur.com/72JmyjM.png","g":["Documentary"],"q":"1080p","u":"https://bamusa-naturetime-emea-eng-rakuten.amagi.tv/playlist.m3u8"},{"n":"NatureTime AU","l":"https://i.imgur.com/72JmyjM.png","g":["Documentary"],"q":"1080p","u":"https://amg00090-blueantllc-lovenature-au-samsungau-wggcn.amagi.tv/playlist/amg00090-blueantllc-lovenature-au-samsungau/playlist.m3u8"},{"n":"NatureTime ES","l":"https://i.imgur.com/72JmyjM.png","g":["Documentary"],"q":"1080p","u":"https://shls-live-ak.akamaized.net/out/v1/b06a89a463764d3688cda337d40dc5bf/index.m3u8"},{"n":"NatureTime France","l":"https://i.imgur.com/72JmyjM.png","g":["Documentary"],"q":"1080p","u":"https://bamusa-naturetime-emea-fra-rakuten.amagi.tv/playlist.m3u8"},{"n":"NatureTime LATAM","l":"https://i.imgur.com/72JmyjM.png","g":["Documentary"],"q":"684p","u":"https://jmp2.uk/plu-681ba2729624e6275efe0044.m3u8"},{"n":"NatureTime UK","l":"https://i.imgur.com/72JmyjM.png","g":["Documentary"],"q":"1080p","u":"https://amg01515-amg01515c43-samsung-gb-9038.playouts.now.amagi.tv/playlist.m3u8"},{"n":"Nauka (Russia)","l":"https://i.imgur.com/ZZxzueO.png","g":["Documentary"],"q":"1080p","u":"http://31.148.48.15/Nauka_2.0/index.m3u8"},{"n":"O'zbekiston Tarixi","l":"https://i.imgur.com/iTTd3Ir.png","g":["Documentary"],"q":"1080p","u":"https://stream8.cinerama.uz/1209/tracks-v1a1/playlist.m3u8"},{"n":"On The Case","l":"https://i.imgur.com/TAmVjUL.png","g":["Documentary"],"q":"","u":"https://jmp2.uk/plu-62cd971cec90c20007081050.m3u8"},{"n":"Persiana Docs","l":"","g":["Documentary"],"q":"","u":"https://scihls.persiana.live/hls/stream.m3u8"},{"n":"Persiana Travel","l":"","g":["Documentary"],"q":"","u":"https://ptravelhls.persiana.live/hls/stream.m3u8"},{"n":"Pluto TV Alien Invasion (Germany)","l":"https://images.pluto.tv/channels/6462190b7cb4b1000862dd60/colorLogoPNG.png","g":["Documentary"],"q":"","u":"https://jmp2.uk/plu-6462190b7cb4b1000862dd60.m3u8"},{"n":"Pluto TV Alien Invasion (Sweden)","l":"https://images.pluto.tv/channels/650999b86a841400083bd1ab/colorLogoPNG.png","g":["Documentary"],"q":"","u":"https://jmp2.uk/plu-650999b86a841400083bd1ab.m3u8"},{"n":"Pluto TV Aliens","l":"https://images.pluto.tv/channels/6806d65e84f24b70109485fa/colorLogoPNG_1746817107468.png","g":["Documentary","Series"],"q":"","u":"https://jmp2.uk/plu-6806d65e84f24b70109485fa.m3u8"},{"n":"Pluto TV American True Crime","l":"https://images.pluto.tv/channels/692ebafce72f03e07e7df985/colorLogoPNG_1768902223754.png","g":["Documentary","Series"],"q":"","u":"https://jmp2.uk/plu-692ebafce72f03e07e7df985.m3u8"},{"n":"Pluto TV Animais","l":"https://images.pluto.tv/channels/6474aa984cfc2c0008883a92/colorLogoPNG.png","g":["Documentary"],"q":"","u":"https://jmp2.uk/plu-6474aa984cfc2c0008883a92.m3u8"},{"n":"Pluto TV Animales","l":"https://images.pluto.tv/channels/600ae6a78d801e0007117d21/colorLogoPNG.png","g":["Documentary"],"q":"","u":"https://jmp2.uk/plu-600ae6a78d801e0007117d21.m3u8"},{"n":"Pluto TV Animals","l":"https://images.pluto.tv/channels/5d767ae7b456c8cf265ce922/colorLogoPNG.png","g":["Documentary"],"q":"","u":"https://jmp2.uk/plu-5d767ae7b456c8cf265ce922.m3u8"},{"n":"Pluto TV Animals GB","l":"https://images.pluto.tv/channels/5d767ae7b456c8cf265ce922/colorLogoPNG.png","g":["Documentary"],"q":"","u":"https://jmp2.uk/plu-5ddf8ea0d000120009bcad83.m3u8"},{"n":"Pluto TV Animaux","l":"https://images.pluto.tv/channels/60925a44f0350600075a1fdc/colorLogoPNG.png","g":["Documentary"],"q":"","u":"https://jmp2.uk/plu-60925a44f0350600075a1fdc.m3u8"},{"n":"Pluto TV Aventure","l":"https://images.pluto.tv/channels/611e7811eb9daf000764cbfd/colorLogoPNG.png","g":["Documentary"],"q":"","u":"https://jmp2.uk/plu-611e7811eb9daf000764cbfd.m3u8"},{"n":"Pluto TV Britain at War","l":"https://images.pluto.tv/channels/625e8cb585ef320007806caf/colorLogoPNG.png","g":["Documentary"],"q":"","u":"https://jmp2.uk/plu-625e8cb585ef320007806caf.m3u8"},{"n":"Pluto TV Conspiracy","l":"https://images.pluto.tv/channels/5d4ae94ef1a1bbb350ca41bb/colorLogoPNG.png","g":["Documentary"],"q":"","u":"https://jmp2.uk/plu-5d4ae94ef1a1bbb350ca41bb.m3u8"},{"n":"Pluto TV Documentari","l":"https://images.pluto.tv/channels/608aa8a5709d6b0007b132fe/colorLogoPNG.png","g":["Documentary"],"q":"","u":"https://jmp2.uk/plu-608aa8a5709d6b0007b132fe.m3u8"},{"n":"Pluto TV Dokumentar","l":"https://images.pluto.tv/channels/62b30b0060a9ca0007d628b4/colorLogoPNG.png","g":["Documentary"],"q":"","u":"https://jmp2.uk/plu-62b1e2498261390007f25c98.m3u8"},{"n":"Pluto TV Dokumentar DK","l":"https://images.pluto.tv/channels/62b30b0060a9ca0007d628b4/colorLogoPNG.png","g":["Documentary"],"q":"","u":"https://jmp2.uk/plu-62b30b0060a9ca0007d628b4.m3u8"},{"n":"Pluto TV Explore","l":"https://images.pluto.tv/channels/5ad9b8551b95267e225e59c1/colorLogoPNG.png","g":["Documentary"],"q":"","u":"https://jmp2.uk/plu-5ad9b8551b95267e225e59c1.m3u8"},{"n":"Pluto TV Food","l":"https://images.pluto.tv/channels/5dc280c9aa218c0009724b4b/colorLogoPNG_1769092247484.png","g":["Cooking","Documentary"],"q":"","u":"https://jmp2.uk/plu-5dc280c9aa218c0009724b4b.m3u8"},{"n":"Pluto TV Food GB","l":"https://images.pluto.tv/channels/5dc280c9aa218c0009724b4b/colorLogoPNG_1769092247484.png","g":["Cooking","Documentary"],"q":"","u":"https://jmp2.uk/plu-5ddf930548ff9b00090d5686.m3u8"},{"n":"Pluto TV Histoire","l":"https://images.pluto.tv/channels/611e771e2f5f180007002224/colorLogoPNG.png","g":["Documentary"],"q":"720p","u":"https://jmp2.uk/plu-611e771e2f5f180007002224.m3u8"},{"n":"Pluto TV Historia (Germany)","l":"https://images.pluto.tv/channels/61cd7b49543066000713b620/colorLogoPNG.png","g":["Documentary"],"q":"720p","u":"https://jmp2.uk/plu-61cd7b49543066000713b620.m3u8"},{"n":"Pluto TV History","l":"https://i.imgur.com/XkQD5kM.png","g":["Documentary"],"q":"","u":"https://jmp2.uk/plu-5a4d35dfa5c02e717a234f86.m3u8"},{"n":"Pluto TV Investigacao","l":"https://i.imgur.com/JlQq0YJ.png","g":["Documentary"],"q":"","u":"https://jmp2.uk/plu-5f32cf37c9ff2b00082adbc8.m3u8"},{"n":"Pluto TV Mi Obsesion Favorita","l":"https://images.pluto.tv/channels/6109ab25b84d6a0007504886/colorLogoPNG.png","g":["Documentary"],"q":"","u":"https://jmp2.uk/plu-6109ab25b84d6a0007504886.m3u8"},{"n":"Pluto TV Mystery","l":"https://images.pluto.tv/channels/617aad99b68ef100072608cd/colorLogoPNG.png","g":["Documentary"],"q":"","u":"https://jmp2.uk/plu-617aad99b68ef100072608cd.m3u8"},{"n":"Pluto TV Natura","l":"https://images.pluto.tv/channels/60802b37709d6b0007b0c549/colorLogoPNG_1773147389391.png","g":["Documentary"],"q":"","u":"https://jmp2.uk/plu-60802b37709d6b0007b0c549.m3u8"},{"n":"Pluto TV Naturaleza","l":"https://images.pluto.tv/channels/5dd85eac039bba0009e86d1d/colorLogoPNG.png","g":["Documentary","Outdoor"],"q":"","u":"https://jmp2.uk/plu-5dd85eac039bba0009e86d1d.m3u8"},{"n":"Pluto TV Nature","l":"https://images.pluto.tv/channels/5be1c3f9851dd5632e2c91b2/colorLogoPNG.png","g":["Documentary"],"q":"","u":"https://jmp2.uk/plu-5be1c3f9851dd5632e2c91b2.m3u8"},{"n":"Pluto TV Negocio Fechado","l":"https://images.pluto.tv/channels/64ad7394798def00087b2bfe/colorLogoPNG.png","g":["Documentary"],"q":"","u":"https://jmp2.uk/plu-64ad7394798def00087b2bfe.m3u8"},{"n":"Pluto TV Paranormal (United States)","l":"https://images.pluto.tv/channels/62e92a58f3e4290007290c96/colorLogoPNG.png","g":["Documentary"],"q":"","u":"https://jmp2.uk/plu-5adf96e3e738977e2c31cb04.m3u8"},{"n":"Pluto TV Paranormal (United States) CA","l":"https://images.pluto.tv/channels/62e92a58f3e4290007290c96/colorLogoPNG.png","g":["Documentary"],"q":"","u":"https://jmp2.uk/plu-62e92a58f3e4290007290c96.m3u8"},{"n":"Pluto TV PetrolHeads","l":"https://images.pluto.tv/channels/65a7b0814a10d800085ff2df/colorLogoPNG.png","g":["Documentary"],"q":"","u":"https://jmp2.uk/plu-65a7b0814a10d800085ff2df.m3u8"},{"n":"Pluto TV Policial","l":"https://images.pluto.tv/channels/678fdf9e3de7c8cf948e8824/colorLogoPNG.png","g":["Documentary"],"q":"","u":"https://jmp2.uk/plu-678fdf9e3de7c8cf948e8824.m3u8"},{"n":"Pluto TV Reportagen","l":"https://images.pluto.tv/channels/68ada3edf84960586ad31c7d/colorLogoPNG_1760078189640.png","g":["Documentary"],"q":"","u":"https://jmp2.uk/plu-68ada3edf84960586ad31c7d.m3u8"},{"n":"Pluto TV Science","l":"https://i.imgur.com/uhunRoU.png","g":["Documentary","Science"],"q":"","u":"https://jmp2.uk/plu-563a970aa1a1f7fe7c9daad7.m3u8"},{"n":"Pluto TV Space (Germany)","l":"https://images.pluto.tv/channels/61409f8d6feb30000766b675/colorLogoPNG.png","g":["Documentary"],"q":"","u":"https://jmp2.uk/plu-61409f8d6feb30000766b675.m3u8"},{"n":"Pluto TV Space (Germany) GB","l":"https://images.pluto.tv/channels/61409f8d6feb30000766b675/colorLogoPNG.png","g":["Documentary"],"q":"","u":"https://jmp2.uk/plu-5dbc2f98777f2e0009934ae7.m3u8"},{"n":"Pluto TV Space (Sweden)","l":"https://images.pluto.tv/channels/61b86c6ef30f5d0007e4c6d1/colorLogoPNG.png","g":["Documentary"],"q":"","u":"https://jmp2.uk/plu-61b86c6ef30f5d0007e4c6d1.m3u8"},{"n":"Pluto TV Storia","l":"https://images.pluto.tv/channels/65253fdf3fd33c00080214a3/colorLogoPNG_1773147329671.png","g":["Documentary"],"q":"","u":"https://jmp2.uk/plu-65253fdf3fd33c00080214a3.m3u8"},{"n":"Pluto TV Tough Jobs","l":"https://images.pluto.tv/channels/600acaff5f2d6e000745effb/colorLogoPNG.png","g":["Documentary","Series"],"q":"","u":"https://jmp2.uk/plu-600acaff5f2d6e000745effb.m3u8"},{"n":"Pluto TV True Crime (Sweden)","l":"https://images.pluto.tv/channels/615333098185f00008715a56/colorLogoPNG.png","g":["Documentary","Series"],"q":"","u":"https://jmp2.uk/plu-61c0b438244e50000758083b.m3u8"},{"n":"Pluto TV True Crime (Sweden) DK","l":"https://images.pluto.tv/channels/615333098185f00008715a56/colorLogoPNG.png","g":["Documentary","Series"],"q":"","u":"https://jmp2.uk/plu-61c097ec8bb1830008e3f962.m3u8"},{"n":"Pluto TV True Crime (Sweden) NO","l":"https://images.pluto.tv/channels/615333098185f00008715a56/colorLogoPNG.png","g":["Documentary","Series"],"q":"","u":"https://jmp2.uk/plu-61c1e51354d923000731bf78.m3u8"},{"n":"Pluto TV True Crime (United States)","l":"https://images.pluto.tv/channels/62e9289f8d467f0007fbc701/colorLogoPNG.png","g":["Documentary","Series"],"q":"","u":"https://jmp2.uk/plu-5812be1c249444e05d09cc50.m3u8"},{"n":"Pluto TV True Crime (United States) CA","l":"https://images.pluto.tv/channels/62e9289f8d467f0007fbc701/colorLogoPNG.png","g":["Documentary","Series"],"q":"","u":"https://jmp2.uk/plu-62e9289f8d467f0007fbc701.m3u8"},{"n":"Pluto TV Turbo","l":"https://images.pluto.tv/channels/6014761dfb91870008ea6463/colorLogoPNG.png","g":["Auto","Documentary"],"q":"","u":"https://jmp2.uk/plu-6014761dfb91870008ea6463.m3u8"},{"n":"Pluto TV Varldskrigen","l":"https://images.pluto.tv/channels/677d3ad04bd63600082f7c54/colorLogoPNG_1759445391825.png","g":["Documentary"],"q":"","u":"https://jmp2.uk/plu-677d3ad04bd63600082f7c54.m3u8"},{"n":"Pluto TV Verdenskrigene","l":"https://images.pluto.tv/channels/677d397b60fbeb00084b0bff/colorLogoPNG_1759437735629.png","g":["Documentary"],"q":"","u":"https://jmp2.uk/plu-677d397b60fbeb00084b0bff.m3u8"},{"n":"Pluto TV Verdenskrigene NO","l":"https://images.pluto.tv/channels/677d397b60fbeb00084b0bff/colorLogoPNG_1759437735629.png","g":["Documentary"],"q":"","u":"https://jmp2.uk/plu-677d3a424bd63600082f7baf.m3u8"},{"n":"Polsat Viasat Explore","l":"https://i.imgur.com/gDlqO9h.png","g":["Documentary"],"q":"","u":"http://92.114.85.87:8014/play/a00g/index.m3u8"},{"n":"Polsat Viasat History","l":"https://i.imgur.com/X16UGUf.png","g":["Documentary"],"q":"1080p","u":"http://185.227.34.179:8080/polsat-viasat-history-hd/index.m3u8"},{"n":"Polsat Viasat Nature","l":"https://i.imgur.com/TUcM0oS.png","g":["Documentary"],"q":"","u":"http://92.114.85.87:8016/play/a004/index.m3u8"},{"n":"Reelz","l":"https://upload.wikimedia.org/wikipedia/commons/thumb/1/19/Reelz.svg/960px-Reelz.svg.png","g":["Documentary"],"q":"720p","u":"http://23.237.104.106:8080/USA_REELZ/index.m3u8"},{"n":"Reelz Famous & Infamous","l":"https://i.imgur.com/czrTtNK.png","g":["Documentary"],"q":"1080p","u":"https://aegis-cloudfront-1.tubi.video/dfd312a3-99b3-45fe-89b2-d20579fee2e9/playlist.m3u8"},{"n":"RL PRO TV","l":"https://i.imgur.com/PIBtCEN.jpeg","g":["Documentary"],"q":"","u":"https://stream.berosat.live:19360/rlpro-tv/rlpro-tv.m3u8"},{"n":"RT Documentary","l":"https://i.imgur.com/aeu5zIC.png","g":["Documentary"],"q":"Geo-blocked","u":"https://rt-rtd.rttv.com/dvr/rtdoc/playlist.m3u8"},{"n":"RT Documentary Russian","l":"https://i.imgur.com/aeu5zIC.png","g":["Documentary"],"q":"1080p","u":"https://rt-doc.rttv.com/dvr/rtdru/playlist.m3u8"},{"n":"Safari TV","l":"https://xstreamcp-assets-msp.streamready.in/assets/LIVETV/LIVECHANNEL/LIVETV_LIVETVCHANNEL_SAFARI_TV/images/LOGO_HD/image.png","g":["Documentary"],"q":"576p","u":"https://fta.ektv.in/live/410/master.m3u8"},{"n":"Sensing Murder","l":"https://i.imgur.com/HYEABSt.png","g":["Documentary"],"q":"","u":"https://jmp2.uk/plu-5e9ed47c26ebb000074af566.m3u8"},{"n":"Smithsonian Channel Pluto TV","l":"https://images.pluto.tv/channels/6298bd10d88ef000073f16b7/colorLogoPNG.png","g":["Documentary"],"q":"","u":"https://jmp2.uk/plu-6298bd10d88ef000073f16b7.m3u8"},{"n":"Smithsonian Channel Pluto TV LatAm","l":"https://images.pluto.tv/channels/6298bd10d88ef000073f16b7/colorLogoPNG.png","g":["Documentary"],"q":"","u":"https://jmp2.uk/plu-63a084934734f30007457b2c.m3u8"},{"n":"Smithsonian Channel Selects (Sweden)","l":"https://images.pluto.tv/channels/61fb988e032c0100077d5252/colorLogoPNG.png","g":["Documentary"],"q":"","u":"https://jmp2.uk/plu-61fb9907b1b78d000717ed9f.m3u8"},{"n":"Smithsonian Channel Selects (Sweden) DK","l":"https://images.pluto.tv/channels/61fb988e032c0100077d5252/colorLogoPNG.png","g":["Documentary"],"q":"","u":"https://jmp2.uk/plu-61fb988e032c0100077d5252.m3u8"},{"n":"Smotrim 100% Fakty","l":"https://i.imgur.com/dB3cJzO.png","g":["Documentary"],"q":"720p","u":"https://stream.smotrim.ru/hls/fasttv06/playlist_3.m3u8"},{"n":"Spektrum (Czech Republic)","l":"https://i.imgur.com/F5Uosum.png","g":["Documentary"],"q":"","u":"http://88.212.15.50/live/test_spektrum/playlist.m3u8"},{"n":"Spektrum (Hungary)","l":"https://i.imgur.com/GmFRQ82.png","g":["Documentary"],"q":"","u":"http://88.212.7.14/live/spektrum_hun/index.m3u8"},{"n":"Spike Pluto TV","l":"https://i.imgur.com/woY8Ecb.png","g":["Documentary"],"q":"","u":"https://jmp2.uk/plu-5812bcc8237a6ff45d16c407.m3u8"},{"n":"Storie Criminali","l":"https://images.pluto.tv/channels/66177d18c8311c0008d077d0/colorLogoPNG.png","g":["Documentary"],"q":"","u":"https://jmp2.uk/plu-66177d18c8311c0008d077d0.m3u8"},{"n":"Teen Mom (United States)","l":"https://i.imgur.com/8o3ClCV.png","g":["Documentary"],"q":"","u":"https://jmp2.uk/plu-6127e12ed140e900077e7b6f.m3u8"},{"n":"TERRA","l":"https://i.imgur.com/ZxUjCpF.png","g":["Documentary"],"q":"1080p","u":"http://s1.merlive.am/TerraHD/index.m3u8"},{"n":"Terra Mater WILD","l":"https://i.imgur.com/EbMK3Ph.png","g":["Documentary"],"q":"1080p","u":"https://53ff3982.wurl.com/master/f36d25e7e52f1ba8d7e56eb859c636563214f541/UmxheHhUVi1ldV9UZXJyYU1hdGVyV2lsZF9ITFM/playlist.m3u8"},{"n":"Terra Mater WILD English","l":"https://i.imgur.com/EbMK3Ph.png","g":["Documentary"],"q":"1080p","u":"https://amg01775-amg01775c1-amgplt0343.playout.now3.amagi.tv/playlist/amg01775-amg01775c1-amgplt0343/playlist.m3u8"},{"n":"The Explorers","l":"https://www.oreol.tv/img/news/Logo_The_Explorers_Bleu.png","g":["Documentary"],"q":"1080p","u":"https://sofast-yupptv.vgcdn.net/v1/master/611d79b11b77e2f571934fd80ca1413453772ac7/4804aca3-dd54-43d1-8caa-0b836a76d9e9/manifest.m3u8"},{"n":"The Nest","l":"https://iili.io/JGqD21e.png","g":["Documentary","Entertainment"],"q":"1080p","u":"https://fast-channels.sinclairstoryline.com/THENEST/index.m3u8"},{"n":"Total Crime","l":"https://images.pluto.tv/channels/62e93b8eb8e02600071f8b1d/colorLogoPNG_1731000193486.png","g":["Documentary"],"q":"1080p","u":"https://aegis-cloudfront-1.tubi.video/b062c287-a170-47df-99e4-f5dcd441ee59/playlist.m3u8"},{"n":"TRT Belgesel","l":"https://upload.wikimedia.org/wikipedia/commons/thumb/0/09/TRT_Belgesel_logo_%282019-%29.svg/960px-TRT_Belgesel_logo_%282019-%29.svg.png","g":["Documentary"],"q":"720p","u":"https://tv-trtbelgesel.medya.trt.com.tr/master.m3u8"},{"n":"UMSA TVU Internacional","l":"https://tvu.umsa.bo/documents/780216/12171558/Logo+TVU-Int.png/b67c9c61-7516-e38a-a425-72e61f3824c6?t=1751574228493","g":["Documentary","Education","Science"],"q":"720p","u":"https://edge.enhdtv.com/8026/index.m3u8"},{"n":"Unidentified","l":"https://i.imgur.com/naYszow.jpg","g":["Documentary"],"q":"1080p","u":"https://d3ify425qsio2d.cloudfront.net/playlist.m3u8"},{"n":"Viasat Explore (Bulgaria)","l":"https://upload.wikimedia.org/wikipedia/commons/7/71/Viasat_Explore_2026.svg","g":["Documentary"],"q":"1080p","u":"https://shift03.isp.bg/ViasatExplorer_HD/index.m3u8"},{"n":"Viasat Explore (Czech Republic)","l":"https://i.imgur.com/DyT5pKB.png","g":["Documentary"],"q":"","u":"http://88.212.15.50/live/test_viasat_explore_atk_tv/playlist.m3u8"},{"n":"Viasat Explore (Hungary)","l":"https://i.imgur.com/DyT5pKB.png","g":["Documentary"],"q":"","u":"http://205.237.104.26:8080/stream/345/index.m3u8"},{"n":"Viasat Explore (Slovenia)","l":"https://i.imgur.com/jboGcoY.png","g":["Documentary"],"q":"","u":"https://lb.dstvmultimedia.com/ViasatExplore/index.m3u8"},{"n":"Viasat History (Bulgaria)","l":"https://upload.wikimedia.org/wikipedia/commons/9/9e/Viasat_History_2026.svg","g":["Documentary"],"q":"1080p","u":"https://shift03.isp.bg/ViasatHistory_HD/index.m3u8"},{"n":"Viasat History (Czech Republic)","l":"https://i.imgur.com/wRP9XA7.png","g":["Documentary"],"q":"","u":"http://88.212.15.50/live/test_viasat_history_atk_tv/playlist.m3u8"},{"n":"Viasat History (Hungary)","l":"https://i.imgur.com/wRP9XA7.png","g":["Documentary"],"q":"","u":"http://193.33.39.108:9007/play/a00p"},{"n":"Viasat History (Slovenia)","l":"https://i.imgur.com/qCkCGqa.png","g":["Documentary"],"q":"","u":"https://lb.dstvmultimedia.com/ViasatHistory/index.m3u8"},{"n":"Viasat History (Turkiye)","l":"https://i.imgur.com/wRP9XA7.png","g":["Documentary"],"q":"720p","u":"https://nord.ayakkabiparti.lol/viasathistory/index.m3u8"},{"n":"Viasat History (Ukraine)","l":"https://i.imgur.com/39qZ68J.png","g":["Documentary"],"q":"","u":"http://777905.live.tvstitch.com/playlist.m3u8?master=78&source=aHR0cDovLzE3Ni4xMjIuMTAzLjI0MTo3MDAwL2NoODYvdHJhY2tzLXYxYTEvbW9uby5tM3U4P2xpdmU9MSZpcD0xNzguMTM2LjQyLjIyMCZpZD05NDg4NjUmc2VjcmV0PW4xdTd1aTA2JnNzbD0xJjIxeW89MCZlPTE3OTA3NTM0ODYmc3Q9MVprUlhpb2xfODRPc2RMR2R0VDNzQQ=="},{"n":"Viasat Nature (Bulgaria)","l":"https://upload.wikimedia.org/wikipedia/commons/2/24/Cropped-viasat-nature.png","g":["Documentary"],"q":"1080p","u":"https://shift03.isp.bg/ViasatNature_HD/index.m3u8"},{"n":"Viasat Nature (Czech Republic)","l":"https://i.imgur.com/ousRqqD.png","g":["Documentary"],"q":"","u":"http://88.212.15.50/live/test_viasat_nature_atk_tv/playlist.m3u8"},{"n":"Viasat Nature (Hungary)","l":"https://i.imgur.com/ousRqqD.png","g":["Documentary"],"q":"","u":"http://193.33.39.108:9000/play/a05r"},{"n":"Viasat Nature (Slovenia)","l":"https://i.imgur.com/gxlZZ91.png","g":["Documentary"],"q":"","u":"https://lb.dstvmultimedia.com/ViasatNature/index.m3u8"},{"n":"viju Explore","l":"https://i.imgur.com/EGIpLPu.png","g":["Documentary"],"q":"576p","u":"http://46.53.200.153:7777/play/a01i/index.m3u8"},{"n":"viju History","l":"https://i.imgur.com/FqWkeXb.png","g":["Documentary"],"q":"576p","u":"http://46.53.200.153:7777/play/a01j/index.m3u8"},{"n":"viju Nature","l":"https://i.imgur.com/8BPZ18l.png","g":["Documentary"],"q":"576p","u":"http://46.53.200.153:7777/play/a01k/index.m3u8"},{"n":"viju+ Planet HD","l":"https://i.imgur.com/9Weqdsk.png","g":["Documentary"],"q":"1080p","u":"http://stream.mcquack.net/240/index.m3u8"},{"n":"WaterBear","l":"https://framerusercontent.com/images/41VQQ7F0fYlp1MX1N4Ixog5QnPI.png","g":["Documentary","Outdoor"],"q":"1080p","u":"https://amg01415-waterbearnetwor-waterbear-samsunguk-1h0y8.amagi.tv/playlist/amg01415-waterbearnetwor-waterbear-samsunguk/playlist.m3u8"},{"n":"Wedo Big Stories","l":"https://provider-static.plex.tv/epg/cms/production/49cf6309-0a4a-4d39-bdcc-fa48e4ef84a7/WEDOBIGSTORIES_LIGHTTHEME_-_Sorin_Stoian.png","g":["Documentary"],"q":"1080p","u":"https://amg00735-videosolutionsa-wedobigdocs-ono-0urlz.amagi.tv/playlist/amg00735-videosolutionsa-wedobigdocs-ono/playlist.m3u8"},{"n":"WildEarth","l":"https://i.imgur.com/Vhv5gjN.png","g":["Documentary","Education","Outdoor","Relax"],"q":"1080p","u":"https://dqga3jatxofgx.cloudfront.net/WildEarth.m3u8"}];</script>
+  <div class="top">
+    <div class="brand"><b>SPRtix</b><span>Documentary CHANNELS</span></div>
+    <input type="search" id="searchInput" class="search" placeholder="Search channels..." autocomplete="off" aria-label="Search channels">
+    <div class="chips" id="chips" role="group" aria-label="Categories"></div>
+    <div class="count" id="count"></div>
+  </div>
+  <div class="grid" id="grid"></div>
+</div>
+
+<div id="toastPopup" class="toast-popup">Message</div>
+<input type="file" id="fileInput" accept=".m3u,.m3u8,.txt,text/plain,audio/x-mpegurl,application/vnd.apple.mpegurl" style="display:none">
+
+<!-- Video.js 8 already includes HLS (m3u8) support -->
+<script src="https://vjs.zencdn.net/8.10.0/video.min.js"></script>
+<script>if(!window.videojs){document.write('<script src="https://cdn.jsdelivr.net/npm/video.js@8.10.0/dist/video.min.js"><\/script>');}</script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/hls.js/1.5.13/hls.min.js"></script>
+<script>if(!window.Hls){document.write('<script src="https://cdn.jsdelivr.net/npm/hls.js@1.5.13/dist/hls.min.js"><\/script>');}</script>
+<script>
+const PLACEHOLDER = 'data:image/svg+xml;utf8,' + encodeURIComponent(
+  '<svg xmlns="http://www.w3.org/2000/svg" width="100" height="70" viewBox="0 0 100 70"><rect width="100" height="70" fill="#0f172a"/><text x="50" y="40" font-size="14" fill="#00f2fe" text-anchor="middle" font-family="Arial">SPRtix</text></svg>'
+);
+let playerInstance = null;
+let playerOpen = false, pushedState = false;
+let cat = 'All', term = '';
+const dead = new Set();
+
+function esc(str){return String(str==null?'':str).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
+function safeImg(url){return esc(url||PLACEHOLDER);}
+let toastTimer;
+function showToast(msg){
+  const t=document.getElementById('toastPopup'); t.textContent=msg; t.classList.add('show');
+  clearTimeout(toastTimer); toastTimer=setTimeout(()=>t.classList.remove('show'),3500);
+}
+
+/* ---------------- PLAYER (index.html wala same player) ---------------- */
+let hls = null, triedNative = false;
+function destroyHls(){ if (hls) { try { hls.destroy(); } catch(e){} hls = null; } }
+function initHlsPlayer(){
+  const v = document.getElementById('videoPlayer');
+  v.addEventListener('error', () => {
+    if (!v.getAttribute('src')) return;
+    if (window.currentIdx != null) markDead(window.currentIdx);
+    showToast('Stream error: link offline, blocked ya geo-restricted ho sakta hai');
+  });
+  playerInstance = {
+    pause(){ v.pause(); },
+    reset(){ destroyHls(); v.pause(); v.removeAttribute('src'); v.load(); }
+  };
+}
+
+function detectType(url){
+  const u = url.split('?')[0].split('#')[0].toLowerCase();
+  if (u.endsWith('.mp4') || u.endsWith('.m4v')) return 'video/mp4';
+  if (u.endsWith('.webm')) return 'video/webm';
+  if (u.endsWith('.ogv') || u.endsWith('.ogg')) return 'video/ogg';
+  if (u.endsWith('.mkv')) return 'video/webm';
+  if (u.endsWith('.mpd')) return 'application/dash+xml';
+  // .m3u8, and also links with no extension (most live TV / IPTV links) are treated as HLS
+  return 'application/x-mpegURL';
+}
+
+function playStreamHls(url, title){
+  url = (url || '').trim();
+  if (!url) { showToast('Stream URL not available!'); return; }
+  document.getElementById('playerTitle').innerText = title || 'Live Stream';
+  document.getElementById('playerModal').classList.add('active');
+  document.body.classList.add('playing');
+  if (!playerOpen) {
+    playerOpen = true;
+    try { history.pushState({player:1}, ''); pushedState = true; } catch(e) { pushedState = false; }
+  }
+  window.scrollTo({top:0, behavior:'smooth'});
+  const v = document.getElementById('videoPlayer');
+  playerInstance.reset();
+  triedNative = false;
+  const type = detectType(url);
+  const tryPlay = () => { const p = v.play(); if (p && p.catch) p.catch(() => {}); };
+  const playNative = () => { v.src = url; v.load(); tryPlay(); };
+
+  if (type !== 'application/x-mpegURL') { playNative(); return; }   // mp4 / webm etc.
+
+  if (window.Hls && Hls.isSupported()) {
+    hls = new Hls({ enableWorker: false, lowLatencyMode: false, maxBufferLength: 30, manifestLoadingMaxRetry: 2, levelLoadingMaxRetry: 2, fragLoadingMaxRetry: 3 });
+    const myHls = hls;
+    hls.on(Hls.Events.MANIFEST_PARSED, tryPlay);
+    hls.on(Hls.Events.ERROR, (ev, d) => {
+      if (!d.fatal || hls !== myHls) return;
+      if (d.type === Hls.ErrorTypes.MEDIA_ERROR) { myHls.recoverMediaError(); return; }
+      // network / manifest problem: ek baar browser ke native player se koshish
+      destroyHls();
+      if (!triedNative && v.canPlayType('application/vnd.apple.mpegurl')) { triedNative = true; playNative(); return; }
+      if (window.currentIdx != null) markDead(window.currentIdx);
+      showToast('Stream error: link offline, blocked (CORS) ya geo-restricted ho sakta hai');
+    });
+    hls.loadSource(url);
+    hls.attachMedia(v);
+  } else {
+    playNative();   // Safari / native HLS
+  }
+}
+
+let useVjs = false;
+function initPlayer(){
+  if (typeof videojs === 'undefined') { useVjs = false; initHlsPlayer(); return; }
+  playerInstance = videojs('videoPlayer', {
+    fill: true, controls: true, autoplay: false, preload: 'auto', playsinline: true,
+    html5: {
+      vhs: { overrideNative: true, enableLowInitialPlaylist: true, smoothQualityChange: true, withCredentials: false },
+      nativeAudioTracks: false, nativeVideoTracks: false
+    }
+  });
+  useVjs = true;
+  playerInstance.on('error', () => {
+    const err = playerInstance.error();
+    if (err) {
+      console.error('Player error:', err);
+      if (window.currentIdx != null) markDead(window.currentIdx);
+      showToast('Stream error: link may be offline, blocked (CORS) or http on https');
+    }
+  });
+}
+
+function playStream(url, title){
+  if (!useVjs) { playStreamHls(url, title); return; }
+  url = (url || '').trim();
+  if (!url) { showToast('Stream URL not available!'); return; }
+  document.getElementById('playerTitle').innerText = title || 'Live Stream';
+  document.getElementById('playerModal').classList.add('active');
+  document.body.classList.add('playing');
+  if (!playerOpen) {
+    playerOpen = true;
+    try { history.pushState({player:1}, ''); pushedState = true; } catch(e) { pushedState = false; }
+  }
+  window.scrollTo({top:0, behavior:'smooth'});
+  playerInstance.pause();
+  playerInstance.reset();
+  playerInstance.src({ src: url, type: detectType(url) });
+  playerInstance.load();
+  const p = playerInstance.play();
+  if (p && p.catch) p.catch(() => {});
+}
+
+function doClosePlayer(){
+  document.getElementById('playerModal').classList.remove('active');
+  document.body.classList.remove('playing');
+  document.querySelectorAll('.channel-card.playing').forEach(c => c.classList.remove('playing'));
+  playerInstance.pause();
+  playerInstance.reset(); // fully stops the stream so it stops downloading in background
+  window.currentIdx = null;
+  playerOpen = false;
+}
+// X button / Escape: agar history entry push hui thi to back() chalao, popstate player band karega
+function closePlayer(){
+  if (!playerOpen) return;
+  if (pushedState) { pushedState = false; history.back(); }
+  else doClosePlayer();
+}
+// Phone/browser Back button: pehle player band hoga, dobara back dabane par page wapis jayega
+window.addEventListener('popstate', () => { if (playerOpen) { pushedState = false; doClosePlayer(); } });
+
+function markDead(i){
+  dead.add(i);
+  const c = document.querySelector('.channel-card[data-i="'+i+'"]'); if (c) c.classList.add('dead');
+}
+
+/* ---- AUTO background colour: image ke kinaron ka sab se zyada aane wala rang (index.html se) ---- */
+const bgColorCache = {};
+function applyAutoBg(wrap, url){
+  if (!url) return;
+  const paint = (rgb) => {
+    wrap.style.backgroundColor = rgb;
+    const blurImg = wrap.querySelector('.thumb-bg');
+    if (blurImg) blurImg.style.display = 'none';
+  };
+  if (bgColorCache[url]) { paint(bgColorCache[url]); return; }
+  const probe = new Image();
+  probe.crossOrigin = 'anonymous';
+  probe.onload = () => {
+    try {
+      const S = 40;
+      const cv = document.createElement('canvas'); cv.width = S; cv.height = S;
+      const ctx = cv.getContext('2d', { willReadFrequently: true });
+      ctx.drawImage(probe, 0, 0, S, S);
+      const d = ctx.getImageData(0, 0, S, S).data;
+      const buckets = {}; let best = null, bestCount = 0, opaque = 0;
+      const take = (x, y) => {
+        const i = (y * S + x) * 4;
+        if (d[i + 3] < 40) return;
+        opaque++;
+        const key = (d[i] >> 5) + ',' + (d[i + 1] >> 5) + ',' + (d[i + 2] >> 5);
+        const b = buckets[key] || (buckets[key] = { n: 0, r: 0, g: 0, b: 0 });
+        b.n++; b.r += d[i]; b.g += d[i + 1]; b.b += d[i + 2];
+        if (b.n > bestCount) { bestCount = b.n; best = b; }
+      };
+      for (let k = 0; k < S; k++) { take(k, 0); take(k, S - 1); take(0, k); take(S - 1, k); }
+      if (!best || opaque < S) return;
+      const rgb = `rgb(${Math.round(best.r / best.n)},${Math.round(best.g / best.n)},${Math.round(best.b / best.n)})`;
+      bgColorCache[url] = rgb; paint(rgb);
+    } catch (e) { /* CORS block: blur wala background hi chalega */ }
+  };
+  probe.src = url;
+}
+
+/* ---------------- GRID ---------------- */
+function initials(n){return (n.replace(/[^A-Za-z0-9 ]/g,'').trim().split(/\s+/).slice(0,2).map(w=>w[0]).join('')||'?').toUpperCase();}
+
+function buildCard(i){
+  const c = CHANNELS[i];
+  const card = document.createElement('div');
+  card.className = 'channel-card' + (dead.has(i) ? ' dead' : '');
+  card.dataset.i = i;
+  card.setAttribute('role','button'); card.tabIndex = 0;
+  card.innerHTML = `
+    <div class="thumb-wrap"></div>
+    <div class="channel-logo-text">${esc(c.n)}</div>
+    <div class="channel-footer">
+      <span class="live-badge">LIVE</span>
+      <span class="view-count">${esc(c.q || 'Online')}</span>
+    </div>`;
+  const wrap = card.querySelector('.thumb-wrap');
+  const fallback = () => { wrap.innerHTML = '<div class="ini">'+esc(initials(c.n))+'</div>'; wrap.style.backgroundColor='#111827'; };
+  if (!c.l) fallback();
+  else {
+    wrap.innerHTML = `<img src="${safeImg(c.l)}" class="thumb-bg" alt="" referrerpolicy="no-referrer"><img src="${safeImg(c.l)}" class="card-thumb" loading="lazy" alt="" referrerpolicy="no-referrer">`;
+    const px = 'https://wsrv.nl/?url=' + encodeURIComponent(c.l.replace(/^https?:\/\//,'')) + '&w=200';
+    wrap.querySelectorAll('img').forEach(im => {
+      let retried = false;
+      im.onerror = () => { if (!retried) { retried = true; im.src = px; } else fallback(); };
+    });
+    applyAutoBg(wrap, c.l);
+  }
+  return card;
+}
+
+function render(){
+  const t = term.trim().toLowerCase();
+  const grid = document.getElementById('grid');
+  grid.innerHTML = '';
+  const frag = document.createDocumentFragment();
+  let n = 0;
+  CHANNELS.forEach((c,i) => {
+    if (cat !== 'All' && !c.g.includes(cat)) return;
+    if (t && !c.n.toLowerCase().includes(t)) return;
+    frag.appendChild(buildCard(i)); n++;
+  });
+  grid.appendChild(frag);
+  if (!CHANNELS.length) { showLoader(); document.getElementById('count').textContent = ''; return; }
+  if (!n) grid.innerHTML = '<div class="empty-msg">No channels found.</div>';
+  document.getElementById('count').textContent = n + ' of ' + CHANNELS.length + ' channels';
+}
+
+function buildChips(){
+  const counts = {};
+  CHANNELS.forEach(c => c.g.forEach(g => counts[g] = (counts[g]||0)+1));
+  const names = ['All', ...Object.keys(counts).sort((a,b)=>((b==='Pakistan')-(a==='Pakistan'))||(counts[b]-counts[a]))];
+  const box = document.getElementById('chips');
+  box.innerHTML = '';
+  names.forEach(n => {
+    const b = document.createElement('button');
+    b.className = 'chip'; b.textContent = n === 'All' ? 'All' : n + ' ' + counts[n];
+    b.setAttribute('aria-pressed', n === cat);
+    b.onclick = () => { cat = n; [...box.children].forEach((x,k)=>x.setAttribute('aria-pressed', names[k]===cat)); render(); };
+    box.appendChild(b);
+  });
+}
+
+
+/* ---------------- PLAYLIST LOADER ---------------- */
+const STORE_KEY = 'sprtix_news_playlist';
+
+function parseM3U(text){
+  const lines = String(text).split(/\r?\n/), out = [];
+  for (let i = 0; i < lines.length; i++) {
+    const l = lines[i].trim();
+    if (!l.startsWith('#EXTINF')) continue;
+    const m = l.match(/,([^,]*)$/);                       // naam hamesha aakhri comma ke baad hota hai
+    let name = (m ? m[1] : '').trim();
+    const logo = (l.match(/tvg-logo="([^"]*)"/) || [])[1] || '';
+    const grp  = (l.match(/group-title="([^"]*)"/) || [])[1] || '';
+    let j = i + 1;
+    while (j < lines.length && lines[j].trim() && lines[j].trim().startsWith('#') && !lines[j].trim().startsWith('#EXTINF')) j++;
+    while (j < lines.length && !lines[j].trim()) j++;
+    const url = (lines[j] || '').trim();
+    if (!url || url.startsWith('#')) continue;            // URL missing: is entry ko chor do
+    let tag = '';
+    name = name.replace(/\s*\[([^\]]+)\]\s*/g, (_, t) => { tag = t; return ' '; }).trim();
+    const q = name.match(/\s*\(([^)]*\d+[pi])\)\s*$/);
+    let quality = '';
+    if (q) { quality = q[1]; name = name.slice(0, q.index).trim(); }
+    if (!name) continue;
+    const g = grp.split(';').map(x => x.trim()).filter(Boolean);
+    out.push({ n: name, l: logo, g: g.length ? g : ['Other'], q: /geo/i.test(tag) ? 'Geo-blocked' : (quality || ''), u: url });
+    i = j;
+  }
+  return out;
+}
+
+function setPlaylist(text, save){
+  const list = parseM3U(text);
+  if (!list.length) { showToast('Is file mein koi channel nahi mila (#EXTINF lines chahiye)'); return false; }
+  CHANNELS = list; cat = 'All'; term = ''; dead.clear();
+  document.getElementById('searchInput').value = '';
+  buildChips(); render();
+  if (save) { try { localStorage.setItem(STORE_KEY, text); } catch (e) {} }
+  showToast(list.length + ' channels loaded');
+  return true;
+}
+
+function showLoader(){
+  const grid = document.getElementById('grid');
+  grid.innerHTML = `
+    <div class="loader">
+      <h3>News playlist load karein</h3>
+      <p>Apni news playlist (.m3u / .txt) select karein ya neeche paste karein. Ek baar load karne ke baad ye browser mein save rehti hai.</p>
+      <button class="go" type="button" id="pickBtn">Playlist file select karein</button>
+      <textarea id="pasteBox" placeholder="#EXTM3U ... yahan paste karein"></textarea>
+      <button class="go alt" type="button" id="pasteBtn">Paste se load karein</button>
+    </div>`;
+  document.getElementById('pickBtn').onclick = () => document.getElementById('fileInput').click();
+  document.getElementById('pasteBtn').onclick = () => setPlaylist(document.getElementById('pasteBox').value, true);
+}
+
+function openChannel(card){
+  const i = +card.dataset.i, c = CHANNELS[i];
+  dead.delete(i); card.classList.remove('dead');
+  window.currentIdx = i;
+  document.querySelectorAll('.channel-card.playing').forEach(x => x.classList.remove('playing'));
+  card.classList.add('playing');
+  playStream(c.u, c.n);
+}
+
+window.addEventListener('DOMContentLoaded', () => {
+  try { initPlayer(); } catch (e) { console.error(e); try { useVjs = false; initHlsPlayer(); } catch (e2) {} }
+  document.getElementById('fileInput').addEventListener('change', e => {
+    const f = e.target.files[0]; if (!f) return;
+    const r = new FileReader(); r.onload = () => setPlaylist(r.result, true); r.readAsText(f); e.target.value = '';
+  });
+  if (!CHANNELS.length) {
+    try { const saved = localStorage.getItem(STORE_KEY); if (saved) CHANNELS = parseM3U(saved); } catch (e) {}
+  }
+  buildChips();
+  render();
+
+  const grid = document.getElementById('grid');
+  grid.addEventListener('click', e => { const c = e.target.closest('.channel-card'); if (c) openChannel(c); });
+  grid.addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' ') { const c = e.target.closest('.channel-card'); if (c) { e.preventDefault(); openChannel(c); } } });
+  let st; document.getElementById('searchInput').addEventListener('input', e => { term = e.target.value; clearTimeout(st); st = setTimeout(render, 120); });
+  document.addEventListener('keydown', e => { if (e.key === 'Escape') closePlayer(); });
+});
+</script>
+</body>
+</html>
