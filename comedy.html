@@ -1,0 +1,432 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="referrer" content="no-referrer">
+<title>SPRtix - Comedy CHANNELS</title>
+<link href="https://vjs.zencdn.net/8.10.0/video-js.css" rel="stylesheet" />
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<style>
+*{margin:0;padding:0;box-sizing:border-box;font-family:'Poppins',sans-serif;-webkit-tap-highlight-color:transparent}
+body{background:radial-gradient(circle at top,#0f172a 0%,#030712 70%) fixed;background-color:#030712;color:#fff;min-height:100vh}
+.page{max-width:1100px;margin:0 auto;padding-bottom:40px}
+
+.top{position:sticky;top:0;z-index:30;background:rgba(3,7,18,.95);backdrop-filter:blur(10px);border-bottom:1px solid rgba(0,242,254,.2);padding:12px 16px 8px}
+.brand{display:flex;align-items:baseline;gap:10px;margin-bottom:10px}
+.brand b{font-size:20px;font-weight:700;letter-spacing:.5px}
+.brand span{font-size:9px;letter-spacing:1.5px;color:#94a3b8}
+.loadbtn{margin-left:auto;background:transparent;border:1px solid rgba(0,242,254,.5);color:#00f2fe;border-radius:999px;padding:4px 12px;font-size:11px;cursor:pointer}
+.loader{grid-column:1/-1;max-width:520px;margin:20px auto;text-align:center;display:flex;flex-direction:column;gap:12px;align-items:center}
+.loader h3{font-size:16px}.loader p{font-size:12px;color:#94a3b8;line-height:1.6}
+.loader textarea{width:100%;height:110px;background:#0f172a;border:1px solid rgba(0,242,254,.4);border-radius:10px;color:#fff;padding:10px;font-size:11px;resize:vertical;outline:none}
+.loader .go{background:#00f2fe;color:#030712;border:0;border-radius:999px;padding:8px 22px;font-weight:600;font-size:12px;cursor:pointer}
+.loader .go.alt{background:transparent;color:#00f2fe;border:1px solid #00f2fe}
+.search{width:100%;max-width:460px;background:#0f172a;border:1px solid #00f2fe;border-radius:20px;padding:8px 16px;color:#fff;font-size:13px;outline:none}
+.search::placeholder{color:#64748b}
+.chips{display:flex;gap:8px;overflow-x:auto;padding:10px 0 4px;scrollbar-width:none}
+.chips::-webkit-scrollbar{display:none}
+.chip{flex:none;background:transparent;border:1px solid rgba(255,255,255,.15);color:#94a3b8;border-radius:999px;padding:4px 13px;font-size:11px;cursor:pointer}
+.chip[aria-pressed=true]{background:#00f2fe;border-color:#00f2fe;color:#030712;font-weight:600}
+.count{font-size:10px;color:#64748b;padding:2px 2px 0}
+
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(104px,1fr));gap:10px;padding:14px 16px}
+.channel-card{position:relative;background:rgba(15,23,42,.7);border:1px solid rgba(255,255,255,.08);border-radius:12px;padding:12px 6px 8px;display:flex;flex-direction:column;align-items:center;gap:7px;cursor:pointer;transition:transform .2s,border-color .2s;min-width:0}
+.channel-card:hover{transform:translateY(-2px);border-color:#00f2fe}
+.channel-card.dead{opacity:.4}
+.thumb-wrap{position:relative;width:76px;height:76px;border-radius:50%;overflow:hidden;background:#111827;flex-shrink:0;border:2px solid rgba(0,242,254,.55);box-shadow:0 0 10px rgba(0,242,254,.25)}
+.thumb-bg{position:absolute;inset:-12px;width:calc(100% + 24px);height:calc(100% + 24px);object-fit:cover;filter:blur(12px) brightness(.55) saturate(1.3)}
+.card-thumb{position:relative;z-index:1;width:100%;height:100%;object-fit:contain;object-position:center;padding:15%;display:block}
+.ini{position:relative;z-index:1;width:100%;height:100%;display:grid;place-items:center;font-weight:700;font-size:20px;color:#00f2fe}
+.channel-logo-text{font-size:10.5px;font-weight:600;text-align:center;line-height:1.2;width:100%;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;padding:0 4px}
+.channel-footer{width:100%;display:flex;justify-content:space-between;align-items:center;font-size:8px;padding:0 4px}
+.live-badge{background:#ff0055;color:#fff;padding:2px 5px;border-radius:3px;font-weight:700;font-size:7px}
+.view-count{color:#94a3b8}
+.empty-msg{padding:30px 16px;font-size:13px;color:#94a3b8;grid-column:1/-1}
+
+/* ---- player modal: same as index.html ---- */
+.player-modal{position:sticky;top:0;background:#000;z-index:150;display:none;flex-direction:column;border-bottom:1px solid rgba(0,242,254,.3)}
+.player-modal.active{display:flex}
+.player-header{display:flex;justify-content:space-between;align-items:center;padding:12px 16px;background:rgba(3,7,18,.95);border-bottom:1px solid rgba(0,242,254,.2);flex-shrink:0}
+.player-title{font-size:13px;font-weight:700;color:#00f2fe;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:80%}
+.player-close{color:#fff;font-size:16px;cursor:pointer;background:#ff0055;width:26px;height:26px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.player-body{position:relative;background:#000;width:100%;aspect-ratio:16/9;max-height:45vh}
+body.playing .top{position:static}
+.channel-card.playing{border-color:#00f2fe;box-shadow:0 0 12px rgba(0,242,254,.45)}
+.player-body>video{position:absolute;inset:0;width:100%;height:100%;background:#000}
+.player-body .video-js{position:absolute;inset:0;width:100%;height:100%;background-color:#000}
+
+.toast-popup{position:fixed;top:70px;left:50%;transform:translateX(-50%) translateY(-15px);background:rgba(15,23,42,.95);border:1px solid #00f2fe;color:#fff;padding:8px 16px;border-radius:20px;font-size:11px;box-shadow:0 5px 15px rgba(0,0,0,.5);opacity:0;pointer-events:none;transition:.3s;z-index:300;max-width:90vw;text-align:center}
+.toast-popup.show{opacity:1;transform:translateX(-50%) translateY(0)}
+:focus-visible{outline:2px solid #00f2fe;outline-offset:2px}
+@media (min-width:700px){.thumb-wrap{width:88px;height:88px}.grid{grid-template-columns:repeat(auto-fill,minmax(124px,1fr))}}
+</style>
+</head>
+<body>
+
+<div class="page">
+<!-- Video Player Modal -->
+<div id="playerModal" class="player-modal">
+  <div class="player-header">
+    <div id="playerTitle" class="player-title">Playing Content</div>
+    <div class="player-close" onclick="closePlayer()"><i class="fa-solid fa-xmark"></i></div>
+  </div>
+  <div class="player-body">
+    <video id="videoPlayer" class="video-js vjs-default-skin vjs-big-play-centered" controls preload="auto" playsinline webkit-playsinline></video>
+  </div>
+</div>
+
+<script>let CHANNELS = [{"n":"3Cat Plats bruts","l":"https://i.imgur.com/49ZENis.png","g":["Classic","Comedy","Public","Series"],"q":"1080p","u":"https://fast-tailor.3catdirectes.cat/v1/channel/ccma-channel2/hls.m3u8"},{"n":"13 Humor","l":"https://i.imgur.com/KvMuTzN.png","g":["Comedy"],"q":"1080p","u":"https://origin.dpsgo.com/ssai/event/cKWySXKgSK-SzlJmESkOWw/master.m3u8"},{"n":"30A Ridiculous TV","l":"https://30a.media/wp-content/uploads/2023/08/pzaz-30atv-2-230x366-ridiculous.jpg","g":["Comedy"],"q":"720p","u":"https://30a-tv.com/feeds/720p/63.m3u8"},{"n":"AFV","l":"https://i.imgur.com/TOB9vmW.png","g":["Comedy"],"q":"720p","u":"https://linear-12.frequency.stream/dist/plex/12/hls/master/playlist.m3u8"},{"n":"AFV Espanol","l":"https://i.imgur.com/HUK4WXC.png","g":["Comedy"],"q":"720p","u":"https://linear-46.frequency.stream/dist/plex/46/hls/master/playlist.m3u8"},{"n":"Alle hassen Chris","l":"https://images.pluto.tv/channels/622f6e1e2792150007e0b2ff/colorLogoPNG.png","g":["Comedy"],"q":"","u":"https://jmp2.uk/plu-622f6e1e2792150007e0b2ff.m3u8"},{"n":"alpha Cinema","l":"https://i.imgur.com/146OgfU.png","g":["Comedy","Family","Movies"],"q":"1080p","u":"https://live.15plusmg.ru/memfs/b389173a-df4e-4171-8904-e249893e71eb.m3u8"},{"n":"Anger Management Channel","l":"https://i.imgur.com/VXZgrNy.png","g":["Comedy","Series"],"q":"1080p","u":"https://amg00353-lionsgatestudio-angermgmt-samsungau-o9jg9.amagi.tv/playlist/amg00353-lionsgatestudio-angermgmt-samsungau/playlist.m3u8"},{"n":"Awkward (Sweden)","l":"https://images.pluto.tv/channels/61c0925c738ecd000882450a/colorLogoPNG.png","g":["Comedy"],"q":"","u":"https://jmp2.uk/plu-61c0925c738ecd000882450a.m3u8"},{"n":"Beavis and Butt-Head","l":"https://images.pluto.tv/channels/6486e8984cfc2c0008b6844e/colorLogoPNG.png","g":["Comedy"],"q":"","u":"https://jmp2.uk/plu-6486e8b48e3c0a0008e56914.m3u8"},{"n":"Beavis and Butt-Head DK","l":"https://images.pluto.tv/channels/6486e8984cfc2c0008b6844e/colorLogoPNG.png","g":["Comedy"],"q":"","u":"https://jmp2.uk/plu-6486e8984cfc2c0008b6844e.m3u8"},{"n":"Beavis and Butt-Head NO","l":"https://images.pluto.tv/channels/6486e8984cfc2c0008b6844e/colorLogoPNG.png","g":["Comedy"],"q":"","u":"https://jmp2.uk/plu-6486e8328e3c0a0008e5686c.m3u8"},{"n":"Becker (Germany)","l":"https://images.pluto.tv/channels/630348a54c48ce00077eb6c7/colorLogoPNG.png","g":["Comedy"],"q":"","u":"https://jmp2.uk/plu-630348a54c48ce00077eb6c7.m3u8"},{"n":"BET Throwbacks","l":"https://images.pluto.tv/channels/61326275b3c86a00078e4833/colorLogoPNG_1759340015358.png","g":["Comedy"],"q":"","u":"https://jmp2.uk/plu-61326275b3c86a00078e4833.m3u8"},{"n":"Black Family Sitcoms","l":"https://images.pluto.tv/channels/686d61503484d6073283059d/colorLogoPNG_1752619670829.png","g":["Comedy"],"q":"","u":"https://jmp2.uk/plu-686d61503484d6073283059d.m3u8"},{"n":"British Comedy","l":"https://images.pluto.tv/channels/638e11951177840007fdd6b2/colorLogoPNG_1745597179027.png","g":["Comedy"],"q":"","u":"https://jmp2.uk/plu-638e11951177840007fdd6b2.m3u8"},{"n":"Broad City","l":"https://images.pluto.tv/channels/65cba73611ced700082123bc/colorLogoPNG.png","g":["Comedy"],"q":"","u":"https://jmp2.uk/plu-65cba7b1ec452d0008acbed8.m3u8"},{"n":"Broad City DK","l":"https://images.pluto.tv/channels/65cba73611ced700082123bc/colorLogoPNG.png","g":["Comedy"],"q":"","u":"https://jmp2.uk/plu-65cba73611ced700082123bc.m3u8"},{"n":"Broad City NO","l":"https://images.pluto.tv/channels/65cba73611ced700082123bc/colorLogoPNG.png","g":["Comedy"],"q":"","u":"https://jmp2.uk/plu-65cba778ec452d0008acbe86.m3u8"},{"n":"bTV Comedy","l":"https://i.imgur.com/1c6A5dO.png","g":["Comedy"],"q":"","u":"http://213.91.179.28:8000/play/a04k"},{"n":"Camera Smile TV","l":"https://i.imgur.com/V5h4R83.png","g":["Comedy"],"q":"480p","u":"https://rpn.bozztv.com/gusa/gusa-camerasmile/index.m3u8"},{"n":"Caroline in the City","l":"https://images.pluto.tv/channels/66a7aa44cd0d31000843942b/colorLogoPNG.png","g":["Comedy"],"q":"","u":"https://jmp2.uk/plu-66a7ab4dcd0d3100084395b4.m3u8"},{"n":"Caroline in the City DK","l":"https://images.pluto.tv/channels/66a7aa44cd0d31000843942b/colorLogoPNG.png","g":["Comedy"],"q":"","u":"https://jmp2.uk/plu-66a7aa44cd0d31000843942b.m3u8"},{"n":"Caroline in the City NO","l":"https://images.pluto.tv/channels/66a7aa44cd0d31000843942b/colorLogoPNG.png","g":["Comedy"],"q":"","u":"https://jmp2.uk/plu-66a7aac9d512590008ab2dcb.m3u8"},{"n":"CC Pluto TV","l":"https://images.pluto.tv/channels/5d4947590ba40f75dc29c26b/colorLogoPNG.png","g":["Comedy"],"q":"","u":"https://jmp2.uk/plu-5d4947590ba40f75dc29c26b.m3u8"},{"n":"Chappelle's Show","l":"https://images.pluto.tv/channels/65e976ad0d456100082d9b74/colorLogoPNG.png","g":["Comedy"],"q":"","u":"https://jmp2.uk/plu-65e9783b0d456100082d9e05.m3u8"},{"n":"Chappelle's Show DK","l":"https://images.pluto.tv/channels/65e976ad0d456100082d9b74/colorLogoPNG.png","g":["Comedy"],"q":"","u":"https://jmp2.uk/plu-65e976ad0d456100082d9b74.m3u8"},{"n":"Chappelle's Show NO","l":"https://images.pluto.tv/channels/65e976ad0d456100082d9b74/colorLogoPNG.png","g":["Comedy"],"q":"","u":"https://jmp2.uk/plu-65e977a618036500082ec972.m3u8"},{"n":"Cheers (Sweden) NO","l":"https://images.pluto.tv/channels/642e9575af2bd900088527dd/colorLogoPNG.png","g":["Comedy"],"q":"","u":"https://jmp2.uk/plu-63e389dcc111bc0008ee5b8c.m3u8"},{"n":"Cheers + Frasier","l":"https://images.pluto.tv/channels/66ba495ffe11e5000881f049/colorLogoPNG.png","g":["Comedy"],"q":"","u":"https://jmp2.uk/plu-66ba495ffe11e5000881f049.m3u8"},{"n":"Classic TV Comedy","l":"https://i.imgur.com/wg5I5Fb.png","g":["Comedy"],"q":"","u":"https://jmp2.uk/plu-5f15e32b297f96000768f928.m3u8"},{"n":"Comedia a lo bestia de Pluto TV","l":"https://images.pluto.tv/channels/68de3db35fc0afe85de0b843/colorLogoPNG_1759402494389.png","g":["Comedy"],"q":"","u":"https://jmp2.uk/plu-68de3db35fc0afe85de0b843.m3u8"},{"n":"Comedy Central (France)","l":"https://upload.wikimedia.org/wikipedia/commons/thumb/a/aa/Comedy_Central_2018.svg/960px-Comedy_Central_2018.svg.png","g":["Comedy"],"q":"720p","u":"https://r.eu.cdn-redge.media/livehls/oeu/mt/live/comedy_central/live.livx/playlist.m3u8"},{"n":"Comedy Central (France) HD","l":"https://upload.wikimedia.org/wikipedia/commons/thumb/a/aa/Comedy_Central_2018.svg/960px-Comedy_Central_2018.svg.png","g":["Comedy"],"q":"720p","u":"https://r.eu.cdn-redge.media/livehls/oeu/mt/live/comedy_central_en/live.livx/playlist.m3u8"},{"n":"Comedy Central (Germany)","l":"https://upload.wikimedia.org/wikipedia/commons/thumb/a/aa/Comedy_Central_2018.svg/960px-Comedy_Central_2018.svg.png","g":["Comedy"],"q":"","u":"https://ma.anixa.tv/clips/stream/comedy_central/playlist.php"},{"n":"Comedy Central (Italy)","l":"https://upload.wikimedia.org/wikipedia/commons/thumb/a/aa/Comedy_Central_2018.svg/960px-Comedy_Central_2018.svg.png","g":["Comedy"],"q":"720p","u":"http://team-tv.co:81/comedy/index.m3u8"},{"n":"Comedy Central (Spain)","l":"https://upload.wikimedia.org/wikipedia/commons/thumb/a/aa/Comedy_Central_2018.svg/960px-Comedy_Central_2018.svg.png","g":["Comedy"],"q":"1080p","u":"http://90.170.214.40:9700/stream/avatel/comedycentral/master.m3u8"},{"n":"Comedy Central (Sweden)","l":"https://images.pluto.tv/channels/61c0989431084d0007eab12d/colorLogoPNG.png","g":["Comedy"],"q":"","u":"https://jmp2.uk/plu-61c0b550e0d3a700072b6a2a.m3u8"},{"n":"Comedy Central (Sweden) DK","l":"https://images.pluto.tv/channels/61c0989431084d0007eab12d/colorLogoPNG.png","g":["Comedy"],"q":"720p","u":"https://jmp2.uk/plu-61c0989431084d0007eab12d.m3u8"},{"n":"Comedy Central (United States) CA","l":"https://images.pluto.tv/channels/64f8a408bd341e000818fcda/colorLogoPNG.png","g":["Comedy"],"q":"","u":"https://jmp2.uk/plu-64f8a408bd341e000818fcda.m3u8"},{"n":"Comedy Central Animation","l":"https://i.imgur.com/uENch0P.png","g":["Comedy"],"q":"","u":"https://jmp2.uk/plu-64f8a949f5b5e4000862467c.m3u8"},{"n":"Comedy Central Brasil","l":"https://comcastadvertising.com/wp-content/uploads/2021/10/Comedy-Central-White.png","g":["Comedy"],"q":"480p","u":"https://stmv2.srvif.com/gafeab/gafeab/playlist.m3u8"},{"n":"Comedy Central en Espanol","l":"https://i.imgur.com/6xTD3G8.png","g":["Comedy"],"q":"","u":"https://jmp2.uk/plu-5cf96dad1652631e36d43320.m3u8"},{"n":"Comedy Central Latin America","l":"https://upload.wikimedia.org/wikipedia/commons/thumb/a/aa/Comedy_Central_2018.svg/960px-Comedy_Central_2018.svg.png","g":["Comedy"],"q":"1080p","u":"http://190.93.224.42/COMEDY-CENTRAL/index.m3u8"},{"n":"Comedy Central Pluto TV","l":"https://images.pluto.tv/channels/5f357e91b18f0b00073583d2/colorLogoPNG.png","g":["Comedy"],"q":"","u":"https://jmp2.uk/plu-5ca671f215a62078d2ec0abf.m3u8"},{"n":"Comedy Central Pluto TV BR","l":"https://images.pluto.tv/channels/5f357e91b18f0b00073583d2/colorLogoPNG.png","g":["Comedy"],"q":"","u":"https://jmp2.uk/plu-5f357e91b18f0b00073583d2.m3u8"},{"n":"Comedy Central Pluto TV LatAm","l":"https://images.pluto.tv/channels/5f357e91b18f0b00073583d2/colorLogoPNG.png","g":["Comedy"],"q":"","u":"https://jmp2.uk/plu-5ffcc21a432945000762d06b.m3u8"},{"n":"Comedy Central Roast","l":"https://images.pluto.tv/channels/6641fd41b18d700008e7e2b8/colorLogoPNG.png","g":["Comedy"],"q":"","u":"https://jmp2.uk/plu-6641fd41b18d700008e7e2b8.m3u8"},{"n":"Comedy Central South Park","l":"https://images.pluto.tv/channels/609ae66b359b270007869ff1/colorLogoPNG_1733160636316.png","g":["Animation","Comedy"],"q":"","u":"https://jmp2.uk/plu-609ae66b359b270007869ff1.m3u8"},{"n":"Comedy Central South Park LatAm","l":"https://images.pluto.tv/channels/609ae66b359b270007869ff1/colorLogoPNG_1733160636316.png","g":["Animation","Comedy"],"q":"","u":"https://jmp2.uk/plu-609ae5cd48d3200007b0a98e.m3u8"},{"n":"Comedy Dynamics","l":"https://i.imgur.com/1lEvUOa.png","g":["Comedy"],"q":"1080p","u":"https://comedydynamics-plex-ingest.cinedigm.com/playlist.m3u8"},{"n":"Comedy Play","l":"https://i.imgur.com/6kAeVOk.png","g":["Comedy"],"q":"576i","u":"https://stream1.antenaplay.ro/live/ComedyPlay/chunklist.m3u8"},{"n":"Comedy TV","l":"https://i.imgur.com/i1TANKv.png","g":["Comedy"],"q":"","u":"http://31.146.5.178:8087/play/a00b/index.m3u8"},{"n":"Comedy.TV","l":"https://i.imgur.com/KLfXnba.png","g":["Comedy"],"q":"720p","u":"https://a-cdn.klowdtv.com/live2/comedytv_720p/playlist.m3u8"},{"n":"Crazy Ex-Girlfriend","l":"https://images.pluto.tv/channels/693ae5660eedebc8d5db6579/colorLogoPNG_1770039249880.png","g":["Comedy"],"q":"","u":"https://jmp2.uk/plu-693ae5b792fad2e93412a2c7.m3u8"},{"n":"Crazy Ex-Girlfriend DK","l":"https://images.pluto.tv/channels/693ae5660eedebc8d5db6579/colorLogoPNG_1770039249880.png","g":["Comedy"],"q":"","u":"https://jmp2.uk/plu-693ae5660eedebc8d5db6579.m3u8"},{"n":"Crazy Ex-Girlfriend NO","l":"https://images.pluto.tv/channels/693ae5660eedebc8d5db6579/colorLogoPNG_1770039249880.png","g":["Comedy"],"q":"","u":"https://jmp2.uk/plu-693ae58fc2d0f38be38df821.m3u8"},{"n":"Daria","l":"https://images.pluto.tv/channels/62d0895ebe7a970008785244/colorLogoPNG.png","g":["Comedy"],"q":"","u":"https://jmp2.uk/plu-62d0895ebe7a970008785244.m3u8"},{"n":"Distrito Comedia","l":"https://upload.wikimedia.org/wikipedia/commons/thumb/6/6b/DistritoComediaLOGO2018.png/960px-DistritoComediaLOGO2018.png","g":["Comedy"],"q":"1080p","u":"http://15.204.142.109:22880/TELEVISA-PROVEEDOR-DISTRITO-COMEDIA/index.m3u8"},{"n":"Dry Bar Comedy+","l":"https://i.imgur.com/3N2C60N.png","g":["Comedy"],"q":"720p","u":"https://drybar-drybarcomedy-1-au.samsung.wurl.tv/playlist.m3u8"},{"n":"ETV Comedy","l":"https://jiotvimages.cdn.jio.com/dare_images/images/ETV_Comedy.png","g":["Comedy"],"q":"1080p","u":"https://cc-wie8j8y69d2uy.akamaized.net/v1/master/3722c60a815c199d9c0ef36c5b73da68a62b09d1/cc-wie8j8y69d2uy/WWBI/Amagi/ETV_Comedy_IN/playlist.m3u8"},{"n":"Everybody Hates Chris","l":"https://images.pluto.tv/channels/63a1cab19ab2df0007bf1c8b/colorLogoPNG.png","g":["Comedy"],"q":"","u":"https://jmp2.uk/plu-697b5be36dc3c71eb14d728a.m3u8"},{"n":"Everybody Hates Chris DK","l":"https://images.pluto.tv/channels/63a1cab19ab2df0007bf1c8b/colorLogoPNG.png","g":["Comedy"],"q":"","u":"https://jmp2.uk/plu-63a1cab19ab2df0007bf1c8b.m3u8"},{"n":"Everybody Hates Chris NO","l":"https://images.pluto.tv/channels/63a1cab19ab2df0007bf1c8b/colorLogoPNG.png","g":["Comedy"],"q":"","u":"https://jmp2.uk/plu-697b5a6c9567bf7b5f71a350.m3u8"},{"n":"FailArmy","l":"https://i.imgur.com/VIpQJxL.png","g":["Comedy"],"q":"720p","u":"https://failarmy-international-au.samsung.wurl.tv/playlist.m3u8"},{"n":"FailArmy Brazil","l":"https://i.imgur.com/VIpQJxL.png","g":["Comedy"],"q":"","u":"https://jmp2.uk/plu-5f5141c1605ddf000748eb1b.m3u8"},{"n":"FailArmy Italy","l":"https://i.imgur.com/VIpQJxL.png","g":["Comedy"],"q":"720p","u":"https://failarmy-international-it.samsung.wurl.tv/playlist.m3u8"},{"n":"FailArmy Poland","l":"https://i.imgur.com/VIpQJxL.png","g":["Comedy"],"q":"720p","u":"https://bd93cfed.wurl.com/master/f36d25e7e52f1ba8d7e56eb859c636563214f541/UmFrdXRlblRWLWV1X0ZhaWxBcm15X0hMUw/playlist.m3u8"},{"n":"FailArmy UK","l":"https://i.imgur.com/VIpQJxL.png","g":["Comedy"],"q":"720p","u":"https://failarmy-international-gb.samsung.wurl.tv/playlist.m3u8"},{"n":"Family Ties (Sweden)","l":"https://images.pluto.tv/channels/654a4a3ef91d250008ac089b/colorLogoPNG.png","g":["Comedy"],"q":"","u":"https://jmp2.uk/plu-654a510d986ad20008a45874.m3u8"},{"n":"Family Ties (Sweden) DK","l":"https://images.pluto.tv/channels/654a4a3ef91d250008ac089b/colorLogoPNG.png","g":["Comedy"],"q":"","u":"https://jmp2.uk/plu-654a4a3ef91d250008ac089b.m3u8"},{"n":"Family Ties (Sweden) NO","l":"https://images.pluto.tv/channels/654a4a3ef91d250008ac089b/colorLogoPNG.png","g":["Comedy"],"q":"","u":"https://jmp2.uk/plu-654a4f7bf9cc8200086877d5.m3u8"},{"n":"Fora Tedio TV","l":"https://i.imgur.com/R9ul4T1.png","g":["Comedy"],"q":"720p","u":"https://stmv2.srvif.com/foratedio/foratedio/playlist.m3u8"},{"n":"Frasier: Beruhmte Gaste","l":"https://images.pluto.tv/channels/6790fa9e1cfc4aa96dfadcef/colorLogoPNG.png","g":["Comedy"],"q":"","u":"https://jmp2.uk/plu-6790fa9e1cfc4aa96dfadcef.m3u8"},{"n":"Funny AF","l":"https://i.imgur.com/UCwjdtQ.png","g":["Comedy"],"q":"","u":"https://jmp2.uk/plu-580e87ff497c73ba2f321dd3.m3u8"},{"n":"Gagsnetwork","l":"https://i.imgur.com/ENj5GIp.png","g":["Comedy"],"q":"576p","u":"http://stream.mcquack.net/458/index.m3u8"},{"n":"GEM Comedy","l":"https://i.imgur.com/FuscfJW.png","g":["Comedy"],"q":"","u":"https://ca-rt.onetv.app/gemcomedy/index-0.m3u8?token=onetv202"},{"n":"HAHA TV","l":"","g":["Comedy"],"q":"","u":"https://dash3.antik.sk/live/test_haha_tv/playlist.m3u8"},{"n":"HBO Pop Latin America","l":"https://upload.wikimedia.org/wikipedia/commons/thumb/1/1b/HBO_Pop.svg/960px-HBO_Pop.svg.png","g":["Comedy"],"q":"Geo-blocked","u":"http://15.204.246.24:8080/HBOPOPHD/index.m3u8"},{"n":"Humor Mill","l":"https://i.imgur.com/e5W91v2.png","g":["Comedy"],"q":"1080p","u":"https://damkf751d85s1.cloudfront.net/v1/master/9d062541f2ff39b5c0f48b743c6411d25f62fc25/HumorMill-DistroTV/152.m3u8?ads.vf=3I7CXmxz7vK"},{"n":"I Love Lucy","l":"https://images.pluto.tv/channels/63a2f1dda0d69700078b7cba/colorLogoPNG.png","g":["Classic","Comedy"],"q":"","u":"https://jmp2.uk/plu-634f3011f4fff20007431641.m3u8"},{"n":"I Love Lucy CA","l":"https://images.pluto.tv/channels/63a2f1dda0d69700078b7cba/colorLogoPNG.png","g":["Classic","Comedy"],"q":"","u":"https://jmp2.uk/plu-63a2f1dda0d69700078b7cba.m3u8"},{"n":"In Puii Mei","l":"https://assets.antenaplay.ro/2026/05/07/aUyRzOHx0tkHM6SXjA9K.png","g":["Comedy"],"q":"576p","u":"https://live77cdn2.antenaplay.ro/live2_fast/ch7/stream.m3u8"},{"n":"iRoast","l":"https://assets.antenaplay.ro/2026/05/07/1CKR5EoJo1qeSZCe9lkT.png","g":["Comedy"],"q":"576p","u":"https://live77cdn2.antenaplay.ro/live2_fast/ch3/stream.m3u8"},{"n":"iUmor","l":"https://assets.antenaplay.ro/2026/05/07/pB32HtJzC1i0xlH75Rb0.png","g":["Comedy"],"q":"576p","u":"https://live77cdn2.antenaplay.ro/live2_fast/ch2/stream.m3u8"},{"n":"Jordan Comedy","l":"https://i.imgur.com/DuwwoO2.png","g":["Comedy"],"q":"1080p","u":"https://playlist.fasttvcdn.com/pl/cc0blorawy1ibohhrupraa/Comedy/playlist.m3u8"},{"n":"Just for Laughs Gags","l":"https://i.imgur.com/HjVEVMJ.png","g":["Comedy"],"q":"1080p","u":"https://streams2.sofast.tv/ptnr-yupptv/title-JUST_FOR_LAUGHS_GAGS_YUPPTV/v1/master/611d79b11b77e2f571934fd80ca1413453772ac7/2790d143-5874-4146-bf91-9063c52b2f15/manifest.m3u8"},{"n":"Kevin Hart's LOL! Network","l":"https://i.imgur.com/Tiy3Ur2.png","g":["Comedy"],"q":"720p","u":"https://d1kt53vrikzr5o.cloudfront.net/v1/lol_lolnetwork_5/samsungheadend_us/latest/main/hls/playlist.m3u8"},{"n":"Key & Peele","l":"https://images.pluto.tv/channels/65cba715dc10a40008034917/colorLogoPNG.png","g":["Comedy"],"q":"","u":"https://jmp2.uk/plu-65cba798d77d450008d056e5.m3u8"},{"n":"Key & Peele DK","l":"https://images.pluto.tv/channels/65cba715dc10a40008034917/colorLogoPNG.png","g":["Comedy"],"q":"","u":"https://jmp2.uk/plu-65cba715dc10a40008034917.m3u8"},{"n":"Key & Peele NO","l":"https://images.pluto.tv/channels/65cba715dc10a40008034917/colorLogoPNG.png","g":["Comedy"],"q":"","u":"https://jmp2.uk/plu-65cba7573ba51e00084d76e1.m3u8"},{"n":"Kinokomedija","l":"https://i.imgur.com/dVjtth0.png","g":["Comedy"],"q":"576p","u":"http://stream.mcquack.net/265/index.m3u8"},{"n":"Klovn","l":"https://images.pluto.tv/channels/65a63ff00d9ab400080b101c/colorLogoPNG.png","g":["Comedy"],"q":"","u":"https://jmp2.uk/plu-65a63ff00d9ab400080b101c.m3u8"},{"n":"Komedia","l":"https://i.imgur.com/VRC5juh.png","g":["Comedy"],"q":"576p","u":"http://176.118.197.101/Komediya/index.m3u8"},{"n":"Komediynoe HD","l":"https://i.imgur.com/cEKe8XC.png","g":["Comedy"],"q":"1080p","u":"http://stream.mcquack.net/74/index.m3u8"},{"n":"KVN TV","l":"https://i.imgur.com/Vw3LFLX.png","g":["Comedy"],"q":"576p","u":"http://178.124.179.122:8080/KVN-TV/index.m3u8"},{"n":"Laff","l":"https://upload.wikimedia.org/wikipedia/commons/thumb/1/1e/LAFF_logo.png/960px-LAFF_logo.png","g":["Comedy"],"q":"576p","u":"http://tvsen7.aynascope.net/laff/index.m3u8"},{"n":"Man with a Plan","l":"https://images.pluto.tv/channels/678f88bb272ded16b1558c5e/colorLogoPNG.png","g":["Comedy"],"q":"","u":"https://jmp2.uk/plu-6825efbb9eed174f7ffbe5b0.m3u8"},{"n":"Man with a Plan DK","l":"https://images.pluto.tv/channels/678f88bb272ded16b1558c5e/colorLogoPNG.png","g":["Comedy"],"q":"","u":"https://jmp2.uk/plu-678f88bb272ded16b1558c5e.m3u8"},{"n":"Man with a Plan NO","l":"https://images.pluto.tv/channels/678f88bb272ded16b1558c5e/colorLogoPNG.png","g":["Comedy"],"q":"","u":"https://jmp2.uk/plu-6825eeeeb19ce6d4a34ebb2a.m3u8"},{"n":"More Pluto TV Comedy","l":"https://images.pluto.tv/channels/62e91c3add66e00007eeb24c/colorLogoPNG_1759310317971.png","g":["Comedy"],"q":"","u":"https://jmp2.uk/plu-62e91c3add66e00007eeb24c.m3u8"},{"n":"More TV Sitcoms","l":"https://i.imgur.com/4mbhOEo.png","g":["Comedy"],"q":"","u":"https://jmp2.uk/plu-6132619f9ddaa50007e7dd86.m3u8"},{"n":"Mr Bean Live Action","l":"https://d2yv6y0n3qsl5c.cloudfront.net/MBEANP/MrBeanLiveAction-LG_LOGO_800x200.png","g":["Comedy","Kids"],"q":"1080p","u":"https://amg00627-amg00627c39-samsung-gb-5569.playouts.now.amagi.tv/playlist.m3u8"},{"n":"Mystery Science Theater 3000","l":"https://i.imgur.com/8KWjY4o.png","g":["Comedy"],"q":"1080p","u":"https://d1c73nj8qxp55a.cloudfront.net/Mystery_Science_Theater_3000.m3u8"},{"n":"NBC Comedy Vault","l":"https://i.imgur.com/nydZWwg.png","g":["Comedy"],"q":"1080p","u":"https://xumo-xumoent-vc-105-z0vpm.fast.nbcuni.com/live/master.m3u8"},{"n":"Nick/Comedy Central +1","l":"https://i.imgur.com/08ZUI9k.png","g":["Comedy","Kids"],"q":"","u":"http://90.183.52.46:4000/play/a046/index.m3u8"},{"n":"Persiana Comedy","l":"https://i.imgur.com/DBZ3Pi5.png","g":["Comedy"],"q":"","u":"https://comedyhls.persiana.live/hls/stream.m3u8"},{"n":"Pitaara Comedy","l":"https://jiotvimages.cdn.jio.com/dare_images/images/PitaaraComedy.png","g":["Comedy"],"q":"1080p","u":"https://janya-pitaaralive.akamaized.net/ptnr-monitoring/v1/vglive-sk-217489/live/PitaaraComedy_15/chunks.m3u8"},{"n":"Planet Fun","l":"https://i.imgur.com/5U1iKUq.png","g":["Comedy"],"q":"1080p","u":"http://66.102.126.10:8000/play/a02k/index.m3u8"},{"n":"Pluto TV Adult Animation","l":"https://images.pluto.tv/channels/67f68bd2135aeda9ddf0ef54/colorLogoPNG_1746816413112.png","g":["Animation","Comedy"],"q":"","u":"https://jmp2.uk/plu-67f68bd2135aeda9ddf0ef54.m3u8"},{"n":"Pluto TV Animation","l":"https://images.pluto.tv/channels/612f761008a9e50007984ba0/colorLogoPNG.png","g":["Animation","Comedy"],"q":"","u":"https://jmp2.uk/plu-612f761008a9e50007984ba0.m3u8"},{"n":"Pluto TV Comedia made in Spain","l":"https://images.pluto.tv/channels/5f1abce155a03d0007718834/colorLogoPNG.png","g":["Comedy"],"q":"","u":"https://jmp2.uk/plu-5f1abce155a03d0007718834.m3u8"},{"n":"Pluto TV Comedias Romanticas","l":"https://images.pluto.tv/channels/655b5d865812e80008843bd1/colorLogoPNG_1747044085522.png","g":["Comedy","Movies"],"q":"","u":"https://jmp2.uk/plu-655b5d865812e80008843bd1.m3u8"},{"n":"Pluto TV Comedie","l":"https://images.pluto.tv/channels/5f8eb91bb9b9e7000817e67f/colorLogoPNG.png","g":["Comedy"],"q":"","u":"https://jmp2.uk/plu-5f8eb91bb9b9e7000817e67f.m3u8"},{"n":"Pluto TV Comedies Cultes","l":"https://images.pluto.tv/channels/67b4b2d976a934282e92d71c/colorLogoPNG.png","g":["Comedy","Movies"],"q":"","u":"https://jmp2.uk/plu-67b4b2d976a934282e92d71c.m3u8"},{"n":"Pluto TV Comedy","l":"https://images.pluto.tv/channels/62e92178946c8000079a3160/colorLogoPNG.png","g":["Comedy"],"q":"","u":"https://jmp2.uk/plu-5a4d3a00ad95e4718ae8d8db.m3u8"},{"n":"Pluto TV Comedy CA","l":"https://images.pluto.tv/channels/62e92178946c8000079a3160/colorLogoPNG.png","g":["Comedy"],"q":"","u":"https://jmp2.uk/plu-62e92178946c8000079a3160.m3u8"},{"n":"Pluto TV Comedy Movies","l":"https://images.pluto.tv/channels/62ea3d24b8e02600071fa296/colorLogoPNG.png","g":["Comedy","Movies"],"q":"","u":"https://jmp2.uk/plu-62ea3d24b8e02600071fa296.m3u8"},{"n":"Pluto TV Comedy Therapie","l":"https://images.pluto.tv/channels/69b968ba255fecb01f602257/colorLogoPNG_1777380677093.png","g":["Comedy"],"q":"","u":"https://jmp2.uk/plu-69b968ba255fecb01f602257.m3u8"},{"n":"Pluto TV Deutsche Comedy","l":"https://images.pluto.tv/channels/6672f49f61a39900089db68e/colorLogoPNG_1748857141516.png","g":["Comedy"],"q":"","u":"https://jmp2.uk/plu-6672f49f61a39900089db68e.m3u8"},{"n":"Pluto TV Fran: Beste Mama-Momente","l":"https://images.pluto.tv/channels/69b968e011fc7b9e27c0d958/colorLogoPNG_1777469414817.png","g":["Comedy"],"q":"","u":"https://jmp2.uk/plu-69b968e011fc7b9e27c0d958.m3u8"},{"n":"Pluto TV Humor (Sweden)","l":"https://images.pluto.tv/channels/61c0974945b45d0007aaa5ac/colorLogoPNG.png","g":["Comedy","Movies"],"q":"","u":"https://jmp2.uk/plu-61c0974945b45d0007aaa5ac.m3u8"},{"n":"Pluto TV Komedi","l":"https://images.pluto.tv/channels/61c0b36d18447e000717d686/colorLogoPNG.png","g":["Comedy","Movies"],"q":"","u":"https://jmp2.uk/plu-61c0b36d18447e000717d686.m3u8"},{"n":"Pluto TV Komedie","l":"https://images.pluto.tv/channels/61c1e3a679a4390007c78136/colorLogoPNG.png","g":["Comedy","Movies"],"q":"","u":"https://jmp2.uk/plu-61c1e3a679a4390007c78136.m3u8"},{"n":"Pluto TV Kult Comedies","l":"https://images.pluto.tv/channels/66337de656fc840008ff7a65/colorLogoPNG.png","g":["Comedy","Movies"],"q":"","u":"https://jmp2.uk/plu-66337de656fc840008ff7a65.m3u8"},{"n":"Pluto TV Laughs in Spanish","l":"https://images.pluto.tv/channels/69a554179a3f3bb488c7d2be/colorLogoPNG_1774964411015.png","g":["Comedy"],"q":"","u":"https://jmp2.uk/plu-69a554179a3f3bb488c7d2be.m3u8"},{"n":"Pluto TV Scherzi e risate","l":"https://images.pluto.tv/channels/609404b0a8ec810007d8de9d/colorLogoPNG.png","g":["Comedy"],"q":"","u":"https://jmp2.uk/plu-609404b0a8ec810007d8de9d.m3u8"},{"n":"Pluto TV Series Comedia","l":"https://images.pluto.tv/channels/655e5bc94261ca000810cb17/colorLogoPNG.png","g":["Comedy","Series"],"q":"","u":"https://jmp2.uk/plu-655e5bc94261ca000810cb17.m3u8"},{"n":"Pluto TV Sitcoms","l":"https://images.pluto.tv/channels/5d767ab2b456c8cf265ce921/colorLogoPNG.png","g":["Comedy","Series"],"q":"","u":"https://jmp2.uk/plu-5d767ab2b456c8cf265ce921.m3u8"},{"n":"Pluto TV Sitcoms GB","l":"https://images.pluto.tv/channels/5d767ab2b456c8cf265ce921/colorLogoPNG.png","g":["Comedy","Series"],"q":"","u":"https://jmp2.uk/plu-62f53dc6ee9a0400071dc22b.m3u8"},{"n":"Pluto TV Worst of Bundy","l":"https://images.pluto.tv/channels/69b968ca1c36025fd0a3d92d/colorLogoPNG_1777369824096.png","g":["Comedy"],"q":"","u":"https://jmp2.uk/plu-69b968ca1c36025fd0a3d92d.m3u8"},{"n":"Reno 911","l":"https://images.pluto.tv/channels/65e9766eec9fda0008cb418a/colorLogoPNG.png","g":["Comedy"],"q":"","u":"https://jmp2.uk/plu-65e9781a2873090008b48d8a.m3u8"},{"n":"Reno 911 DK","l":"https://images.pluto.tv/channels/65e9766eec9fda0008cb418a/colorLogoPNG.png","g":["Comedy"],"q":"","u":"https://jmp2.uk/plu-65e9766eec9fda0008cb418a.m3u8"},{"n":"Reno 911 NO","l":"https://images.pluto.tv/channels/65e9766eec9fda0008cb418a/colorLogoPNG.png","g":["Comedy"],"q":"","u":"https://jmp2.uk/plu-65e977874e01740008c9fb4c.m3u8"},{"n":"Ridiculousness (Germany)","l":"https://images.pluto.tv/channels/5f8eb8a8b2619a000710605c/colorLogoPNG.png","g":["Comedy"],"q":"720p","u":"https://jmp2.uk/plu-5f8eb8a8b2619a000710605c.m3u8"},{"n":"Ridiculousness (United States)","l":"https://images.pluto.tv/channels/6996296087742204bff43147/colorLogoPNG_1772645176417.png","g":["Comedy"],"q":"","u":"https://jmp2.uk/plu-6996296087742204bff43147.m3u8"},{"n":"RiffTrax","l":"https://i.imgur.com/hM4yKMn.png","g":["Comedy"],"q":"720p","u":"https://wurlrifftrax.global.transmit.live/hls/68222b9cbe836edbe6f39e74/playlist.m3u8"},{"n":"Rotana Comedy","l":"https://i.imgur.com/IlT8U6S.png","g":["Comedy"],"q":"Geo-blocked","u":"https://rotana.hibridcdn.net/rotananet/comedy_net-7Y83PP5adWixDF93/playlist.m3u8"},{"n":"Sabrina The Teenage Witch","l":"https://images.pluto.tv/channels/66276091cee0d900085fe053/colorLogoPNG.png","g":["Comedy"],"q":"","u":"https://jmp2.uk/plu-66276091cee0d900085fe053.m3u8"},{"n":"Sabrina the Teenage Witch","l":"https://images.pluto.tv/channels/6512ecf63a0d700008db506a/colorLogoPNG.png","g":["Comedy"],"q":"","u":"https://jmp2.uk/plu-6512d72b473a540008592be5.m3u8"},{"n":"Sabrina the Teenage Witch DK","l":"https://images.pluto.tv/channels/6512ecf63a0d700008db506a/colorLogoPNG.png","g":["Comedy"],"q":"","u":"https://jmp2.uk/plu-6512ecf63a0d700008db506a.m3u8"},{"n":"Sabrina the Teenage Witch NO","l":"https://images.pluto.tv/channels/6512ecf63a0d700008db506a/colorLogoPNG.png","g":["Comedy"],"q":"","u":"https://jmp2.uk/plu-6512d3c96a84140008513ff5.m3u8"},{"n":"Sabrina: Total verhext!","l":"https://images.pluto.tv/channels/622f40c901d4b70007ad7609/colorLogoPNG.png","g":["Comedy"],"q":"","u":"https://jmp2.uk/plu-622f40c901d4b70007ad7609.m3u8"},{"n":"Sirippoli TV","l":"https://dtil.tmsimg.com/assets/s143791_ld_h9_aa.png?lock=720x540","g":["Comedy"],"q":"576p","u":"https://segment.yuppcdn.net/240122/siripoli/playlist.m3u8"},{"n":"Sitcom Legends","l":"https://images.pluto.tv/channels/633354b63df9700007f6a1b7/colorLogoPNG.png","g":["Comedy"],"q":"","u":"https://jmp2.uk/plu-633354b63df9700007f6a1b7.m3u8"},{"n":"Sketchy AF","l":"https://images.pluto.tv/channels/67882c1c7b11714b795c2008/colorLogoPNG.png","g":["Comedy"],"q":"","u":"https://jmp2.uk/plu-67882c1c7b11714b795c2008.m3u8"},{"n":"SNL Vault","l":"https://provider-static.plex.tv/epg/cms/production/712dae9e-9111-4bbc-8ea4-242e891ab5b3/snl-vault-fclogo-72-dpi-1500-x-1000-3-2-channel-logo-dark-plex-1.png","g":["Comedy"],"q":"1080p","u":"https://d4whmvwm0rdvi.cloudfront.net/10007/99993017/hls/master.m3u8?ads.xumo_channelId=99993017"},{"n":"South Park (Germany)","l":"https://images.pluto.tv/channels/628751bb7154a40007168843/colorLogoPNG_1748431640253.png","g":["Animation","Comedy"],"q":"","u":"https://jmp2.uk/plu-628751bb7154a40007168843.m3u8"},{"n":"South Park (Germany) GB","l":"https://images.pluto.tv/channels/628751bb7154a40007168843/colorLogoPNG_1748431640253.png","g":["Animation","Comedy"],"q":"","u":"https://jmp2.uk/plu-64edf6eaa7ec0d000812f58c.m3u8"},{"n":"South Park (Germany) IT","l":"https://images.pluto.tv/channels/628751bb7154a40007168843/colorLogoPNG_1748431640253.png","g":["Animation","Comedy"],"q":"","u":"https://jmp2.uk/plu-62bc1f502b70e3000706298e.m3u8"},{"n":"South Park (Sweden)","l":"https://images.pluto.tv/channels/61c098df897b9d00070375c8/colorLogoPNG_1754471522651.png","g":["Animation","Comedy"],"q":"","u":"https://jmp2.uk/plu-61c0b627e3ed94000793c18a.m3u8"},{"n":"South Park (Sweden) DK","l":"https://images.pluto.tv/channels/61c098df897b9d00070375c8/colorLogoPNG_1754471522651.png","g":["Animation","Comedy"],"q":"","u":"https://jmp2.uk/plu-61c098df897b9d00070375c8.m3u8"},{"n":"South Park (Sweden) NO","l":"https://images.pluto.tv/channels/61c098df897b9d00070375c8/colorLogoPNG_1754471522651.png","g":["Animation","Comedy"],"q":"","u":"https://jmp2.uk/plu-61c1e88cd168ea0007068133.m3u8"},{"n":"South Park (United States)","l":"https://images.pluto.tv/channels/62bdb1c5e25122000798ac79/colorLogoPNG.png","g":["Animation","Comedy"],"q":"","u":"https://jmp2.uk/plu-62bdb1c5e25122000798ac79.m3u8"},{"n":"South Park Armageddon","l":"https://images.pluto.tv/channels/660bff28516d260008479e23/colorLogoPNG.png","g":["Animation","Comedy"],"q":"","u":"https://jmp2.uk/plu-660bff7dc8311c0008b4bdb4.m3u8"},{"n":"South Park Armageddon DK","l":"https://images.pluto.tv/channels/660bff28516d260008479e23/colorLogoPNG.png","g":["Animation","Comedy"],"q":"","u":"https://jmp2.uk/plu-660bff28516d260008479e23.m3u8"},{"n":"South Park Armageddon NO","l":"https://images.pluto.tv/channels/660bff28516d260008479e23/colorLogoPNG.png","g":["Animation","Comedy"],"q":"","u":"https://jmp2.uk/plu-660bff5724e1d000085b7c07.m3u8"},{"n":"South Park En Francais","l":"https://images.pluto.tv/channels/62bdb919d36cbd0007e6ab8a/colorLogoPNG.png","g":["Animation","Comedy"],"q":"","u":"https://jmp2.uk/plu-62bdb919d36cbd0007e6ab8a.m3u8"},{"n":"South Park Rockin' Out","l":"https://images.pluto.tv/channels/664f132c8ea5560008ce4d86/colorLogoPNG.png","g":["Animation","Comedy"],"q":"","u":"https://jmp2.uk/plu-664f13aff9992200084a3532.m3u8"},{"n":"South Park Rockin' Out DK","l":"https://images.pluto.tv/channels/664f132c8ea5560008ce4d86/colorLogoPNG.png","g":["Animation","Comedy"],"q":"","u":"https://jmp2.uk/plu-664f132c8ea5560008ce4d86.m3u8"},{"n":"South Park Rockin' Out NO","l":"https://images.pluto.tv/channels/664f132c8ea5560008ce4d86/colorLogoPNG.png","g":["Animation","Comedy"],"q":"","u":"https://jmp2.uk/plu-664f1370f78a8500092df452.m3u8"},{"n":"South Park Version Original","l":"https://images.pluto.tv/channels/63d7a8e5a9957100086bfc23/colorLogoPNG.png","g":["Animation","Comedy"],"q":"","u":"https://jmp2.uk/plu-63d7a8e5a9957100086bfc23.m3u8"},{"n":"South Park: Butters Collection (Germany)","l":"https://images.pluto.tv/channels/646b14a0e94c3800082a8d3a/colorLogoPNG.png","g":["Animation","Comedy"],"q":"","u":"https://jmp2.uk/plu-646b14a0e94c3800082a8d3a.m3u8"},{"n":"South Park: Butters Collection (Sweden)","l":"https://images.pluto.tv/channels/65d87a66ec9fda0008a5ac11/colorLogoPNG.png","g":["Animation","Comedy"],"q":"","u":"https://jmp2.uk/plu-65d881d566eec8000887f6bb.m3u8"},{"n":"South Park: Butters Collection (Sweden) DK","l":"https://images.pluto.tv/channels/65d87a66ec9fda0008a5ac11/colorLogoPNG.png","g":["Animation","Comedy"],"q":"","u":"https://jmp2.uk/plu-65d87a66ec9fda0008a5ac11.m3u8"},{"n":"South Park: Butters Collection (Sweden) NO","l":"https://images.pluto.tv/channels/65d87a66ec9fda0008a5ac11/colorLogoPNG.png","g":["Animation","Comedy"],"q":"","u":"https://jmp2.uk/plu-65d87fcb66eec8000887f4aa.m3u8"},{"n":"South Park: Cartman Collection (Germany)","l":"https://images.pluto.tv/channels/646b14747cb4b1000875724d/colorLogoPNG.png","g":["Animation","Comedy"],"q":"","u":"https://jmp2.uk/plu-646b14747cb4b1000875724d.m3u8"},{"n":"South Park: Cartman Collection (Sweden)","l":"https://images.pluto.tv/channels/65d87a058145cb0008265c2e/colorLogoPNG.png","g":["Animation","Comedy"],"q":"","u":"https://jmp2.uk/plu-65d881b1332fec000833a122.m3u8"},{"n":"South Park: Cartman Collection (Sweden) DK","l":"https://images.pluto.tv/channels/65d87a058145cb0008265c2e/colorLogoPNG.png","g":["Animation","Comedy"],"q":"","u":"https://jmp2.uk/plu-65d87a058145cb0008265c2e.m3u8"},{"n":"South Park: Cartman Collection (Sweden) NO","l":"https://images.pluto.tv/channels/65d87a058145cb0008265c2e/colorLogoPNG.png","g":["Animation","Comedy"],"q":"","u":"https://jmp2.uk/plu-65d87fa0f7f0af0008b2358b.m3u8"},{"n":"South Park: Cartman Collection (United States)","l":"https://images.pluto.tv/channels/65df4934f7f0af0008c32545/colorLogoPNG.png","g":["Animation","Comedy"],"q":"","u":"https://jmp2.uk/plu-65df4934f7f0af0008c32545.m3u8"},{"n":"South Park: Colecao Cartman","l":"https://images.pluto.tv/channels/65df71008b24c80008f04281/colorLogoPNG.png","g":["Animation","Comedy"],"q":"","u":"https://jmp2.uk/plu-65df71008b24c80008f04281.m3u8"},{"n":"South Park: Colecao Kenny","l":"https://images.pluto.tv/channels/65df704366eec8000898e32f/colorLogoPNG.png","g":["Animation","Comedy"],"q":"","u":"https://jmp2.uk/plu-65df704366eec8000898e32f.m3u8"},{"n":"South Park: Colecao Kyle","l":"https://images.pluto.tv/channels/65df713dec9fda0008b7a81d/colorLogoPNG.png","g":["Animation","Comedy"],"q":"","u":"https://jmp2.uk/plu-65df713dec9fda0008b7a81d.m3u8"},{"n":"South Park: Colecao Stan","l":"https://images.pluto.tv/channels/65df70b0f7f0af0008c3b316/colorLogoPNG.png","g":["Animation","Comedy"],"q":"","u":"https://jmp2.uk/plu-65df70b0f7f0af0008c3b316.m3u8"},{"n":"South Park: Coleccion Cartman","l":"https://images.pluto.tv/channels/65df731cec9fda0008b7aa8d/colorLogoPNG.png","g":["Animation","Comedy"],"q":"","u":"https://jmp2.uk/plu-65df731cec9fda0008b7aa8d.m3u8"},{"n":"South Park: Coleccion Kenny","l":"https://images.pluto.tv/channels/65df7272ec9fda0008b7a970/colorLogoPNG.png","g":["Animation","Comedy"],"q":"","u":"https://jmp2.uk/plu-65df7272ec9fda0008b7a970.m3u8"},{"n":"South Park: Coleccion Kyle","l":"https://images.pluto.tv/channels/65df73520d4561000817c29b/colorLogoPNG.png","g":["Animation","Comedy"],"q":"","u":"https://jmp2.uk/plu-65df73520d4561000817c29b.m3u8"},{"n":"South Park: Coleccion Stan","l":"https://images.pluto.tv/channels/65df72db18036500081a8292/colorLogoPNG.png","g":["Animation","Comedy"],"q":"","u":"https://jmp2.uk/plu-65df72db18036500081a8292.m3u8"},{"n":"South Park: Into the Stars","l":"https://images.pluto.tv/channels/664f0eaa8ce31100088036bd/colorLogoPNG.png","g":["Animation","Comedy"],"q":"","u":"https://jmp2.uk/plu-664f0eea0120f40008bf97d6.m3u8"},{"n":"South Park: Into the Stars DK","l":"https://images.pluto.tv/channels/664f0eaa8ce31100088036bd/colorLogoPNG.png","g":["Animation","Comedy"],"q":"","u":"https://jmp2.uk/plu-664f0eaa8ce31100088036bd.m3u8"},{"n":"South Park: Into the Stars NO","l":"https://images.pluto.tv/channels/664f0eaa8ce31100088036bd/colorLogoPNG.png","g":["Animation","Comedy"],"q":"","u":"https://jmp2.uk/plu-664f0ecc41af640008e37b43.m3u8"},{"n":"South Park: Kenny Collection (Germany)","l":"https://images.pluto.tv/channels/646b1404ee6a2f00082b5d66/colorLogoPNG.png","g":["Animation","Comedy"],"q":"","u":"https://jmp2.uk/plu-646b1404ee6a2f00082b5d66.m3u8"},{"n":"South Park: Kenny Collection (Sweden)","l":"https://images.pluto.tv/channels/65d879bd0d4561000805d190/colorLogoPNG.png","g":["Animation","Comedy"],"q":"","u":"https://jmp2.uk/plu-65d880cea25d5e0008315b0a.m3u8"},{"n":"South Park: Kenny Collection (Sweden) DK","l":"https://images.pluto.tv/channels/65d879bd0d4561000805d190/colorLogoPNG.png","g":["Animation","Comedy"],"q":"","u":"https://jmp2.uk/plu-65d879bd0d4561000805d190.m3u8"},{"n":"South Park: Kenny Collection (Sweden) NO","l":"https://images.pluto.tv/channels/65d879bd0d4561000805d190/colorLogoPNG.png","g":["Animation","Comedy"],"q":"","u":"https://jmp2.uk/plu-65d87f53ec9fda0008a5b810.m3u8"},{"n":"South Park: Kenny Collection (United States)","l":"https://images.pluto.tv/channels/65df47f428730900089f83ac/colorLogoPNG.png","g":["Animation","Comedy"],"q":"","u":"https://jmp2.uk/plu-65df47f428730900089f83ac.m3u8"},{"n":"South Park: Kyle Collection (Germany)","l":"https://images.pluto.tv/channels/646b14d0e1979c0008915a09/colorLogoPNG.png","g":["Animation","Comedy"],"q":"","u":"https://jmp2.uk/plu-646b14d0e1979c0008915a09.m3u8"},{"n":"South Park: Kyle Collection (Sweden)","l":"https://images.pluto.tv/channels/65d87a908145cb0008265c6d/colorLogoPNG.png","g":["Animation","Comedy"],"q":"","u":"https://jmp2.uk/plu-65d882394e01740008a36768.m3u8"},{"n":"South Park: Kyle Collection (Sweden) DK","l":"https://images.pluto.tv/channels/65d87a908145cb0008265c6d/colorLogoPNG.png","g":["Animation","Comedy"],"q":"","u":"https://jmp2.uk/plu-65d87a908145cb0008265c6d.m3u8"},{"n":"South Park: Kyle Collection (Sweden) NO","l":"https://images.pluto.tv/channels/65d87a908145cb0008265c6d/colorLogoPNG.png","g":["Animation","Comedy"],"q":"","u":"https://jmp2.uk/plu-65d88004ec9fda0008a5b8b3.m3u8"},{"n":"South Park: Kyle Collection (United States)","l":"https://images.pluto.tv/channels/65df49b30d45610008172c5b/colorLogoPNG.png","g":["Animation","Comedy"],"q":"","u":"https://jmp2.uk/plu-65df49b30d45610008172c5b.m3u8"},{"n":"South Park: Original Version","l":"https://images.pluto.tv/channels/646b150a15939400089e2702/colorLogoPNG.png","g":["Animation","Comedy"],"q":"","u":"https://jmp2.uk/plu-646b150a15939400089e2702.m3u8"},{"n":"South Park: Stan Collection (Germany)","l":"https://images.pluto.tv/channels/646b1438e94c3800082a8cff/colorLogoPNG.png","g":["Animation","Comedy"],"q":"","u":"https://jmp2.uk/plu-646b1438e94c3800082a8cff.m3u8"},{"n":"South Park: Stan Collection (Sweden)","l":"https://images.pluto.tv/channels/65d879e266eec8000887e91b/colorLogoPNG.png","g":["Animation","Comedy"],"q":"","u":"https://jmp2.uk/plu-65d881914e01740008a36603.m3u8"},{"n":"South Park: Stan Collection (Sweden) DK","l":"https://images.pluto.tv/channels/65d879e266eec8000887e91b/colorLogoPNG.png","g":["Animation","Comedy"],"q":"","u":"https://jmp2.uk/plu-65d879e266eec8000887e91b.m3u8"},{"n":"South Park: Stan Collection (Sweden) NO","l":"https://images.pluto.tv/channels/65d879e266eec8000887e91b/colorLogoPNG.png","g":["Animation","Comedy"],"q":"","u":"https://jmp2.uk/plu-65d87f7a28730900088e7fbf.m3u8"},{"n":"South Park: Stan Collection (United States)","l":"https://images.pluto.tv/channels/65df48ba28730900089f8480/colorLogoPNG.png","g":["Animation","Comedy"],"q":"","u":"https://jmp2.uk/plu-65df48ba28730900089f8480.m3u8"},{"n":"South Park: Welcome to Canada!","l":"https://images.pluto.tv/channels/663115d923e24f000843b49c/colorLogoPNG.png","g":["Animation","Comedy"],"q":"","u":"https://jmp2.uk/plu-663115d923e24f000843b49c.m3u8"},{"n":"Star Comedy","l":"https://upload.wikimedia.org/wikipedia/commons/thumb/5/5a/Star_Comedy_2024.svg/960px-Star_Comedy_2024.svg.png","g":["Comedy"],"q":"","u":"http://znty.dyndns.org:5010/hls/foxcomedy.m3u8"},{"n":"Starz Comedy","l":"https://i.imgur.com/JpKvjZe.png","g":["Comedy"],"q":"1080p","u":"http://23.237.104.106:8080/USA_STARZ_COMEDY/index.m3u8"},{"n":"Takeshi's Castle","l":"https://images.pluto.tv/channels/6054a9f4bc8a5f000771504c/colorLogoPNG.png","g":["Comedy"],"q":"","u":"https://jmp2.uk/plu-6054a9f4bc8a5f000771504c.m3u8"},{"n":"Telecyan","l":"https://i.imgur.com/9BnHCj5.png","g":["Comedy","Series"],"q":"720p","u":"https://183.giatvcdn.com/giatvplayout7/giatv-211227/playlist.m3u8"},{"n":"The Beverly Hillbillies","l":"https://images.pluto.tv/channels/6565fefdc917a50008485cc6/colorLogoPNG.png","g":["Classic","Comedy"],"q":"","u":"https://jmp2.uk/plu-6565fefdc917a50008485cc6.m3u8"},{"n":"The Chat Show Channel","l":"https://yt3.googleusercontent.com/aQ_vvywmcBt4X1SmeEMgT3uf7bb1Z__I9XVwabeg7RrSSEuIhswMlvwhyi0Wl4PlLHwXufLgOg=s900-c-k-c0x00ffffff-no-rj","g":["Comedy","Series"],"q":"1080p","u":"https://amg00426-littledotstudio-thechatshow-samsungnz-uqmtt.amagi.tv/playlist/amg00426-littledotstudio-thechatshow-samsungnz/playlist.m3u8"},{"n":"The Conners","l":"https://provider-static.plex.tv/epg/cms/production/3acd803e-a5e3-430c-a34e-508123d2bd95/TheConners_1500x1000_Logo_Dark.png","g":["Comedy","Series"],"q":"","u":"https://jmp2.uk/plu-66e2a94d167a8b000813485d.m3u8"},{"n":"Tosh.0 (Sweden)","l":"https://images.pluto.tv/channels/65e977042873090008b48be9/colorLogoPNG.png","g":["Comedy"],"q":"","u":"https://jmp2.uk/plu-65e97856ec9fda0008cb453c.m3u8"},{"n":"Tosh.0 (Sweden) DK","l":"https://images.pluto.tv/channels/65e977042873090008b48be9/colorLogoPNG.png","g":["Comedy"],"q":"","u":"https://jmp2.uk/plu-65e977042873090008b48be9.m3u8"},{"n":"Tosh.0 (Sweden) NO","l":"https://images.pluto.tv/channels/65e977042873090008b48be9/colorLogoPNG.png","g":["Comedy"],"q":"","u":"https://jmp2.uk/plu-65e977c48b24c8000805b9ef.m3u8"},{"n":"TV2 Comedy","l":"https://i.imgur.com/B02hbcV.png","g":["Comedy"],"q":"","u":"http://88.212.7.14/live/tv2_comedy/index.m3u8"},{"n":"TV Land Sitcoms","l":"https://i.imgur.com/phHHs7l.png","g":["Comedy"],"q":"","u":"https://jmp2.uk/plu-5c2d64ffbdf11b71587184b8.m3u8"},{"n":"TVMatic Comedy","l":"https://i.imgur.com/l5PBcKN.png","g":["Comedy"],"q":"720p","u":"http://cdn.tvmatic.net/comedy.m3u8"},{"n":"Tvoye TV Yumor","l":"https://smotret.tv/images/tvoe-tv-yumor.webp","g":["Comedy"],"q":"1080p","u":"http://tvoetv.space:8080/tvoetv_humor/index.m3u8"},{"n":"TVS Comedy Network","l":"https://i.imgur.com/rXORbti.png","g":["Comedy"],"q":"720p","u":"https://rpn.bozztv.com/gusa/gusa-tvscomedy/index.m3u8"},{"n":"Universal Comedy","l":"https://i.imgur.com/avBL8pQ.png","g":["Comedy","Movies","Series"],"q":"1080p","u":"http://bantel-cdn1.iptvperu.tv:1935/btnscrtn/universalcomedy/playlist.m3u8"},{"n":"USA Network","l":"https://upload.wikimedia.org/wikipedia/commons/thumb/d/d7/USA_Network_logo_%282016%29.svg/960px-USA_Network_logo_%282016%29.svg.png","g":["Comedy","Movies","Series","Sports"],"q":"720p","u":"http://200.32.231.178/USA_NETWORK/index.m3u8"},{"n":"Vaya semanita","l":"https://i.imgur.com/0bCLNUG.png","g":["Comedy"],"q":"","u":"https://jmp2.uk/plu-5f28009b150b2500077766b8.m3u8"},{"n":"Velvet. Series Hits","l":"https://antiabuse-container.b-cdn.net/serialyhity.png","g":["Comedy","Family","Series"],"q":"1080p","u":"https://cdn.rostelekom-tv.xyz/live/DeWr3Sgw1Aj2lJd0.m3u8"},{"n":"Velvet. World Series","l":"https://antiabuse-container.b-cdn.net/mirseriallogo.png","g":["Comedy","Family","Series"],"q":"1080p","u":"https://cdn.rostelekom-tv.xyz/live/2RR44py-yGlIWQIp.m3u8"},{"n":"Viasat Kino Comedy","l":"https://i.imgur.com/qVYt8kP.png","g":["Comedy","Movies"],"q":"","u":"http://777905.live.tvstitch.com/playlist.m3u8?master=249&source=aHR0cDovLzE3Ni4xMjIuMTAzLjI0MTo3MDAwL2NoNDQvdHJhY2tzLXYxYTEvbW9uby5tM3U4P2xpdmU9MSZpcD0xNzguMTM2LjQyLjIyMCZpZD05NDg4NjUmc2VjcmV0PW4xdTd1aTA2JnNzbD0xJjIxeW89MCZlPTE3OTA1OTk4Mzcmc3Q9UzRPS1VZemNocmREQWhnSTJkTDJ5QQ=="},{"n":"viju+ Comedy HD","l":"https://i.imgur.com/YoNOFu7.png","g":["Comedy"],"q":"1080p","u":"http://46.53.200.153:7777/play/Viju_Comedy_HD/index.m3u8"},{"n":"Zee Comedy Nation","l":"https://tvpnlogopus.samsungcloud.tv/platform/image/sourcelogo/vc/00/02/34/IN2100002GD_20260325T012327SQUARE.png","g":["Comedy"],"q":"1080p","u":"https://amg00862-amg00862c5-amgplt0173.playout.now3.amagi.tv/playlist/amg00862-amg00862c5-amgplt0173/playlist.m3u8"}];</script>
+  <div class="top">
+    <div class="brand"><b>SPRtix</b><span>Comedy CHANNELS</span></div>
+    <input type="search" id="searchInput" class="search" placeholder="Search channels..." autocomplete="off" aria-label="Search channels">
+    <div class="chips" id="chips" role="group" aria-label="Categories"></div>
+    <div class="count" id="count"></div>
+  </div>
+  <div class="grid" id="grid"></div>
+</div>
+
+<div id="toastPopup" class="toast-popup">Message</div>
+<input type="file" id="fileInput" accept=".m3u,.m3u8,.txt,text/plain,audio/x-mpegurl,application/vnd.apple.mpegurl" style="display:none">
+
+<!-- Video.js 8 already includes HLS (m3u8) support -->
+<script src="https://vjs.zencdn.net/8.10.0/video.min.js"></script>
+<script>if(!window.videojs){document.write('<script src="https://cdn.jsdelivr.net/npm/video.js@8.10.0/dist/video.min.js"><\/script>');}</script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/hls.js/1.5.13/hls.min.js"></script>
+<script>if(!window.Hls){document.write('<script src="https://cdn.jsdelivr.net/npm/hls.js@1.5.13/dist/hls.min.js"><\/script>');}</script>
+<script>
+const PLACEHOLDER = 'data:image/svg+xml;utf8,' + encodeURIComponent(
+  '<svg xmlns="http://www.w3.org/2000/svg" width="100" height="70" viewBox="0 0 100 70"><rect width="100" height="70" fill="#0f172a"/><text x="50" y="40" font-size="14" fill="#00f2fe" text-anchor="middle" font-family="Arial">SPRtix</text></svg>'
+);
+let playerInstance = null;
+let playerOpen = false, pushedState = false;
+let cat = 'All', term = '';
+const dead = new Set();
+
+function esc(str){return String(str==null?'':str).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
+function safeImg(url){return esc(url||PLACEHOLDER);}
+let toastTimer;
+function showToast(msg){
+  const t=document.getElementById('toastPopup'); t.textContent=msg; t.classList.add('show');
+  clearTimeout(toastTimer); toastTimer=setTimeout(()=>t.classList.remove('show'),3500);
+}
+
+/* ---------------- PLAYER (index.html wala same player) ---------------- */
+let hls = null, triedNative = false;
+function destroyHls(){ if (hls) { try { hls.destroy(); } catch(e){} hls = null; } }
+function initHlsPlayer(){
+  const v = document.getElementById('videoPlayer');
+  v.addEventListener('error', () => {
+    if (!v.getAttribute('src')) return;
+    if (window.currentIdx != null) markDead(window.currentIdx);
+    showToast('Stream error: link offline, blocked ya geo-restricted ho sakta hai');
+  });
+  playerInstance = {
+    pause(){ v.pause(); },
+    reset(){ destroyHls(); v.pause(); v.removeAttribute('src'); v.load(); }
+  };
+}
+
+function detectType(url){
+  const u = url.split('?')[0].split('#')[0].toLowerCase();
+  if (u.endsWith('.mp4') || u.endsWith('.m4v')) return 'video/mp4';
+  if (u.endsWith('.webm')) return 'video/webm';
+  if (u.endsWith('.ogv') || u.endsWith('.ogg')) return 'video/ogg';
+  if (u.endsWith('.mkv')) return 'video/webm';
+  if (u.endsWith('.mpd')) return 'application/dash+xml';
+  // .m3u8, and also links with no extension (most live TV / IPTV links) are treated as HLS
+  return 'application/x-mpegURL';
+}
+
+function playStreamHls(url, title){
+  url = (url || '').trim();
+  if (!url) { showToast('Stream URL not available!'); return; }
+  document.getElementById('playerTitle').innerText = title || 'Live Stream';
+  document.getElementById('playerModal').classList.add('active');
+  document.body.classList.add('playing');
+  if (!playerOpen) {
+    playerOpen = true;
+    try { history.pushState({player:1}, ''); pushedState = true; } catch(e) { pushedState = false; }
+  }
+  window.scrollTo({top:0, behavior:'smooth'});
+  const v = document.getElementById('videoPlayer');
+  playerInstance.reset();
+  triedNative = false;
+  const type = detectType(url);
+  const tryPlay = () => { const p = v.play(); if (p && p.catch) p.catch(() => {}); };
+  const playNative = () => { v.src = url; v.load(); tryPlay(); };
+
+  if (type !== 'application/x-mpegURL') { playNative(); return; }   // mp4 / webm etc.
+
+  if (window.Hls && Hls.isSupported()) {
+    hls = new Hls({ enableWorker: false, lowLatencyMode: false, maxBufferLength: 30, manifestLoadingMaxRetry: 2, levelLoadingMaxRetry: 2, fragLoadingMaxRetry: 3 });
+    const myHls = hls;
+    hls.on(Hls.Events.MANIFEST_PARSED, tryPlay);
+    hls.on(Hls.Events.ERROR, (ev, d) => {
+      if (!d.fatal || hls !== myHls) return;
+      if (d.type === Hls.ErrorTypes.MEDIA_ERROR) { myHls.recoverMediaError(); return; }
+      // network / manifest problem: ek baar browser ke native player se koshish
+      destroyHls();
+      if (!triedNative && v.canPlayType('application/vnd.apple.mpegurl')) { triedNative = true; playNative(); return; }
+      if (window.currentIdx != null) markDead(window.currentIdx);
+      showToast('Stream error: link offline, blocked (CORS) ya geo-restricted ho sakta hai');
+    });
+    hls.loadSource(url);
+    hls.attachMedia(v);
+  } else {
+    playNative();   // Safari / native HLS
+  }
+}
+
+let useVjs = false;
+function initPlayer(){
+  if (typeof videojs === 'undefined') { useVjs = false; initHlsPlayer(); return; }
+  playerInstance = videojs('videoPlayer', {
+    fill: true, controls: true, autoplay: false, preload: 'auto', playsinline: true,
+    html5: {
+      vhs: { overrideNative: true, enableLowInitialPlaylist: true, smoothQualityChange: true, withCredentials: false },
+      nativeAudioTracks: false, nativeVideoTracks: false
+    }
+  });
+  useVjs = true;
+  playerInstance.on('error', () => {
+    const err = playerInstance.error();
+    if (err) {
+      console.error('Player error:', err);
+      if (window.currentIdx != null) markDead(window.currentIdx);
+      showToast('Stream error: link may be offline, blocked (CORS) or http on https');
+    }
+  });
+}
+
+function playStream(url, title){
+  if (!useVjs) { playStreamHls(url, title); return; }
+  url = (url || '').trim();
+  if (!url) { showToast('Stream URL not available!'); return; }
+  document.getElementById('playerTitle').innerText = title || 'Live Stream';
+  document.getElementById('playerModal').classList.add('active');
+  document.body.classList.add('playing');
+  if (!playerOpen) {
+    playerOpen = true;
+    try { history.pushState({player:1}, ''); pushedState = true; } catch(e) { pushedState = false; }
+  }
+  window.scrollTo({top:0, behavior:'smooth'});
+  playerInstance.pause();
+  playerInstance.reset();
+  playerInstance.src({ src: url, type: detectType(url) });
+  playerInstance.load();
+  const p = playerInstance.play();
+  if (p && p.catch) p.catch(() => {});
+}
+
+function doClosePlayer(){
+  document.getElementById('playerModal').classList.remove('active');
+  document.body.classList.remove('playing');
+  document.querySelectorAll('.channel-card.playing').forEach(c => c.classList.remove('playing'));
+  playerInstance.pause();
+  playerInstance.reset(); // fully stops the stream so it stops downloading in background
+  window.currentIdx = null;
+  playerOpen = false;
+}
+// X button / Escape: agar history entry push hui thi to back() chalao, popstate player band karega
+function closePlayer(){
+  if (!playerOpen) return;
+  if (pushedState) { pushedState = false; history.back(); }
+  else doClosePlayer();
+}
+// Phone/browser Back button: pehle player band hoga, dobara back dabane par page wapis jayega
+window.addEventListener('popstate', () => { if (playerOpen) { pushedState = false; doClosePlayer(); } });
+
+function markDead(i){
+  dead.add(i);
+  const c = document.querySelector('.channel-card[data-i="'+i+'"]'); if (c) c.classList.add('dead');
+}
+
+/* ---- AUTO background colour: image ke kinaron ka sab se zyada aane wala rang (index.html se) ---- */
+const bgColorCache = {};
+function applyAutoBg(wrap, url){
+  if (!url) return;
+  const paint = (rgb) => {
+    wrap.style.backgroundColor = rgb;
+    const blurImg = wrap.querySelector('.thumb-bg');
+    if (blurImg) blurImg.style.display = 'none';
+  };
+  if (bgColorCache[url]) { paint(bgColorCache[url]); return; }
+  const probe = new Image();
+  probe.crossOrigin = 'anonymous';
+  probe.onload = () => {
+    try {
+      const S = 40;
+      const cv = document.createElement('canvas'); cv.width = S; cv.height = S;
+      const ctx = cv.getContext('2d', { willReadFrequently: true });
+      ctx.drawImage(probe, 0, 0, S, S);
+      const d = ctx.getImageData(0, 0, S, S).data;
+      const buckets = {}; let best = null, bestCount = 0, opaque = 0;
+      const take = (x, y) => {
+        const i = (y * S + x) * 4;
+        if (d[i + 3] < 40) return;
+        opaque++;
+        const key = (d[i] >> 5) + ',' + (d[i + 1] >> 5) + ',' + (d[i + 2] >> 5);
+        const b = buckets[key] || (buckets[key] = { n: 0, r: 0, g: 0, b: 0 });
+        b.n++; b.r += d[i]; b.g += d[i + 1]; b.b += d[i + 2];
+        if (b.n > bestCount) { bestCount = b.n; best = b; }
+      };
+      for (let k = 0; k < S; k++) { take(k, 0); take(k, S - 1); take(0, k); take(S - 1, k); }
+      if (!best || opaque < S) return;
+      const rgb = `rgb(${Math.round(best.r / best.n)},${Math.round(best.g / best.n)},${Math.round(best.b / best.n)})`;
+      bgColorCache[url] = rgb; paint(rgb);
+    } catch (e) { /* CORS block: blur wala background hi chalega */ }
+  };
+  probe.src = url;
+}
+
+/* ---------------- GRID ---------------- */
+function initials(n){return (n.replace(/[^A-Za-z0-9 ]/g,'').trim().split(/\s+/).slice(0,2).map(w=>w[0]).join('')||'?').toUpperCase();}
+
+function buildCard(i){
+  const c = CHANNELS[i];
+  const card = document.createElement('div');
+  card.className = 'channel-card' + (dead.has(i) ? ' dead' : '');
+  card.dataset.i = i;
+  card.setAttribute('role','button'); card.tabIndex = 0;
+  card.innerHTML = `
+    <div class="thumb-wrap"></div>
+    <div class="channel-logo-text">${esc(c.n)}</div>
+    <div class="channel-footer">
+      <span class="live-badge">LIVE</span>
+      <span class="view-count">${esc(c.q || 'Online')}</span>
+    </div>`;
+  const wrap = card.querySelector('.thumb-wrap');
+  const fallback = () => { wrap.innerHTML = '<div class="ini">'+esc(initials(c.n))+'</div>'; wrap.style.backgroundColor='#111827'; };
+  if (!c.l) fallback();
+  else {
+    wrap.innerHTML = `<img src="${safeImg(c.l)}" class="thumb-bg" alt="" referrerpolicy="no-referrer"><img src="${safeImg(c.l)}" class="card-thumb" loading="lazy" alt="" referrerpolicy="no-referrer">`;
+    const px = 'https://wsrv.nl/?url=' + encodeURIComponent(c.l.replace(/^https?:\/\//,'')) + '&w=200';
+    wrap.querySelectorAll('img').forEach(im => {
+      let retried = false;
+      im.onerror = () => { if (!retried) { retried = true; im.src = px; } else fallback(); };
+    });
+    applyAutoBg(wrap, c.l);
+  }
+  return card;
+}
+
+function render(){
+  const t = term.trim().toLowerCase();
+  const grid = document.getElementById('grid');
+  grid.innerHTML = '';
+  const frag = document.createDocumentFragment();
+  let n = 0;
+  CHANNELS.forEach((c,i) => {
+    if (cat !== 'All' && !c.g.includes(cat)) return;
+    if (t && !c.n.toLowerCase().includes(t)) return;
+    frag.appendChild(buildCard(i)); n++;
+  });
+  grid.appendChild(frag);
+  if (!CHANNELS.length) { showLoader(); document.getElementById('count').textContent = ''; return; }
+  if (!n) grid.innerHTML = '<div class="empty-msg">No channels found.</div>';
+  document.getElementById('count').textContent = n + ' of ' + CHANNELS.length + ' channels';
+}
+
+function buildChips(){
+  const counts = {};
+  CHANNELS.forEach(c => c.g.forEach(g => counts[g] = (counts[g]||0)+1));
+  const names = ['All', ...Object.keys(counts).sort((a,b)=>((b==='Pakistan')-(a==='Pakistan'))||(counts[b]-counts[a]))];
+  const box = document.getElementById('chips');
+  box.innerHTML = '';
+  names.forEach(n => {
+    const b = document.createElement('button');
+    b.className = 'chip'; b.textContent = n === 'All' ? 'All' : n + ' ' + counts[n];
+    b.setAttribute('aria-pressed', n === cat);
+    b.onclick = () => { cat = n; [...box.children].forEach((x,k)=>x.setAttribute('aria-pressed', names[k]===cat)); render(); };
+    box.appendChild(b);
+  });
+}
+
+
+/* ---------------- PLAYLIST LOADER ---------------- */
+const STORE_KEY = 'sprtix_news_playlist';
+
+function parseM3U(text){
+  const lines = String(text).split(/\r?\n/), out = [];
+  for (let i = 0; i < lines.length; i++) {
+    const l = lines[i].trim();
+    if (!l.startsWith('#EXTINF')) continue;
+    const m = l.match(/,([^,]*)$/);                       // naam hamesha aakhri comma ke baad hota hai
+    let name = (m ? m[1] : '').trim();
+    const logo = (l.match(/tvg-logo="([^"]*)"/) || [])[1] || '';
+    const grp  = (l.match(/group-title="([^"]*)"/) || [])[1] || '';
+    let j = i + 1;
+    while (j < lines.length && lines[j].trim() && lines[j].trim().startsWith('#') && !lines[j].trim().startsWith('#EXTINF')) j++;
+    while (j < lines.length && !lines[j].trim()) j++;
+    const url = (lines[j] || '').trim();
+    if (!url || url.startsWith('#')) continue;            // URL missing: is entry ko chor do
+    let tag = '';
+    name = name.replace(/\s*\[([^\]]+)\]\s*/g, (_, t) => { tag = t; return ' '; }).trim();
+    const q = name.match(/\s*\(([^)]*\d+[pi])\)\s*$/);
+    let quality = '';
+    if (q) { quality = q[1]; name = name.slice(0, q.index).trim(); }
+    if (!name) continue;
+    const g = grp.split(';').map(x => x.trim()).filter(Boolean);
+    out.push({ n: name, l: logo, g: g.length ? g : ['Other'], q: /geo/i.test(tag) ? 'Geo-blocked' : (quality || ''), u: url });
+    i = j;
+  }
+  return out;
+}
+
+function setPlaylist(text, save){
+  const list = parseM3U(text);
+  if (!list.length) { showToast('Is file mein koi channel nahi mila (#EXTINF lines chahiye)'); return false; }
+  CHANNELS = list; cat = 'All'; term = ''; dead.clear();
+  document.getElementById('searchInput').value = '';
+  buildChips(); render();
+  if (save) { try { localStorage.setItem(STORE_KEY, text); } catch (e) {} }
+  showToast(list.length + ' channels loaded');
+  return true;
+}
+
+function showLoader(){
+  const grid = document.getElementById('grid');
+  grid.innerHTML = `
+    <div class="loader">
+      <h3>News playlist load karein</h3>
+      <p>Apni news playlist (.m3u / .txt) select karein ya neeche paste karein. Ek baar load karne ke baad ye browser mein save rehti hai.</p>
+      <button class="go" type="button" id="pickBtn">Playlist file select karein</button>
+      <textarea id="pasteBox" placeholder="#EXTM3U ... yahan paste karein"></textarea>
+      <button class="go alt" type="button" id="pasteBtn">Paste se load karein</button>
+    </div>`;
+  document.getElementById('pickBtn').onclick = () => document.getElementById('fileInput').click();
+  document.getElementById('pasteBtn').onclick = () => setPlaylist(document.getElementById('pasteBox').value, true);
+}
+
+function openChannel(card){
+  const i = +card.dataset.i, c = CHANNELS[i];
+  dead.delete(i); card.classList.remove('dead');
+  window.currentIdx = i;
+  document.querySelectorAll('.channel-card.playing').forEach(x => x.classList.remove('playing'));
+  card.classList.add('playing');
+  playStream(c.u, c.n);
+}
+
+window.addEventListener('DOMContentLoaded', () => {
+  try { initPlayer(); } catch (e) { console.error(e); try { useVjs = false; initHlsPlayer(); } catch (e2) {} }
+  document.getElementById('fileInput').addEventListener('change', e => {
+    const f = e.target.files[0]; if (!f) return;
+    const r = new FileReader(); r.onload = () => setPlaylist(r.result, true); r.readAsText(f); e.target.value = '';
+  });
+  if (!CHANNELS.length) {
+    try { const saved = localStorage.getItem(STORE_KEY); if (saved) CHANNELS = parseM3U(saved); } catch (e) {}
+  }
+  buildChips();
+  render();
+
+  const grid = document.getElementById('grid');
+  grid.addEventListener('click', e => { const c = e.target.closest('.channel-card'); if (c) openChannel(c); });
+  grid.addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' ') { const c = e.target.closest('.channel-card'); if (c) { e.preventDefault(); openChannel(c); } } });
+  let st; document.getElementById('searchInput').addEventListener('input', e => { term = e.target.value; clearTimeout(st); st = setTimeout(render, 120); });
+  document.addEventListener('keydown', e => { if (e.key === 'Escape') closePlayer(); });
+});
+</script>
+</body>
+</html>
