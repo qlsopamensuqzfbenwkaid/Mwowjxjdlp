@@ -1,0 +1,432 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="referrer" content="no-referrer">
+<title>SPRtix - France CHANNELS</title>
+<link href="https://vjs.zencdn.net/8.10.0/video-js.css" rel="stylesheet" />
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<style>
+*{margin:0;padding:0;box-sizing:border-box;font-family:'Poppins',sans-serif;-webkit-tap-highlight-color:transparent}
+body{background:radial-gradient(circle at top,#0f172a 0%,#030712 70%) fixed;background-color:#030712;color:#fff;min-height:100vh}
+.page{max-width:1100px;margin:0 auto;padding-bottom:40px}
+
+.top{position:sticky;top:0;z-index:30;background:rgba(3,7,18,.95);backdrop-filter:blur(10px);border-bottom:1px solid rgba(0,242,254,.2);padding:12px 16px 8px}
+.brand{display:flex;align-items:baseline;gap:10px;margin-bottom:10px}
+.brand b{font-size:20px;font-weight:700;letter-spacing:.5px}
+.brand span{font-size:9px;letter-spacing:1.5px;color:#94a3b8}
+.loadbtn{margin-left:auto;background:transparent;border:1px solid rgba(0,242,254,.5);color:#00f2fe;border-radius:999px;padding:4px 12px;font-size:11px;cursor:pointer}
+.loader{grid-column:1/-1;max-width:520px;margin:20px auto;text-align:center;display:flex;flex-direction:column;gap:12px;align-items:center}
+.loader h3{font-size:16px}.loader p{font-size:12px;color:#94a3b8;line-height:1.6}
+.loader textarea{width:100%;height:110px;background:#0f172a;border:1px solid rgba(0,242,254,.4);border-radius:10px;color:#fff;padding:10px;font-size:11px;resize:vertical;outline:none}
+.loader .go{background:#00f2fe;color:#030712;border:0;border-radius:999px;padding:8px 22px;font-weight:600;font-size:12px;cursor:pointer}
+.loader .go.alt{background:transparent;color:#00f2fe;border:1px solid #00f2fe}
+.search{width:100%;max-width:460px;background:#0f172a;border:1px solid #00f2fe;border-radius:20px;padding:8px 16px;color:#fff;font-size:13px;outline:none}
+.search::placeholder{color:#64748b}
+.chips{display:flex;gap:8px;overflow-x:auto;padding:10px 0 4px;scrollbar-width:none}
+.chips::-webkit-scrollbar{display:none}
+.chip{flex:none;background:transparent;border:1px solid rgba(255,255,255,.15);color:#94a3b8;border-radius:999px;padding:4px 13px;font-size:11px;cursor:pointer}
+.chip[aria-pressed=true]{background:#00f2fe;border-color:#00f2fe;color:#030712;font-weight:600}
+.count{font-size:10px;color:#64748b;padding:2px 2px 0}
+
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(104px,1fr));gap:10px;padding:14px 16px}
+.channel-card{position:relative;background:rgba(15,23,42,.7);border:1px solid rgba(255,255,255,.08);border-radius:12px;padding:12px 6px 8px;display:flex;flex-direction:column;align-items:center;gap:7px;cursor:pointer;transition:transform .2s,border-color .2s;min-width:0}
+.channel-card:hover{transform:translateY(-2px);border-color:#00f2fe}
+.channel-card.dead{opacity:.4}
+.thumb-wrap{position:relative;width:76px;height:76px;border-radius:50%;overflow:hidden;background:#111827;flex-shrink:0;border:2px solid rgba(0,242,254,.55);box-shadow:0 0 10px rgba(0,242,254,.25)}
+.thumb-bg{position:absolute;inset:-12px;width:calc(100% + 24px);height:calc(100% + 24px);object-fit:cover;filter:blur(12px) brightness(.55) saturate(1.3)}
+.card-thumb{position:relative;z-index:1;width:100%;height:100%;object-fit:contain;object-position:center;padding:15%;display:block}
+.ini{position:relative;z-index:1;width:100%;height:100%;display:grid;place-items:center;font-weight:700;font-size:20px;color:#00f2fe}
+.channel-logo-text{font-size:10.5px;font-weight:600;text-align:center;line-height:1.2;width:100%;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;padding:0 4px}
+.channel-footer{width:100%;display:flex;justify-content:space-between;align-items:center;font-size:8px;padding:0 4px}
+.live-badge{background:#ff0055;color:#fff;padding:2px 5px;border-radius:3px;font-weight:700;font-size:7px}
+.view-count{color:#94a3b8}
+.empty-msg{padding:30px 16px;font-size:13px;color:#94a3b8;grid-column:1/-1}
+
+/* ---- player modal: same as index.html ---- */
+.player-modal{position:sticky;top:0;background:#000;z-index:150;display:none;flex-direction:column;border-bottom:1px solid rgba(0,242,254,.3)}
+.player-modal.active{display:flex}
+.player-header{display:flex;justify-content:space-between;align-items:center;padding:12px 16px;background:rgba(3,7,18,.95);border-bottom:1px solid rgba(0,242,254,.2);flex-shrink:0}
+.player-title{font-size:13px;font-weight:700;color:#00f2fe;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:80%}
+.player-close{color:#fff;font-size:16px;cursor:pointer;background:#ff0055;width:26px;height:26px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.player-body{position:relative;background:#000;width:100%;aspect-ratio:16/9;max-height:45vh}
+body.playing .top{position:static}
+.channel-card.playing{border-color:#00f2fe;box-shadow:0 0 12px rgba(0,242,254,.45)}
+.player-body>video{position:absolute;inset:0;width:100%;height:100%;background:#000}
+.player-body .video-js{position:absolute;inset:0;width:100%;height:100%;background-color:#000}
+
+.toast-popup{position:fixed;top:70px;left:50%;transform:translateX(-50%) translateY(-15px);background:rgba(15,23,42,.95);border:1px solid #00f2fe;color:#fff;padding:8px 16px;border-radius:20px;font-size:11px;box-shadow:0 5px 15px rgba(0,0,0,.5);opacity:0;pointer-events:none;transition:.3s;z-index:300;max-width:90vw;text-align:center}
+.toast-popup.show{opacity:1;transform:translateX(-50%) translateY(0)}
+:focus-visible{outline:2px solid #00f2fe;outline-offset:2px}
+@media (min-width:700px){.thumb-wrap{width:88px;height:88px}.grid{grid-template-columns:repeat(auto-fill,minmax(124px,1fr))}}
+</style>
+</head>
+<body>
+
+<div class="page">
+<!-- Video Player Modal -->
+<div id="playerModal" class="player-modal">
+  <div class="player-header">
+    <div id="playerTitle" class="player-title">Playing Content</div>
+    <div class="player-close" onclick="closePlayer()"><i class="fa-solid fa-xmark"></i></div>
+  </div>
+  <div class="player-body">
+    <video id="videoPlayer" class="video-js vjs-default-skin vjs-big-play-centered" controls preload="auto" playsinline webkit-playsinline></video>
+  </div>
+</div>
+
+<script>let CHANNELS = [{"n":"6ter","l":"https://i.imgur.com/2nd5Cox.png","g":["Entertainment"],"q":"720p","u":"https://r.eu.cdn-redge.media/livehls/oeu/mt/live/6ter_fr/live.livx/playlist.m3u8"},{"n":"13eme Rue","l":"https://i.imgur.com/k0DCMTL.png","g":["Entertainment"],"q":"","u":"http://192.99.186.30/stream/251/index.m3u8"},{"n":"20 Minutes TV","l":"https://upload.wikimedia.org/wikipedia/commons/thumb/c/cb/20_Minutes_TV_IDF_logo_%282023%29.png/960px-20_Minutes_TV_IDF_logo_%282023%29.png","g":["General"],"q":"1080p","u":"https://live-20minutestv.digiteka.com/1961167769/index.m3u8"},{"n":"AB1","l":"https://i.imgur.com/9C7UsOe.png","g":["Entertainment"],"q":"720p","u":"https://r.eu.cdn-redge.media/livehls/oeu/mt/live/ab1/live.livx/playlist.m3u8"},{"n":"Action","l":"https://i.imgur.com/Zv9VsVq.png","g":["Movies"],"q":"540p","u":"https://r.eu.cdn-redge.media/livehls/oeu/mt/live/action/live.livx/playlist.m3u8"},{"n":"ADN TV+","l":"https://i.imgur.com/HQZQyWt.png","g":["Animation"],"q":"720p","u":"https://d3b73b34o7cvkq.cloudfront.net/v1/master/3722c60a815c199d9c0ef36c5b73da68a62b09d1/cc-gz2sgqzp076kf/adn.m3u8"},{"n":"Africa 24","l":"https://africa24tv.com/wp-content/uploads/2021/09/logo.png","g":["News"],"q":"1080p","u":"https://africa24.vedge.infomaniak.com/livecast/ik:africa24/manifest.m3u8"},{"n":"Africa 24 English","l":"https://africa24tv.com/wp-content/uploads/2023/12/logo-Africa24TVEnglish.png","g":["News"],"q":"1080p","u":"https://edge20.vedge.infomaniak.com/livecast/ik:africa24english/manifest.m3u8"},{"n":"Africa 24 Sport","l":"https://i0.wp.com/africa24tv.com/wp-content/uploads/2023/12/LOGO-AFRICASPORT-4-HD-sans-fond.png?fit=512%2C107&ssl=1","g":["News","Sports"],"q":"1080p","u":"https://africa24.vedge.infomaniak.com/livecast/ik:africa24sport/manifest.m3u8"},{"n":"Alerte a Malibu","l":"https://i.imgur.com/hBiB6uk.png","g":["Series"],"q":"","u":"https://jmp2.uk/plu-60afaa535580be0007ac9ee4.m3u8"},{"n":"Alpe d'Huez TV","l":"https://i.imgur.com/090tCQ5.png","g":["General"],"q":"720p","u":"https://edge13.vedge.infomaniak.com/livecast/ik:adhtv/manifest.m3u8"},{"n":"Animaux","l":"https://i.imgur.com/FM9FVAG.png","g":["Education"],"q":"720p","u":"https://r.eu.cdn-redge.media/livehls/oeu/mt/live/animaux/live.livx/playlist.m3u8"},{"n":"Antenne Reunion","l":"https://i.imgur.com/EPIMMaB.png","g":["General"],"q":"720p","u":"https://live-antenne-reunion.zeop.tv/live/c3eds/antreunihd/hls_fta/antreunihd.m3u8?location=ZEOP01"},{"n":"arte (France)","l":"https://i.imgur.com/ecXMjNl.png","g":["Entertainment"],"q":"1080p","u":"http://5.180.164.197:8080/ARTEFR/index.m3u8"},{"n":"Automoto la chaine","l":"https://i.imgur.com/ebf2uc7.png","g":["Auto"],"q":"720p","u":"https://r.eu.cdn-redge.media/livehls/oeu/mt/live/automoto/live.livx/playlist.m3u8"},{"n":"BFM2","l":"https://alloforfait.fr/wp-content/uploads/2024/03/logo-bfm2-300x200.jpg","g":["News"],"q":"1080p","u":"https://d1ib1gsg71oarf.cloudfront.net/v1/master/3722c60a815c199d9c0ef36c5b73da68a62b09d1/cc-scp7wda722jph/BFM2_FR.m3u8"},{"n":"BFM Alsace","l":"https://i.imgur.com/iRsbEpg.png","g":["General"],"q":"1080p","u":"https://ncdn-live-bfm.pfd.sfr.net/shls/LIVE$BFM_ALSACE/index.m3u8?end=END&start=LIVE"},{"n":"BFM Business","l":"https://i.imgur.com/psqIHn4.png","g":["Business","News"],"q":"1080p","u":"https://ncdn-live-bfm.pfd.sfr.net/shls/LIVE$BFM_BUSINESS/index.m3u8?end=END&start=LIVE"},{"n":"BFM Cote d'Azur","l":"https://i.imgur.com/iiVFvIw.png","g":["News"],"q":"1080p","u":"https://ncdn-live-bfm.pfd.sfr.net/shls/LIVE$BFM_NICECOTEDAZUR/index.m3u8?end=END&start=LIVE"},{"n":"BFM DICI Alpes du Sud","l":"https://i.imgur.com/bV77l68.png","g":["News"],"q":"1080p","u":"https://ncdn-live-bfm.pfd.sfr.net/shls/LIVE$BFM_DICI_ALPESDUSUD/index.m3u8?end=END&start=LIVE"},{"n":"BFM DICI Haute-Provence","l":"https://i.imgur.com/bV77l68.png","g":["News"],"q":"1080p","u":"https://ncdn-live-bfm.pfd.sfr.net/shls/LIVE$BFM_DICI_HAUTEPROVENCE/index.m3u8?end=END&start=LIVE"},{"n":"BFM Grand Lille","l":"https://i.imgur.com/HE5xP0r.png","g":["News"],"q":"1080p","u":"https://ncdn-live-bfm.pfd.sfr.net/shls/LIVE$BFMGRANDLILLE/index.m3u8?end=END&start=LIVE"},{"n":"BFM Grand Littoral","l":"https://i.imgur.com/j7F9MwH.png","g":["News"],"q":"1080p","u":"https://ncdn-live-bfm.pfd.sfr.net/shls/LIVE$BFMGRANDLITTORAL/index.m3u8?end=END&start=LIVE"},{"n":"BFM Lyon","l":"https://i.imgur.com/0uiiZRo.png","g":["News"],"q":"1080p","u":"https://ncdn-live-bfm.pfd.sfr.net/shls/LIVE$BFM_LYON/index.m3u8?end=END&start=LIVE"},{"n":"BFM Marseille","l":"https://i.imgur.com/h7t0l6q.png","g":["News"],"q":"1080p","u":"https://ncdn-live-bfm.pfd.sfr.net/shls/LIVE$BFM_MARSEILLEPROV/index.m3u8?end=END&start=LIVE"},{"n":"BFM Normandie","l":"https://i.imgur.com/WWWQ44G.png","g":["News"],"q":"1080p","u":"https://ncdn-live-bfm.pfd.sfr.net/shls/LIVE$BFM_NORMANDIE/index.m3u8?end=END&start=LIVE"},{"n":"BFM Tech & Co","l":"https://i.imgur.com/FQ0FpXV.png","g":["News","Science"],"q":"1080p","u":"https://ncdn-live-bfm.pfd.sfr.net/shls/LIVE$BFM_TECHANDCO/index.m3u8?end=END&start=LIVE"},{"n":"BFM TV","l":"https://i.imgur.com/YJCcczD.png","g":["News"],"q":"1080p","u":"https://n-5-2.eu.cdn-redge.media/livehls/oeu/mt/live/bfm_tv/live.livx/playlist.m3u8"},{"n":"BFM Var","l":"https://i.imgur.com/vp1oVj3.png","g":["News"],"q":"1080p","u":"https://ncdn-live-bfm.pfd.sfr.net/shls/LIVE$BFM_TOULONVAR/index.m3u8?end=END&start=LIVE"},{"n":"Boomerang (France) HD","l":"https://upload.wikimedia.org/wikipedia/commons/thumb/3/35/Boomerang_2014_logo.svg/960px-Boomerang_2014_logo.svg.png","g":["Kids"],"q":"720p","u":"http://41.205.93.154/BOOMERANG/index.m3u8"},{"n":"Brionnais TV","l":"https://i.imgur.com/y94bhqX.jpg","g":["General"],"q":"720p","u":"https://stream2.mandarine.media/brionnaistv/brionnaistv/playlist.m3u8"},{"n":"BTL TV (Netherlands)","l":"https://yt3.googleusercontent.com/ytc/APkrFKZYgQTsDhkbaqmPRCPZIf0UgZqF1wa6aG2eo8ti=s176-c-k-c0x00ffffff-no-rj-mo","g":["Religious"],"q":"1080p","u":"https://cdn.liveplustv.com/v1/live/btl-tv/master.m3u8"},{"n":"C Star","l":"https://i.imgur.com/w4kAX1V.png","g":["Entertainment"],"q":"720p","u":"https://r.eu.cdn-redge.media/livehls/oeu/mt/live/cstar/live.livx/playlist.m3u8"},{"n":"Caillou","l":"https://i.imgur.com/RgKaoe4.png","g":["Undefined"],"q":"","u":"https://do7nccdsswstc.cloudfront.net/v1/manifest/3722c60a815c199d9c0ef36c5b73da68a62b09d1/cc-1aso0bc668saa/a5233c83-f772-4a81-959a-45ec7877ef61/5.m3u8"},{"n":"Canal+ Sport (France)","l":"https://i.imgur.com/EOXnU15.png","g":["Sports"],"q":"Geo-blocked","u":"http://tv.streambox.fr/live/testlivestream/testlivestream/31.m3u8"},{"n":"Cannes Lerins TV","l":"https://i.imgur.com/atlgnum.png","g":["General"],"q":"1080p","u":"https://vdo2.pro-fhi.net:3628/live/uppodsfqlive.m3u8"},{"n":"Chasse & Peche","l":"https://i.imgur.com/ZIS2ZQ1.png","g":["Outdoor"],"q":"540p","u":"https://r.eu.cdn-redge.media/livehls/oeu/mt/live/chasse_et_peche/live.livx/playlist.m3u8"},{"n":"Cine 666 by Pluto TV","l":"https://images.pluto.tv/channels/6823648580b2665220d9e69a/colorLogoPNG-1757404141.png","g":["Movies"],"q":"","u":"https://jmp2.uk/plu-6823648580b2665220d9e69a.m3u8"},{"n":"Cine Action by Pluto TV","l":"https://images.pluto.tv/channels/5f8ed1ff5c39700007e2204a/colorLogoPNG_1752228138963.png","g":["Movies"],"q":"","u":"https://jmp2.uk/plu-5f8ed1ff5c39700007e2204a.m3u8"},{"n":"Cine by Pluto TV","l":"https://images.pluto.tv/channels/5f8ed0f17564a300082b676a/colorLogoPNG_1775048900088.png","g":["Movies"],"q":"","u":"https://jmp2.uk/plu-5f8ed0f17564a300082b676a.m3u8"},{"n":"Cine Catastrophe by Pluto TV","l":"https://images.pluto.tv/channels/65a69ef53af63d000825e0ee/colorLogoPNG_1751272916058.png","g":["Movies"],"q":"","u":"https://jmp2.uk/plu-65a69ef53af63d000825e0ee.m3u8"},{"n":"Cine d'Asie by Pluto TV","l":"https://images.pluto.tv/channels/62f3e2d000418d00070f7dbc/colorLogoPNG_1751272759694.png","g":["Movies"],"q":"","u":"https://jmp2.uk/plu-62f3e2d000418d00070f7dbc.m3u8"},{"n":"Cine Horreur by Pluto TV","l":"https://images.pluto.tv/channels/66e1978babec540008ce41ac/colorLogoPNG_1751272165674.png","g":["Movies"],"q":"","u":"https://jmp2.uk/plu-66e1978babec540008ce41ac.m3u8"},{"n":"Cine Nanar","l":"https://i.imgur.com/YnUZd3W.png","g":["Movies"],"q":"1080p","u":"https://zylo-cinenanar-rakuten.amagi.tv/playlist.m3u8"},{"n":"Cine Retro by Pluto TV","l":"https://images.pluto.tv/channels/5f8ed168f72fcd0007e56269/colorLogoPNG_1751272859383.png","g":["Movies"],"q":"","u":"https://jmp2.uk/plu-5f8ed168f72fcd0007e56269.m3u8"},{"n":"Cine Romance by Pluto TV","l":"https://images.pluto.tv/channels/60812fc8539963000707d1e1/colorLogoPNG_1775048649580.png","g":["Movies"],"q":"","u":"https://jmp2.uk/plu-60812fc8539963000707d1e1.m3u8"},{"n":"Cine Sci-Fi by Pluto TV","l":"https://images.pluto.tv/channels/60c34592c911890007f29a73/colorLogoPNG.png","g":["Movies"],"q":"","u":"https://jmp2.uk/plu-60c34592c911890007f29a73.m3u8"},{"n":"Cine Thrillers by Pluto TV","l":"https://images.pluto.tv/channels/60c3472a51a2050008dad272/colorLogoPNG_1751272093012.png","g":["Movies"],"q":"","u":"https://jmp2.uk/plu-60c3472a51a2050008dad272.m3u8"},{"n":"Cine Western (France)","l":"https://i.imgur.com/tteOFkL.png","g":["Movies"],"q":"1080p","u":"https://amg00711-zylo-amg00711c8-rakuten-uk-2686.playouts.now.amagi.tv/playlist/amg00711-zylofast-cinewestern-rakutenuk/playlist.m3u8"},{"n":"Cine Western by Pluto TV","l":"https://images.pluto.tv/channels/65cca3e2ec452d0008af3a65/colorLogoPNG_1751272826143.png","g":["Movies"],"q":"","u":"https://jmp2.uk/plu-65cca3e2ec452d0008af3a65.m3u8"},{"n":"Cine+ Classic","l":"https://i.imgur.com/y2zeLS3.jpeg","g":["Movies"],"q":"","u":"http://99.27.51.147/CineClassic/index.m3u8"},{"n":"Cine+ Frisson","l":"https://i.imgur.com/MwFtbnR.jpeg","g":["Movies"],"q":"1080p","u":"http://99.27.51.147:8080/CineFrisson/index.m3u8"},{"n":"Clubbing TV France","l":"https://i.imgur.com/MyiA92q.png","g":["Music"],"q":"","u":"https://d1j2csarxnwazk.cloudfront.net/v1/master/3722c60a815c199d9c0ef36c5b73da68a62b09d1/cc-uze1m6xh4fiyr-ssai-prd/master.m3u8"},{"n":"CNews","l":"https://i.imgur.com/sSNhk2g.png","g":["News"],"q":"1080p","u":"https://raw.githubusercontent.com/Paradise-91/ParaTV/main/streams/canalplus/cnews-dm.m3u8"},{"n":"CNEWS PRIME","l":"https://www.cnews.fr/themes/cnews/img/cnews-prime.png","g":["News"],"q":"1080p","u":"https://raw.githubusercontent.com/Paradise-91/ParaTV/main/streams/canalplus/cnews-prime-dm.m3u8"},{"n":"Comedy Central (France)","l":"https://upload.wikimedia.org/wikipedia/commons/thumb/a/aa/Comedy_Central_2018.svg/960px-Comedy_Central_2018.svg.png","g":["Comedy"],"q":"720p","u":"https://r.eu.cdn-redge.media/livehls/oeu/mt/live/comedy_central/live.livx/playlist.m3u8"},{"n":"Comedy Central (France) HD","l":"https://upload.wikimedia.org/wikipedia/commons/thumb/a/aa/Comedy_Central_2018.svg/960px-Comedy_Central_2018.svg.png","g":["Comedy"],"q":"720p","u":"https://r.eu.cdn-redge.media/livehls/oeu/mt/live/comedy_central_en/live.livx/playlist.m3u8"},{"n":"Crime District","l":"https://i.imgur.com/WQJ6Lbk.png","g":["Series"],"q":"540p","u":"https://r.eu.cdn-redge.media/livehls/oeu/mt/live/crime_district/live.livx/playlist.m3u8"},{"n":"DBM TV","l":"https://i.imgur.com/ab6p2SW.png","g":["Music"],"q":"1080p","u":"https://dbmtv.vedge.infomaniak.com/livecast/dbmtv/playlist.m3u8"},{"n":"Detective Conan France","l":"https://images.pluto.tv/channels/62f3e8ad2a8e8000077b013d/colorLogoPNG.png?w=512","g":["Animation","Kids"],"q":"720p","u":"https://jmp2.uk/plu-62f3e8ad2a8e8000077b013d.m3u8"},{"n":"Discovery Channel (France)","l":"https://upload.wikimedia.org/wikipedia/commons/thumb/f/f1/2019_Discovery_logo.svg/960px-2019_Discovery_logo.svg.png","g":["Entertainment"],"q":"","u":"http://192.99.186.30/stream/68/index.m3u8"},{"n":"Disney Jr. (France)","l":"https://upload.wikimedia.org/wikipedia/commons/e/e3/2024_Disney_Jr._Logo.svg","g":["Kids"],"q":"1080p","u":"http://151.80.18.177:86/Disney_Junior_HD/index.m3u8"},{"n":"Dossiers FBI","l":"https://i.imgur.com/8Zx6dA7.png","g":["Documentary"],"q":"","u":"https://jmp2.uk/plu-5f8edad922b10b000753bc37.m3u8"},{"n":"Emotion L","l":"https://i.imgur.com/MP34aaj.png","g":["Movies"],"q":"1080p","u":"https://rakutenaa-zylo-emotional-rakuten-r1zkm.amagi.tv/playlist/rakutenAA-zylo-emotional-rakuten/playlist.m3u8"},{"n":"Equidia","l":"https://i.imgur.com/QPpbRcZ.png","g":["Sports"],"q":"1080p","u":"https://raw.githubusercontent.com/Paradise-91/ParaTV/main/streams/equidia/live2.m3u8"},{"n":"Euronews French","l":"https://i.imgur.com/8t9mdg9.png","g":["News"],"q":"720p","u":"https://2f6c5bf4.wurl.com/master/f36d25e7e52f1ba8d7e56eb859c636563214f541/UmxheHhUVi1ldV9FdXJvbmV3c0ZyYW5jYWlzX0hMUw/playlist.m3u8"},{"n":"Europe 1 TV","l":"https://i.ibb.co/rGqB5FcH/Europe1-TV.png","g":["News"],"q":"1080p","u":"https://raw.githubusercontent.com/Paradise-91/ParaTV/main/streams/misc/europe-1-tv-dm.m3u8"},{"n":"Eurosport 1","l":"https://i.imgur.com/olQJgm7.png","g":["Sports"],"q":"","u":"https://r.eu.cdn-redge.media/livehls/oeu/mt/live/eurosport_1/live.livx/playlist.m3u8"},{"n":"Eurosport 2","l":"https://i.imgur.com/f56dHgR.png","g":["Sports"],"q":"1080p","u":"https://r.eu.cdn-redge.media/livehls/oeu/mt/live/eurosport_2/live.livx/playlist.m3u8"},{"n":"Evandis Gospel TV","l":"https://i.imgur.com/v8TiqhH.png","g":["Religious"],"q":"1080p","u":"https://evandis.streamakaci.tv/str_evandis_evandis/str_evandis_multi/playlist.m3u8"},{"n":"FashionTV Paris L'Original","l":"https://i.imgur.com/GFTAN5Q.png","g":["Lifestyle"],"q":"1080p","u":"https://edge-fast3.evrideo.tv/bfdbb576-83f7-11f0-9f89-0200170e3e04_1000028043_HLS/manifest.m3u8"},{"n":"FashionTV Secrets","l":"https://i.ibb.co/fVGJyCC8/w512.png","g":["Lifestyle"],"q":"1080p","u":"https://ssai.aniview.com/api/v1/hls/stream.m3u8?AVS_SSAIID=67c0c39764ad6f7dab07aa0b&AV_APPNAME=[ADS.APP_NAME]&AV_APPPKGNAME=[ADS.APP_BUNDLE]&AV_APPSTOREURL=[ADS.APP_STORE_URL]&AV_CCPA=[ADS.US_PRIVACY]&AV_CLIENT_SECTION=ftv_secrets&AV_CONSENT=[ADS.GDPR_CONSENT]&AV_CONTENT_CAT=IAB7&AV_CONTENT_CHANNEL=&AV_CONTENT_CONTEXT=&AV_CONTENT_EPISODE=&AV_CONTENT_GENRE=fashion+and+lifestyle&AV_CONTENT_ID=[ADS.VIDAA_ADS_CONTENTID]&AV_CONTENT_KEYWORDS=&AV_CONTENT_LANGUAGE=en&AV_CONTENT_LENGTH=&AV_CONTENT_NETWORK=&AV_CONTENT_PROVIDER=FTV&AV_CONTENT_RATING=R&AV_CONTENT_SEASON=&AV_CONTENT_SERIES=&AV_CONTENT_TITLE=&AV_CONTENT_URL=&AV_DNT=[ADS.DNT]&AV_GDPR=[ADS.GDPR]&AV_HEIGHT=[ADS.H]&AV_IDFA=[ADS.IFA]&AV_IFA_TYPE=[ADS.IFA_TYPE]&AV_LANGUAGE=[ADS.DEVICE_LANGUAGE]&AV_OSVERS=[ADS.DEVICE_OSV]&AV_RTB_DEVICE_TYPE=[ADS.DEVICE_TYPE]&AV_VAUTH=[ADS.VAUTH]&AV_WIDTH=[ADS.W]&Content_Id=[ADS.ADS_CONTENTID]&ads.vidaa_ads_param=1191723366&cb=[CACHEBUSTER]&content_channel_name=ftv+-fashiontv+Secrets&content_livestream=1"},{"n":"FIFA+ French","l":"https://upload.wikimedia.org/wikipedia/commons/thumb/9/9c/FIFA%2B_(2025).svg/960px-FIFA%2B_(2025).svg.png","g":["Sports"],"q":"720p","u":"https://37b4c228.wurl.com/master/f36d25e7e52f1ba8d7e56eb859c636563214f541/UmFrdXRlblRWLWZyX0ZJRkFQbHVzRnJlbmNoX0hMUw/playlist.m3u8"},{"n":"France 2","l":"https://upload.wikimedia.org/wikipedia/commons/thumb/5/53/France_2_2018.svg/960px-France_2_2018.svg.png","g":["General"],"q":"1080p","u":"https://r.eu.cdn-redge.media/livehls/oeu/mt/live/france_2/live.livx/playlist.m3u8"},{"n":"France 3","l":"https://upload.wikimedia.org/wikipedia/commons/thumb/d/dd/France_3_2018.svg/960px-France_3_2018.svg.png","g":["General"],"q":"1080p","u":"https://r.eu.cdn-redge.media/livehls/oeu/mt/live/france_3/live.livx/playlist.m3u8"},{"n":"France 3 Cote d'Azur","l":"https://upload.wikimedia.org/wikipedia/commons/9/9c/France_3_Cote_d%27Azur_-_Logo_2018.svg","g":["General"],"q":"720p","u":"https://r.eu.cdn-redge.media/livehls/oeu/mt/live/france_3_nice/live.livx/playlist.m3u8"},{"n":"France 3 Lorraine","l":"https://upload.wikimedia.org/wikipedia/commons/6/61/France_3_Lorraine_-_Logo_2018.svg","g":["General"],"q":"1080p","u":"http://5.180.164.197:8080/FRANCE3/index.m3u8"},{"n":"France 4","l":"https://upload.wikimedia.org/wikipedia/commons/thumb/3/3b/France_4_2018.svg/960px-France_4_2018.svg.png","g":["Kids"],"q":"1080p","u":"https://r.eu.cdn-redge.media/livehls/oeu/mt/live/france_4/live.livx/playlist.m3u8"},{"n":"France 5","l":"https://upload.wikimedia.org/wikipedia/commons/thumb/5/50/France_5_2018.svg/960px-France_5_2018.svg.png","g":["General"],"q":"1080p","u":"https://r.eu.cdn-redge.media/livehls/oeu/mt/live/france_5/live.livx/playlist.m3u8"},{"n":"France 24","l":"https://i.imgur.com/u8N6uoj.png","g":["News"],"q":"1080p","u":"https://freem3u.xyz/api/live/play.m3u8?vid=10007"},{"n":"Franceinfo","l":"https://i.imgur.com/eITXz6A.png","g":["News"],"q":"720p","u":"https://r.eu.cdn-redge.media/livehls/oeu/mt/live/france_info/live.livx/playlist.m3u8"},{"n":"Francophonie24","l":"https://i.imgur.com/uM1v1sd.png","g":["Documentary"],"q":"1080p","u":"https://5421175365ea3.streamlock.net/live/smil:switch.smil/playlist.m3u8"},{"n":"Frequence Novelas","l":"https://i.imgur.com/fEjNAps.png","g":["Series"],"q":"1080p","u":"https://d20oth1416y9a1.cloudfront.net/playlist/amg00711-zylofast-frequencenovelas-rakutenus/playlist.m3u8"},{"n":"Generations TV","l":"https://i.imgur.com/NgBrDMe.png","g":["Undefined"],"q":"576p","u":"https://event.vedge.infomaniak.com/livecast/ik:generation-tv/manifest.m3u8"},{"n":"Golf +","l":"https://i.imgur.com/WHnddkg.png","g":["Sports"],"q":"Geo-blocked","u":"http://tv.streambox.fr/live/testlivestream/testlivestream/49.m3u8"},{"n":"Gong","l":"https://i.imgur.com/lA9UFMG.png","g":["Animation"],"q":"1080p","u":"https://amg01596-gongnetworks-gong-ono-vh5f2.amagi.tv/1080p-vtt/index.m3u8"},{"n":"Gulli","l":"https://i.imgur.com/kqYssbW.png","g":["Kids"],"q":"1080p","u":"http://99.27.51.147:8080/Gulli/index.m3u8"},{"n":"HANDICAP TV","l":"https://i.imgur.com/vXbAeD0.png","g":["Lifestyle"],"q":"","u":"https://srv.webtvmanager.fr:3697/stream/play.m3u8"},{"n":"Helene et les garcons","l":"https://i.imgur.com/EjjzjF9.png","g":["Series"],"q":"","u":"https://jmp2.uk/plu-604f8de01b479400078fb1e7.m3u8"},{"n":"Histoire TV","l":"https://i.imgur.com/hxuJXll.png","g":["Documentary"],"q":"720p","u":"https://r.eu.cdn-redge.media/livehls/oeu/mt/live/histoire/live.livx/playlist.m3u8"},{"n":"ILTV","l":"https://i.imgur.com/fVhrJHK.png","g":["Undefined"],"q":"720p","u":"https://live.creacast.com/iltv/smil:iltv.smil/playlist.m3u8"},{"n":"Inazuma Eleven","l":"https://i.imgur.com/pLv0T3D.png","g":["Kids","Series"],"q":"","u":"https://jmp2.uk/plu-632c6df43d2bc5000751f621.m3u8"},{"n":"Into Crime","l":"https://i.imgur.com/43at4M2.png","g":["Documentary"],"q":"1080p","u":"https://amg00711-zylo-amg00711c10-rakuten-fr-6731.playouts.now.amagi.tv/playlist.m3u8"},{"n":"Investigation by Pluto TV","l":"https://images.pluto.tv/channels/6683cd2fca74680008772545/colorLogoPNG_1747399523793.png","g":["Series"],"q":"","u":"https://jmp2.uk/plu-6683cd2fca74680008772545.m3u8"},{"n":"Investigation Discovery (France)","l":"https://upload.wikimedia.org/wikipedia/commons/thumb/3/35/InvestigationDiscoveryLogo2020.svg/960px-InvestigationDiscoveryLogo2020.svg.png","g":["Documentary"],"q":"","u":"http://192.99.186.30/stream/81/index.m3u8"},{"n":"Kozoom TV","l":"https://i.imgur.com/M1Ee79b.png","g":["Sports"],"q":"1080p","u":"https://streams2.sofast.tv/v1/master/611d79b11b77e2f571934fd80ca1413453772ac7/fdd6f243-f971-4a1a-9510-97ac01d6b37f/manifest.m3u8"},{"n":"KTO","l":"https://i.imgur.com/EY6TsdV.png","g":["Religious"],"q":"404p","u":"https://live-kto.akamaized.net/hls/live/2033284/KTO/master.m3u8"},{"n":"L'Equipe","l":"https://i.imgur.com/t35zhM9.png","g":["Sports"],"q":"1080p","u":"https://dq37unyetkpcz.cloudfront.net/v1/master/3722c60a815c199d9c0ef36c5b73da68a62b09d1/cc-m04j89j7k5gtp/LEquipe_FR.m3u8"},{"n":"LCI","l":"https://i.imgur.com/DED8EXs.png","g":["News"],"q":"1080p","u":"https://r.eu.cdn-redge.media/livehls/oeu/mt/live/lci/live.livx/playlist.m3u8"},{"n":"LCI HD","l":"https://i.imgur.com/DED8EXs.png","g":["News"],"q":"1080p","u":"http://151.80.18.177:86/LCI_HD/index.m3u8"},{"n":"LCP","l":"https://i.imgur.com/k7UImOJ.png","g":["Legislative"],"q":"720p","u":"https://n-5-2.eu.cdn-redge.media/livehls/oeu/mt/live/lcp/live.livx/playlist.m3u8"},{"n":"Le Figaro TV Ile-de-France","l":"https://i.imgur.com/a8RuRUQ.png","g":["General"],"q":"1080p","u":"https://figarotv-live.freecaster.com/live/freecaster/figarotv.m3u8"},{"n":"Le miracle de l'amour","l":"https://i.imgur.com/3Xz4hjD.png","g":["Series"],"q":"","u":"https://jmp2.uk/plu-60549c238c3f21000753d3e0.m3u8"},{"n":"Les Annees fac","l":"https://i.imgur.com/M1OjaB0.png","g":["Series"],"q":"","u":"https://jmp2.uk/plu-60afae68a7fc50000737186d.m3u8"},{"n":"Les filles d'a cote","l":"https://i.imgur.com/dxipSaQ.png","g":["Series"],"q":"","u":"https://jmp2.uk/plu-60549d97cd7b090007c73314.m3u8"},{"n":"Les Nouveaux Detectives","l":"https://i.imgur.com/ego8ozn.png","g":["Series"],"q":"","u":"https://jmp2.uk/plu-5f8edb6df1ebb800072edf10.m3u8"},{"n":"Littoral FM TV","l":"https://i.imgur.com/DCZKAQ1.png","g":["Music"],"q":"720p","u":"https://live.creacast.com/littoralfm-ch1/stream/playlist.m3u8"},{"n":"Louis La Brocante","l":"https://i.imgur.com/I1w7rFb.png","g":["Series"],"q":"","u":"https://jmp2.uk/plu-5f8ed6d569d2d4000864a976.m3u8"},{"n":"M6 HD","l":"https://i.imgur.com/7GVp3fW.png","g":["Entertainment"],"q":"1080p","u":"http://99.27.51.147:8080/M6/index.m3u8"},{"n":"M6 SD","l":"https://i.imgur.com/7GVp3fW.png","g":["Entertainment"],"q":"1080p","u":"https://n-5-2.eu.cdn-redge.media/livehls/oeu/mt/live/m6_fr/live.livx/playlist.m3u8"},{"n":"M6 Music","l":"https://static.wikia.nocookie.net/logopedia/images/6/68/M6music-95cde0867d.svg/revision/latest?cb=20200412210630","g":["Music"],"q":"1080p","u":"https://r.eu.cdn-redge.media/livehls/oeu/mt/live/m6_music_hits/live.livx/playlist.m3u8"},{"n":"Mangas","l":"https://i.imgur.com/wmmEOza.png","g":["Animation"],"q":"720p","u":"https://r.eu.cdn-redge.media/livehls/oeu/mt/live/mangas/live.livx/playlist.m3u8"},{"n":"MCM Pop","l":"https://i.imgur.com/j31lBL7.png","g":["Music"],"q":"","u":"http://176.65.153.78:8201/play/a070/index.m3u8"},{"n":"MCM Top (France)","l":"https://i.imgur.com/EVtWQLd.png","g":["Music"],"q":"","u":"http://185.228.163.146:8000/play/a00g/index.m3u8"},{"n":"MDL","l":"https://i.imgur.com/REN30bx.png","g":["Undefined"],"q":"720p","u":"http://tv.mondeduloisir.fr:1935/tixtv/smil:web.smil/playlist.m3u8"},{"n":"Melody","l":"https://i.imgur.com/9GVyQ6x.png","g":["Music"],"q":"720p","u":"https://r.eu.cdn-redge.media/livehls/oeu/mt/live/melody/live.livx/playlist.m3u8"},{"n":"Mezzo","l":"https://i.imgur.com/auNdGeW.png","g":["Music"],"q":"","u":"http://92.180.26.103/stream/62/index.m3u8"},{"n":"Mezzo Live","l":"https://i.imgur.com/H9ytKPN.png","g":["Music"],"q":"1080p","u":"http://stream.mcquack.net/276/index.m3u8"},{"n":"Monte Carlo Digital Television","l":"https://i.imgur.com/99h8F1y.jpeg","g":["Lifestyle"],"q":"1080p","u":"https://fl718492-exthls-p1.flovp.com/fl718492/live/live.m3u8"},{"n":"Moselle TV","l":"https://i.imgur.com/hrm5QnU.png","g":["General"],"q":"720p","u":"https://live.creacast.com/mirabelletv/smil:mirabelletv.smil/playlist.m3u8"},{"n":"Motorvision+","l":"https://i.imgur.com/5cs5GkJ.png","g":["Auto"],"q":"720p","u":"https://r.eu.cdn-redge.media/livehls/oeu/mt/live/motorvision_en/live.livx/playlist.m3u8"},{"n":"Mr Bean Animated FR","l":"https://static.wikia.nocookie.net/logopedia/images/2/25/Mr._Bean_Animated_Series_stacked_logo.png","g":["Animation","Kids"],"q":"1080p","u":"https://amg00627-amg00627c31-rakuten-fr-3991.playouts.now.amagi.tv/playlist/amg00627-banijayfast-mrbeanfrcc-rakutenfr/playlist.m3u8"},{"n":"MTV (France)","l":"https://upload.wikimedia.org/wikipedia/commons/thumb/6/68/MTV_2021_%28brand_version%29.svg/960px-MTV_2021_%28brand_version%29.svg.png","g":["Entertainment"],"q":"720p","u":"https://r.eu.cdn-redge.media/livehls/oeu/mt/live/mtv/live.livx/playlist.m3u8"},{"n":"MTV CLASSICS","l":"https://images.pluto.tv/channels/5f92b56a367e170007cd43f4/colorLogoPNG.png","g":["Entertainment"],"q":"","u":"https://jmp2.uk/plu-5f92b56a367e170007cd43f4.m3u8"},{"n":"Museum TV French","l":"https://i.imgur.com/WbjURLo.png","g":["Culture"],"q":"Geo-blocked","u":"https://cdn-ue1-prod.tsv2.amagi.tv/linear/amg01492-secomsasmediart-museumtv-eng-samsungit/playlist.m3u8"},{"n":"MyZen TV","l":"https://i.imgur.com/fIi8o0C.png","g":["Relax"],"q":"720p","u":"https://r.eu.cdn-redge.media/livehls/oeu/mt/live/myzen_tv/live.livx/playlist.m3u8"},{"n":"NatureTime France","l":"https://i.imgur.com/72JmyjM.png","g":["Documentary"],"q":"1080p","u":"https://bamusa-naturetime-emea-fra-rakuten.amagi.tv/playlist.m3u8"},{"n":"Nickelodeon (France)","l":"https://i.imgur.com/E84jnP8.png","g":["Kids"],"q":"720p","u":"https://r.eu.cdn-redge.media/livehls/oeu/mt/live/nickelodeon/live.livx/playlist.m3u8"},{"n":"Nickelodeon Junior","l":"https://upload.wikimedia.org/wikipedia/commons/thumb/9/99/Nickelodeon_Junior.png/960px-Nickelodeon_Junior.png","g":["Kids"],"q":"720p","u":"https://r.eu.cdn-redge.media/livehls/oeu/mt/live/nickelodeon_junior/live.livx/playlist.m3u8"},{"n":"Nicktoons (France)","l":"https://i.imgur.com/OWRUPA4.png","g":["Kids"],"q":"720p","u":"https://r.eu.cdn-redge.media/livehls/oeu/mt/live/nicktoons/live.livx/playlist.m3u8"},{"n":"NOVO19","l":"https://upload.wikimedia.org/wikipedia/commons/thumb/b/b0/Logo_NOVO19_-_2025.svg/960px-Logo_NOVO19_-_2025.svg.png","g":["General"],"q":"720p","u":"https://r.eu.cdn-redge.media/livehls/oeu/mt/live/novo_19/live.livx/playlist.m3u8"},{"n":"NRJ Hits","l":"https://i.imgur.com/2xDVwOh.png","g":["Music"],"q":"","u":"https://test.946985.filegear-sg.me/proxy/a23981548880f405"},{"n":"One Piece FR","l":"https://i.imgur.com/XsvbAWR.png","g":["Animation"],"q":"","u":"https://jmp2.uk/plu-6380c94947c72b0007ee9a13.m3u8"},{"n":"P2M TV","l":"https://i.imgur.com/TrecSeG.png","g":["Music"],"q":"720p","u":"https://vdo2.pro-fhi.net:3207/stream/play.m3u8"},{"n":"Paris Premiere","l":"https://i.imgur.com/ily4bEm.png","g":["General"],"q":"720p","u":"https://r.eu.cdn-redge.media/livehls/oeu/mt/live/paris_premiere/live.livx/playlist.m3u8"},{"n":"Pluto TV 90's Classics","l":"https://images.pluto.tv/channels/66b4990746762a00084c2f78/colorLogoPNG.png","g":["Movies","Series"],"q":"","u":"https://jmp2.uk/plu-66b4990746762a00084c2f78.m3u8"},{"n":"Pluto TV Animaux","l":"https://images.pluto.tv/channels/60925a44f0350600075a1fdc/colorLogoPNG.png","g":["Documentary"],"q":"","u":"https://jmp2.uk/plu-60925a44f0350600075a1fdc.m3u8"},{"n":"Pluto TV ANIME GO!","l":"https://images.pluto.tv/channels/691b3669c48674840c3b832a/colorLogoPNG_1778491402325.png","g":["Entertainment"],"q":"","u":"https://jmp2.uk/plu-691b3669c48674840c3b832a.m3u8"},{"n":"Pluto TV Aventure","l":"https://images.pluto.tv/channels/611e7811eb9daf000764cbfd/colorLogoPNG.png","g":["Documentary"],"q":"","u":"https://jmp2.uk/plu-611e7811eb9daf000764cbfd.m3u8"},{"n":"Pluto TV Brigade Criminelle","l":"https://images.pluto.tv/channels/684bf01df7d8b74b625b7dd1/colorLogoPNG_1753890939606.png","g":["Series"],"q":"","u":"https://jmp2.uk/plu-684bf01df7d8b74b625b7dd1.m3u8"},{"n":"Pluto TV Comedie","l":"https://images.pluto.tv/channels/5f8eb91bb9b9e7000817e67f/colorLogoPNG.png","g":["Comedy"],"q":"","u":"https://jmp2.uk/plu-5f8eb91bb9b9e7000817e67f.m3u8"},{"n":"Pluto TV Comedies Cultes","l":"https://images.pluto.tv/channels/67b4b2d976a934282e92d71c/colorLogoPNG.png","g":["Comedy","Movies"],"q":"","u":"https://jmp2.uk/plu-67b4b2d976a934282e92d71c.m3u8"},{"n":"Pluto TV Cuisine","l":"https://images.pluto.tv/channels/5f8ed48146ba9e00078424b6/colorLogoPNG_1733440509319.png","g":["Cooking","Lifestyle"],"q":"","u":"https://jmp2.uk/plu-5f8ed48146ba9e00078424b6.m3u8"},{"n":"Pluto TV Dating","l":"https://images.pluto.tv/channels/682318568e6c0f2f6c6e0038/colorLogoPNG_1750772750435.png","g":["Series"],"q":"720p","u":"https://jmp2.uk/plu-682318568e6c0f2f6c6e0038.m3u8"},{"n":"Pluto TV French Collection","l":"https://images.pluto.tv/channels/62f3e0522443200008c567d7/colorLogoPNG.png","g":["Entertainment"],"q":"","u":"https://jmp2.uk/plu-62f3e0522443200008c567d7.m3u8"},{"n":"Pluto TV Histoire","l":"https://images.pluto.tv/channels/611e771e2f5f180007002224/colorLogoPNG.png","g":["Documentary"],"q":"720p","u":"https://jmp2.uk/plu-611e771e2f5f180007002224.m3u8"},{"n":"Pluto TV Inside","l":"https://images.pluto.tv/channels/5f8ed3892ed7bb000741a1d2/colorLogoPNG.png","g":["Entertainment"],"q":"","u":"https://jmp2.uk/plu-5f8ed3892ed7bb000741a1d2.m3u8"},{"n":"Pluto TV Kids Classics FR","l":"https://images.pluto.tv/channels/609e7e423e9173000706a681/colorLogoPNG_1750147033956.png","g":["Kids"],"q":"720p","u":"https://jmp2.uk/plu-654a58dbf9cc82000868f0fb.m3u8"},{"n":"Pluto TV Polar","l":"https://images.pluto.tv/channels/5f8ed4dbf6bb0800071ffbcb/colorLogoPNG.png","g":["Series"],"q":"","u":"https://jmp2.uk/plu-5f8ed4dbf6bb0800071ffbcb.m3u8"},{"n":"Pluto TV Retro Toons","l":"https://images.pluto.tv/channels/611e6a9b4bb5790007a6f0f8/colorLogoPNG.png","g":["Animation","Kids"],"q":"","u":"https://jmp2.uk/plu-611e6a9b4bb5790007a6f0f8.m3u8"},{"n":"Pluto TV Series Fantastiques","l":"https://images.pluto.tv/channels/625ec7a1c853fd00073b38fd/colorLogoPNG_1775048560569.png","g":["Series"],"q":"","u":"https://jmp2.uk/plu-625ec7a1c853fd00073b38fd.m3u8"},{"n":"Pluto TV Super Kids","l":"https://images.pluto.tv/channels/652557d93fd33c000802f995/colorLogoPNG_1733440546104.png","g":["Kids"],"q":"","u":"https://jmp2.uk/plu-652557d93fd33c000802f995.m3u8"},{"n":"Pluto TV Teen FR","l":"https://images.pluto.tv/channels/63eb944dc111bc0008fe7021/colorLogoPNG_1761820520562.png","g":["Kids"],"q":"720p","u":"https://jmp2.uk/plu-5f8eb99ff17815000784a3b0.m3u8"},{"n":"Pluto TV Telerealite France","l":"https://images.pluto.tv/channels/699865ccac36b147e74619fe/colorLogoPNG_1779788356699.png","g":["Entertainment"],"q":"","u":"https://jmp2.uk/plu-699865ccac36b147e74619fe.m3u8"},{"n":"Pluto TV Toons FR","l":"https://images.pluto.tv/channels/6880aa28164eb4890282e803/colorLogoPNG_1760522020317.png","g":["Kids"],"q":"720p","u":"https://jmp2.uk/plu-5f8eba14a4ffb8000764e950.m3u8"},{"n":"Puissance TV","l":"https://pbs.twimg.com/profile_images/1274572654016675842/A6v8Qo_X_400x400.jpg","g":["General"],"q":"","u":"https://event.vedge.infomaniak.com/livecast/ik:puissancetelevision/manifest.m3u8"},{"n":"Qwest TV Jazz & Beyond","l":"https://i.imgur.com/89yWH5L.png","g":["Music"],"q":"1080p","u":"https://samsungau-qwestjazz-samsungtv-zw2jc.amagi.tv/playlist/samsungau-qwestjazz-samsungtv/playlist.m3u8"},{"n":"Ridiculousness (Germany)","l":"https://images.pluto.tv/channels/5f8eb8a8b2619a000710605c/colorLogoPNG.png","g":["Comedy"],"q":"720p","u":"https://jmp2.uk/plu-5f8eb8a8b2619a000710605c.m3u8"},{"n":"RMC Decouverte","l":"https://upload.wikimedia.org/wikipedia/fr/thumb/b/b3/RMC_D%C3%A9couverte_logo_2017.svg/960px-RMC_D%C3%A9couverte_logo_2017.svg.png","g":["Undefined"],"q":"1080p","u":"https://d16zzycxcd0m0r.cloudfront.net/v1/master/3722c60a815c199d9c0ef36c5b73da68a62b09d1/cc-hixvx5kymecr9/RMC_Decouverte_FR.m3u8"},{"n":"RMC Life","l":"https://img1.dc2.oqee.net/channel_pictures/3606/w512","g":["Entertainment","Interactive"],"q":"1080p","u":"https://d3dcdjv6dx07iz.cloudfront.net/v1/master/3722c60a815c199d9c0ef36c5b73da68a62b09d1/cc-eaaww2dyp3iih/RMC_Life_FR.m3u8"},{"n":"RMC Story","l":"https://upload.wikimedia.org/wikipedia/fr/thumb/4/43/Logo_RMC_Story_2025.png/960px-Logo_RMC_Story_2025.png","g":["Undefined"],"q":"1080p","u":"https://d15aro46bnpfm8.cloudfront.net/v1/master/3722c60a815c199d9c0ef36c5b73da68a62b09d1/cc-fqkqiax1078up/RMC_Story_FR.m3u8"},{"n":"RT France","l":"https://upload.wikimedia.org/wikipedia/commons/thumb/b/b8/RT-France-logo.svg/960px-RT-France-logo.svg.png","g":["News"],"q":"Geo-blocked","u":"https://rt-fra.rttv.com/dvr/rtfrance/playlist.m3u8"},{"n":"RTL9","l":"https://i.imgur.com/nFqjVNW.png","g":["Entertainment"],"q":"720p","u":"https://r.eu.cdn-redge.media/livehls/oeu/mt/live/rtl_9/live.livx/playlist.m3u8"},{"n":"Science & Vie TV","l":"https://i.imgur.com/9ELsSMI.png","g":["Science"],"q":"720p","u":"https://r.eu.cdn-redge.media/livehls/oeu/mt/live/science_et_vie/live.livx/playlist.m3u8"},{"n":"SciFi","l":"https://upload.wikimedia.org/wikipedia/commons/d/d1/SciFi_2026.svg","g":["Entertainment"],"q":"","u":"http://192.99.186.30/stream/250/index.m3u8"},{"n":"ScreamIN","l":"https://i.imgur.com/tGmKbil.png","g":["Movies"],"q":"1080p","u":"https://rakutenaa-zylo-screamin-rakuten-p11ej.amagi.tv/playlist/rakutenAA-zylo-screamin-rakuten/playlist.m3u8"},{"n":"Serie Club","l":"https://i.imgur.com/V8wRRg5.png","g":["Undefined"],"q":"720p","u":"https://r.eu.cdn-redge.media/livehls/oeu/mt/live/serie_club/live.livx/playlist.m3u8"},{"n":"Series by Pluto TV","l":"https://images.pluto.tv/channels/5f8ed2d1c34c2300073bf02c/colorLogoPNG_1775048963457.png","g":["Series"],"q":"","u":"https://jmp2.uk/plu-5f8ed2d1c34c2300073bf02c.m3u8"},{"n":"Sony One Blacklist","l":"https://i.imgur.com/uJC8rXr.png","g":["Series"],"q":"1080p","u":"https://06cb85ad6ccb4a6b97f561e62d16ad3f.mediatailor.us-west-2.amazonaws.com/v1/master/ba62fe743df0fe93366eba3a257d792884136c7f/LINEAR-822-FR-SONYONETHEBLACKLIST-LG_FR/playlist.m3u8"},{"n":"Sony One Favoris","l":"https://i.imgur.com/RO4AM4b.png","g":["Movies"],"q":"1080p","u":"https://49d735318d6b4c30a24a7997ea594e1b.mediatailor.us-west-2.amazonaws.com/v1/master/ba62fe743df0fe93366eba3a257d792884136c7f/LINEAR-820-FR-SONYONEFAVORIS-LG_FR/playlist.m3u8"},{"n":"Sony One Hits Action","l":"https://i.imgur.com/pXsZEsR.png","g":["Movies"],"q":"1080p","u":"https://5098a8b860504a3690fd2e7c0a18d68f.mediatailor.us-west-2.amazonaws.com/v1/master/ba62fe743df0fe93366eba3a257d792884136c7f/LINEAR-817-FR-SONYONEHITSACTION-LG_FR/playlist.m3u8"},{"n":"Sony One Hits Comedie","l":"https://i.imgur.com/8sHuxxS.png","g":["Movies"],"q":"1080p","u":"https://7aa9671895264ec9a384dfed1b992171.mediatailor.us-west-2.amazonaws.com/v1/master/ba62fe743df0fe93366eba3a257d792884136c7f/LINEAR-818-FR-SONYONEHITSCOMDIE-LG_FR/playlist.m3u8"},{"n":"Syfy","l":"https://i.imgur.com/gUOXdjv.png","g":["Undefined"],"q":"","u":"http://99.27.51.147:8080/SYFY/index.m3u8"},{"n":"T18","l":"https://upload.wikimedia.org/wikipedia/commons/thumb/9/99/Logo_de_la_chaine_T18.svg/500px-Logo_de_la_chaine_T18.svg.png","g":["General"],"q":"1080p","u":"https://raw.githubusercontent.com/Paradise-91/ParaTV/main/streams/t18/t18-dm.m3u8"},{"n":"Tebeo TV","l":"https://i.imgur.com/WdZWBEd.png","g":["General"],"q":"576i","u":"https://tebeo.streamakaci.tv/tebeo/tebeo-multi/playlist.m3u8"},{"n":"Teen Mom (Germany) FR","l":"https://images.pluto.tv/channels/62e7fc8c0d061100083946a9/colorLogoPNG.png","g":["Entertainment"],"q":"720p","u":"https://jmp2.uk/plu-62f3f05505e621000783df2f.m3u8"},{"n":"TeleGohelle","l":"https://i.imgur.com/Oa3Pwbf.png","g":["General"],"q":"","u":"https://videas.agglo-lenslievin.fr/index.m3u8"},{"n":"Teva","l":"https://i.imgur.com/kDW0hN5.png","g":["Undefined"],"q":"720p","u":"https://r.eu.cdn-redge.media/livehls/oeu/mt/live/teva/live.livx/playlist.m3u8"},{"n":"TF1","l":"https://i.imgur.com/QxHt9NC.png","g":["Entertainment"],"q":"1080p","u":"https://r.eu.cdn-redge.media/livehls/oeu/mt/live/tf1/live.livx/playlist.m3u8"},{"n":"TF1 Series Films","l":"https://i.imgur.com/4CJIDKQ.png","g":["Movies"],"q":"1080p","u":"https://r.eu.cdn-redge.media/livehls/oeu/mt/live/tf1_series_films/live.livx/playlist.m3u8"},{"n":"TFX","l":"https://i.imgur.com/d91GcVf.png","g":["Undefined"],"q":"1080p","u":"https://r.eu.cdn-redge.media/livehls/oeu/mt/live/tfx/live.livx/playlist.m3u8"},{"n":"TiVi5 Monde","l":"https://i.imgur.com/fVVKpmk.png","g":["Undefined"],"q":"Geo-blocked","u":"https://ott.tv5monde.com/Content/HLS/Live/channel(tivi5)/variant.m3u8"},{"n":"TMC","l":"https://upload.wikimedia.org/wikipedia/en/thumb/5/54/TMC_logo.svg/960px-TMC_logo.svg.png","g":["General"],"q":"1080p","u":"https://r.eu.cdn-redge.media/livehls/oeu/mt/live/tmc_fr/live.livx/playlist.m3u8"},{"n":"TMC HD","l":"https://upload.wikimedia.org/wikipedia/en/thumb/5/54/TMC_logo.svg/960px-TMC_logo.svg.png","g":["General"],"q":"Geo-blocked","u":"http://tv.streambox.fr/live/testlivestream/testlivestream/13.m3u8"},{"n":"Tortues Ninja TV (Germany)","l":"https://images.pluto.tv/channels/5f8ecc1b37867f00071469e9/colorLogoPNG.png","g":["Kids"],"q":"720p","u":"https://jmp2.uk/plu-5f8ecc1b37867f00071469e9.m3u8"},{"n":"Tout le monde deteste Chris","l":"https://images.pluto.tv/channels/67b4b4a21a5ca760802d25fd/colorLogoPNG_1747394750060.png","g":["Series"],"q":"","u":"https://jmp2.uk/plu-67b4b4a21a5ca760802d25fd.m3u8"},{"n":"Toute l'Histoire","l":"https://i.imgur.com/xRfyQYn.png","g":["Undefined"],"q":"720p","u":"https://r.eu.cdn-redge.media/livehls/oeu/mt/live/toute_lhistoire/live.livx/playlist.m3u8"},{"n":"Trace Africa","l":"https://i.imgur.com/kPUkoS7.png","g":["Music"],"q":"1080p","u":"https://channels.trace.plus/Traceprod/AFRICA_FR_hd/index.m3u8"},{"n":"Trace Afrikora","l":"https://i.imgur.com/CQDdnhp.png","g":["Music"],"q":"1080p","u":"https://channels.trace.plus/Traceprod/TERANGA_hd/index.m3u8"},{"n":"Trace Ayiti","l":"https://i.imgur.com/KkJ6fet.png","g":["Music"],"q":"1080p","u":"https://channels.trace.plus/Traceprod/AYITI_hd/index.m3u8"},{"n":"Trace Brazuca","l":"https://i.imgur.com/DFBocPu.png","g":["Music"],"q":"1080p","u":"https://amg01131-tracetv-amg01131c4-stirr-us-4390.playouts.now.amagi.tv/playlist.m3u8"},{"n":"Trace Brazuca HD","l":"https://i.imgur.com/DFBocPu.png","g":["Music"],"q":"1080p","u":"https://cdn-uw2-prod.tsv2.amagi.tv/linear/amg01131-tracetv-tracebrazuca-samsungbr/playlist.m3u8"},{"n":"Trace Caribbean","l":"https://i.imgur.com/ZHD7Vxy.png","g":["Music"],"q":"1080p","u":"https://channels.trace.plus/Traceprod/CARIBBEAN_hd/index.m3u8"},{"n":"Trace Gospel","l":"https://i.imgur.com/X0UmU3K.png","g":["Music","Religious"],"q":"1080p","u":"https://channels.trace.plus/Traceprod/GOSPEL_FR_hd/index.m3u8"},{"n":"Trace Jama","l":"https://i.imgur.com/pthX34m.png","g":["Music"],"q":"1080p","u":"https://channels.trace.plus/Traceprod/JAMA_hd/index.m3u8"},{"n":"Trace Kitoko","l":"https://i.imgur.com/q6vkMrU.png","g":["Music"],"q":"1080p","u":"https://channels.trace.plus/Traceprod/KITOKO_hd/index.m3u8"},{"n":"Trace Latina","l":"https://i.imgur.com/CUVAi4u.png","g":["Music"],"q":"1080p","u":"https://channels.trace.plus/Traceprod/LATINA_hd/index.m3u8"},{"n":"Trace Mboa","l":"https://i.imgur.com/cYwkCj2.png","g":["Music"],"q":"1080p","u":"https://channels.trace.plus/Traceprod/MBOA_hd/index.m3u8"},{"n":"Trace Muzika","l":"https://i.imgur.com/xsEGIXO.png","g":["Music"],"q":"1080p","u":"https://channels.trace.plus/Traceprod/MUZIKA_hd/index.m3u8"},{"n":"Trace Mziki","l":"https://i.imgur.com/l3X9Gg4.png","g":["Music"],"q":"1080p","u":"https://channels.trace.plus/Traceprod/MZIKI_hd/index.m3u8"},{"n":"Trace Naija","l":"https://i.imgur.com/Rguekcp.png","g":["Music"],"q":"1080p","u":"https://channels.trace.plus/Traceprod/NAIJA_hd/index.m3u8"},{"n":"Trace Sport Stars","l":"https://i.imgur.com/FabFP5A.png","g":["Sports"],"q":"1080p","u":"https://lightning-tracesport-samsungau.amagi.tv/playlist.m3u8"},{"n":"Trace Urban","l":"https://i.imgur.com/DLIbUMx.png","g":["Music"],"q":"1080p","u":"https://lightning-traceurban-samsungau.amagi.tv/playlist.m3u8"},{"n":"Trace Urban HD","l":"https://i.imgur.com/DLIbUMx.png","g":["Music"],"q":"1080p","u":"https://channels.trace.plus/Traceprod/URBAN_FR_hd/index.m3u8"},{"n":"Trace Vanilla Islands","l":"https://i.imgur.com/ngF58fe.png","g":["Music"],"q":"1080p","u":"https://channels.trace.plus/Traceprod/VANILLA_hd/index.m3u8"},{"n":"True Crime by Pluto TV","l":"https://images.pluto.tv/channels/5f914f4b36d67d0007a91a04/colorLogoPNG.png","g":["Series"],"q":"","u":"https://jmp2.uk/plu-5f914f4b36d67d0007a91a04.m3u8"},{"n":"Turbo","l":"https://images.pluto.tv/channels/66f55c3955567d0008ef9b68/colorLogoPNG.png","g":["Entertainment"],"q":"720p","u":"https://jmp2.uk/plu-66f55c3955567d0008ef9b68.m3u8"},{"n":"TV3V","l":"https://i.ibb.co/X2yd0zL/logo-tv3v.jpg","g":["General"],"q":"720p","u":"https://tv3v.live-kd.com/live/tv3v/livestream/index.m3u8"},{"n":"TV5Monde France Belgium Switzerland Monaco","l":"https://i.imgur.com/WmRbudc.png","g":["General"],"q":"720p","u":"https://n-5-2.eu.cdn-redge.media/livehls/oeu/mt/live/tv5_monde_fbs/live.livx/playlist.m3u8"},{"n":"TV5Monde Info","l":"https://i.imgur.com/AJx5Fy2.png","g":["News"],"q":"1080p","u":"http://91.235.255.32:8001/1:0:1:2CA:14B4:13E:820000:0:0:0"},{"n":"TV5Monde Style","l":"https://i.imgur.com/cwC7Q2V.png","g":["Lifestyle"],"q":"","u":"http://103.190.232.129/stream/tvb/style/master.m3u8?p=967e33767f592e1aaf3d4019f38f380bf784e113b193d89c412d047059d6300d&u=Oleg"},{"n":"TV7 Colmar","l":"https://i.imgur.com/kSdGi43.png","g":["General"],"q":"576p","u":"https://tv7.live-kd.com/live/tv7/livestream/playlist.m3u8"},{"n":"TV78","l":"https://i.imgur.com/stzE1Ij.png","g":["Undefined"],"q":"720p","u":"https://streamtv.cdn.dvmr.fr/TV78/ngrp:tv78.stream_all/master.m3u8"},{"n":"TV Alsace","l":"https://academie.kasumay.international/ico/radioalsace.png","g":["General"],"q":"1080p","u":"http://194.163.157.137:8080/hls/radioalsace.m3u8"},{"n":"TV Breizh","l":"https://i.imgur.com/O8W4yhn.png","g":["Undefined"],"q":"720p","u":"https://r.eu.cdn-redge.media/livehls/oeu/mt/live/tv_breizh/live.livx/playlist.m3u8"},{"n":"TV Monaco","l":"https://upload.wikimedia.org/wikipedia/commons/thumb/4/4b/TVMonaco_2023.svg/960px-TVMonaco_2023.svg.png","g":["General"],"q":"1080p","u":"https://production-fast-mcrtv.content.okast.tv/channels/2116dc08-1959-465d-857f-3619daefb66b/b702b2b9-aebd-436c-be69-2118f56f3d86/master.m3u8"},{"n":"TV Mulhouse","l":"https://academie.kasumay.international/ico/radiomulhouse.png","g":["General"],"q":"1080p","u":"http://194.163.157.137:8080/hls/radiomulhouse.m3u8"},{"n":"TVR (France)","l":"https://www.tvr.bzh/favicon-1024.png","g":["Undefined"],"q":"720p","u":"https://streamtv.cdn.dvmr.fr/TVR/ngrp:tvr.stream_all/master.m3u8"},{"n":"TZiK","l":"https://i.imgur.com/TAagRkn.png","g":["Music"],"q":"","u":"https://54627d4fc5996.streamlock.net/tzik/tzik/chunklist.m3u8"},{"n":"Ushuaia TV","l":"https://i.imgur.com/WjjlqbP.png","g":["Undefined"],"q":"720p","u":"https://r.eu.cdn-redge.media/livehls/oeu/mt/live/ushuaia/live.livx/playlist.m3u8"},{"n":"ViaMatele","l":"https://i.imgur.com/XVCV9rj.png","g":["Undefined"],"q":"1080p","u":"https://5dd226f8f01e8.streamlock.net/via-matele-live/matelelive_1080/playlist.m3u8"},{"n":"ViaOccitanie","l":"https://i.imgur.com/NzuKt1R.png","g":["General"],"q":"540p","u":"https://streamer01.myvideoplace.tv/streamer02/hls/MDS_VIA_PAD_301117.m3u8"},{"n":"viaTelePaese","l":"https://i.imgur.com/TLZsAKK.png","g":["General"],"q":"720p","u":"https://srv.webtvmanager.fr:3970/live/viatelepaeselive.m3u8"},{"n":"Vosges TV","l":"https://i.imgur.com/7y7ancc.png","g":["Undefined"],"q":"576p","u":"https://vosgestv.live-kd.com/live/vosgestv/vosgestv/playlist.m3u8"},{"n":"Voyages & Saveurs","l":"https://images.pluto.tv/channels/680291e38e1ff89c2427aefd/colorLogoPNG_1749650211442.png","g":["Lifestyle","Travel"],"q":"720p","u":"https://jmp2.uk/plu-680291e38e1ff89c2427aefd.m3u8"},{"n":"W9","l":"https://i.imgur.com/reYeMuE.png","g":["Entertainment"],"q":"1080p","u":"https://r.eu.cdn-redge.media/livehls/oeu/mt/live/w9_fr/live.livx/playlist.m3u8"},{"n":"Walker Texas Ranger","l":"https://i.imgur.com/0N7EhuD.png","g":["Series"],"q":"","u":"https://jmp2.uk/plu-635659445b4c4700076d2ad1.m3u8"},{"n":"Y'a que la verite qui compte","l":"https://i.imgur.com/MDHN2Vc.png","g":["Entertainment"],"q":"","u":"https://jmp2.uk/plu-612e044c970e6f00083bcf3b.m3u8"},{"n":"Zee One French","l":"https://upload.wikimedia.org/wikipedia/commons/2/24/Zee_One_Logo_2025.png","g":["Entertainment"],"q":"720p","u":"https://7689426c.wurl.com/master/f36d25e7e52f1ba8d7e56eb859c636563214f541/U2Ftc3VuZy1mcl9aZWVNYWdpY19ITFM/playlist.m3u8"},{"n":"zenith","l":"https://znth.tv/images/logo.png","g":["Culture","General"],"q":"1080p","u":"https://live.azenagroup.com/zenith/index.ll.m3u8"}];</script>
+  <div class="top">
+    <div class="brand"><b>SPRtix</b><span>France CHANNELS</span></div>
+    <input type="search" id="searchInput" class="search" placeholder="Search channels..." autocomplete="off" aria-label="Search channels">
+    <div class="chips" id="chips" role="group" aria-label="Categories"></div>
+    <div class="count" id="count"></div>
+  </div>
+  <div class="grid" id="grid"></div>
+</div>
+
+<div id="toastPopup" class="toast-popup">Message</div>
+<input type="file" id="fileInput" accept=".m3u,.m3u8,.txt,text/plain,audio/x-mpegurl,application/vnd.apple.mpegurl" style="display:none">
+
+<!-- Video.js 8 already includes HLS (m3u8) support -->
+<script src="https://vjs.zencdn.net/8.10.0/video.min.js"></script>
+<script>if(!window.videojs){document.write('<script src="https://cdn.jsdelivr.net/npm/video.js@8.10.0/dist/video.min.js"><\/script>');}</script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/hls.js/1.5.13/hls.min.js"></script>
+<script>if(!window.Hls){document.write('<script src="https://cdn.jsdelivr.net/npm/hls.js@1.5.13/dist/hls.min.js"><\/script>');}</script>
+<script>
+const PLACEHOLDER = 'data:image/svg+xml;utf8,' + encodeURIComponent(
+  '<svg xmlns="http://www.w3.org/2000/svg" width="100" height="70" viewBox="0 0 100 70"><rect width="100" height="70" fill="#0f172a"/><text x="50" y="40" font-size="14" fill="#00f2fe" text-anchor="middle" font-family="Arial">SPRtix</text></svg>'
+);
+let playerInstance = null;
+let playerOpen = false, pushedState = false;
+let cat = 'All', term = '';
+const dead = new Set();
+
+function esc(str){return String(str==null?'':str).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
+function safeImg(url){return esc(url||PLACEHOLDER);}
+let toastTimer;
+function showToast(msg){
+  const t=document.getElementById('toastPopup'); t.textContent=msg; t.classList.add('show');
+  clearTimeout(toastTimer); toastTimer=setTimeout(()=>t.classList.remove('show'),3500);
+}
+
+/* ---------------- PLAYER (index.html wala same player) ---------------- */
+let hls = null, triedNative = false;
+function destroyHls(){ if (hls) { try { hls.destroy(); } catch(e){} hls = null; } }
+function initHlsPlayer(){
+  const v = document.getElementById('videoPlayer');
+  v.addEventListener('error', () => {
+    if (!v.getAttribute('src')) return;
+    if (window.currentIdx != null) markDead(window.currentIdx);
+    showToast('Stream error: link offline, blocked ya geo-restricted ho sakta hai');
+  });
+  playerInstance = {
+    pause(){ v.pause(); },
+    reset(){ destroyHls(); v.pause(); v.removeAttribute('src'); v.load(); }
+  };
+}
+
+function detectType(url){
+  const u = url.split('?')[0].split('#')[0].toLowerCase();
+  if (u.endsWith('.mp4') || u.endsWith('.m4v')) return 'video/mp4';
+  if (u.endsWith('.webm')) return 'video/webm';
+  if (u.endsWith('.ogv') || u.endsWith('.ogg')) return 'video/ogg';
+  if (u.endsWith('.mkv')) return 'video/webm';
+  if (u.endsWith('.mpd')) return 'application/dash+xml';
+  // .m3u8, and also links with no extension (most live TV / IPTV links) are treated as HLS
+  return 'application/x-mpegURL';
+}
+
+function playStreamHls(url, title){
+  url = (url || '').trim();
+  if (!url) { showToast('Stream URL not available!'); return; }
+  document.getElementById('playerTitle').innerText = title || 'Live Stream';
+  document.getElementById('playerModal').classList.add('active');
+  document.body.classList.add('playing');
+  if (!playerOpen) {
+    playerOpen = true;
+    try { history.pushState({player:1}, ''); pushedState = true; } catch(e) { pushedState = false; }
+  }
+  window.scrollTo({top:0, behavior:'smooth'});
+  const v = document.getElementById('videoPlayer');
+  playerInstance.reset();
+  triedNative = false;
+  const type = detectType(url);
+  const tryPlay = () => { const p = v.play(); if (p && p.catch) p.catch(() => {}); };
+  const playNative = () => { v.src = url; v.load(); tryPlay(); };
+
+  if (type !== 'application/x-mpegURL') { playNative(); return; }   // mp4 / webm etc.
+
+  if (window.Hls && Hls.isSupported()) {
+    hls = new Hls({ enableWorker: false, lowLatencyMode: false, maxBufferLength: 30, manifestLoadingMaxRetry: 2, levelLoadingMaxRetry: 2, fragLoadingMaxRetry: 3 });
+    const myHls = hls;
+    hls.on(Hls.Events.MANIFEST_PARSED, tryPlay);
+    hls.on(Hls.Events.ERROR, (ev, d) => {
+      if (!d.fatal || hls !== myHls) return;
+      if (d.type === Hls.ErrorTypes.MEDIA_ERROR) { myHls.recoverMediaError(); return; }
+      // network / manifest problem: ek baar browser ke native player se koshish
+      destroyHls();
+      if (!triedNative && v.canPlayType('application/vnd.apple.mpegurl')) { triedNative = true; playNative(); return; }
+      if (window.currentIdx != null) markDead(window.currentIdx);
+      showToast('Stream error: link offline, blocked (CORS) ya geo-restricted ho sakta hai');
+    });
+    hls.loadSource(url);
+    hls.attachMedia(v);
+  } else {
+    playNative();   // Safari / native HLS
+  }
+}
+
+let useVjs = false;
+function initPlayer(){
+  if (typeof videojs === 'undefined') { useVjs = false; initHlsPlayer(); return; }
+  playerInstance = videojs('videoPlayer', {
+    fill: true, controls: true, autoplay: false, preload: 'auto', playsinline: true,
+    html5: {
+      vhs: { overrideNative: true, enableLowInitialPlaylist: true, smoothQualityChange: true, withCredentials: false },
+      nativeAudioTracks: false, nativeVideoTracks: false
+    }
+  });
+  useVjs = true;
+  playerInstance.on('error', () => {
+    const err = playerInstance.error();
+    if (err) {
+      console.error('Player error:', err);
+      if (window.currentIdx != null) markDead(window.currentIdx);
+      showToast('Stream error: link may be offline, blocked (CORS) or http on https');
+    }
+  });
+}
+
+function playStream(url, title){
+  if (!useVjs) { playStreamHls(url, title); return; }
+  url = (url || '').trim();
+  if (!url) { showToast('Stream URL not available!'); return; }
+  document.getElementById('playerTitle').innerText = title || 'Live Stream';
+  document.getElementById('playerModal').classList.add('active');
+  document.body.classList.add('playing');
+  if (!playerOpen) {
+    playerOpen = true;
+    try { history.pushState({player:1}, ''); pushedState = true; } catch(e) { pushedState = false; }
+  }
+  window.scrollTo({top:0, behavior:'smooth'});
+  playerInstance.pause();
+  playerInstance.reset();
+  playerInstance.src({ src: url, type: detectType(url) });
+  playerInstance.load();
+  const p = playerInstance.play();
+  if (p && p.catch) p.catch(() => {});
+}
+
+function doClosePlayer(){
+  document.getElementById('playerModal').classList.remove('active');
+  document.body.classList.remove('playing');
+  document.querySelectorAll('.channel-card.playing').forEach(c => c.classList.remove('playing'));
+  playerInstance.pause();
+  playerInstance.reset(); // fully stops the stream so it stops downloading in background
+  window.currentIdx = null;
+  playerOpen = false;
+}
+// X button / Escape: agar history entry push hui thi to back() chalao, popstate player band karega
+function closePlayer(){
+  if (!playerOpen) return;
+  if (pushedState) { pushedState = false; history.back(); }
+  else doClosePlayer();
+}
+// Phone/browser Back button: pehle player band hoga, dobara back dabane par page wapis jayega
+window.addEventListener('popstate', () => { if (playerOpen) { pushedState = false; doClosePlayer(); } });
+
+function markDead(i){
+  dead.add(i);
+  const c = document.querySelector('.channel-card[data-i="'+i+'"]'); if (c) c.classList.add('dead');
+}
+
+/* ---- AUTO background colour: image ke kinaron ka sab se zyada aane wala rang (index.html se) ---- */
+const bgColorCache = {};
+function applyAutoBg(wrap, url){
+  if (!url) return;
+  const paint = (rgb) => {
+    wrap.style.backgroundColor = rgb;
+    const blurImg = wrap.querySelector('.thumb-bg');
+    if (blurImg) blurImg.style.display = 'none';
+  };
+  if (bgColorCache[url]) { paint(bgColorCache[url]); return; }
+  const probe = new Image();
+  probe.crossOrigin = 'anonymous';
+  probe.onload = () => {
+    try {
+      const S = 40;
+      const cv = document.createElement('canvas'); cv.width = S; cv.height = S;
+      const ctx = cv.getContext('2d', { willReadFrequently: true });
+      ctx.drawImage(probe, 0, 0, S, S);
+      const d = ctx.getImageData(0, 0, S, S).data;
+      const buckets = {}; let best = null, bestCount = 0, opaque = 0;
+      const take = (x, y) => {
+        const i = (y * S + x) * 4;
+        if (d[i + 3] < 40) return;
+        opaque++;
+        const key = (d[i] >> 5) + ',' + (d[i + 1] >> 5) + ',' + (d[i + 2] >> 5);
+        const b = buckets[key] || (buckets[key] = { n: 0, r: 0, g: 0, b: 0 });
+        b.n++; b.r += d[i]; b.g += d[i + 1]; b.b += d[i + 2];
+        if (b.n > bestCount) { bestCount = b.n; best = b; }
+      };
+      for (let k = 0; k < S; k++) { take(k, 0); take(k, S - 1); take(0, k); take(S - 1, k); }
+      if (!best || opaque < S) return;
+      const rgb = `rgb(${Math.round(best.r / best.n)},${Math.round(best.g / best.n)},${Math.round(best.b / best.n)})`;
+      bgColorCache[url] = rgb; paint(rgb);
+    } catch (e) { /* CORS block: blur wala background hi chalega */ }
+  };
+  probe.src = url;
+}
+
+/* ---------------- GRID ---------------- */
+function initials(n){return (n.replace(/[^A-Za-z0-9 ]/g,'').trim().split(/\s+/).slice(0,2).map(w=>w[0]).join('')||'?').toUpperCase();}
+
+function buildCard(i){
+  const c = CHANNELS[i];
+  const card = document.createElement('div');
+  card.className = 'channel-card' + (dead.has(i) ? ' dead' : '');
+  card.dataset.i = i;
+  card.setAttribute('role','button'); card.tabIndex = 0;
+  card.innerHTML = `
+    <div class="thumb-wrap"></div>
+    <div class="channel-logo-text">${esc(c.n)}</div>
+    <div class="channel-footer">
+      <span class="live-badge">LIVE</span>
+      <span class="view-count">${esc(c.q || 'Online')}</span>
+    </div>`;
+  const wrap = card.querySelector('.thumb-wrap');
+  const fallback = () => { wrap.innerHTML = '<div class="ini">'+esc(initials(c.n))+'</div>'; wrap.style.backgroundColor='#111827'; };
+  if (!c.l) fallback();
+  else {
+    wrap.innerHTML = `<img src="${safeImg(c.l)}" class="thumb-bg" alt="" referrerpolicy="no-referrer"><img src="${safeImg(c.l)}" class="card-thumb" loading="lazy" alt="" referrerpolicy="no-referrer">`;
+    const px = 'https://wsrv.nl/?url=' + encodeURIComponent(c.l.replace(/^https?:\/\//,'')) + '&w=200';
+    wrap.querySelectorAll('img').forEach(im => {
+      let retried = false;
+      im.onerror = () => { if (!retried) { retried = true; im.src = px; } else fallback(); };
+    });
+    applyAutoBg(wrap, c.l);
+  }
+  return card;
+}
+
+function render(){
+  const t = term.trim().toLowerCase();
+  const grid = document.getElementById('grid');
+  grid.innerHTML = '';
+  const frag = document.createDocumentFragment();
+  let n = 0;
+  CHANNELS.forEach((c,i) => {
+    if (cat !== 'All' && !c.g.includes(cat)) return;
+    if (t && !c.n.toLowerCase().includes(t)) return;
+    frag.appendChild(buildCard(i)); n++;
+  });
+  grid.appendChild(frag);
+  if (!CHANNELS.length) { showLoader(); document.getElementById('count').textContent = ''; return; }
+  if (!n) grid.innerHTML = '<div class="empty-msg">No channels found.</div>';
+  document.getElementById('count').textContent = n + ' of ' + CHANNELS.length + ' channels';
+}
+
+function buildChips(){
+  const counts = {};
+  CHANNELS.forEach(c => c.g.forEach(g => counts[g] = (counts[g]||0)+1));
+  const names = ['All', ...Object.keys(counts).sort((a,b)=>((b==='Pakistan')-(a==='Pakistan'))||(counts[b]-counts[a]))];
+  const box = document.getElementById('chips');
+  box.innerHTML = '';
+  names.forEach(n => {
+    const b = document.createElement('button');
+    b.className = 'chip'; b.textContent = n === 'All' ? 'All' : n + ' ' + counts[n];
+    b.setAttribute('aria-pressed', n === cat);
+    b.onclick = () => { cat = n; [...box.children].forEach((x,k)=>x.setAttribute('aria-pressed', names[k]===cat)); render(); };
+    box.appendChild(b);
+  });
+}
+
+
+/* ---------------- PLAYLIST LOADER ---------------- */
+const STORE_KEY = 'sprtix_news_playlist';
+
+function parseM3U(text){
+  const lines = String(text).split(/\r?\n/), out = [];
+  for (let i = 0; i < lines.length; i++) {
+    const l = lines[i].trim();
+    if (!l.startsWith('#EXTINF')) continue;
+    const m = l.match(/,([^,]*)$/);                       // naam hamesha aakhri comma ke baad hota hai
+    let name = (m ? m[1] : '').trim();
+    const logo = (l.match(/tvg-logo="([^"]*)"/) || [])[1] || '';
+    const grp  = (l.match(/group-title="([^"]*)"/) || [])[1] || '';
+    let j = i + 1;
+    while (j < lines.length && lines[j].trim() && lines[j].trim().startsWith('#') && !lines[j].trim().startsWith('#EXTINF')) j++;
+    while (j < lines.length && !lines[j].trim()) j++;
+    const url = (lines[j] || '').trim();
+    if (!url || url.startsWith('#')) continue;            // URL missing: is entry ko chor do
+    let tag = '';
+    name = name.replace(/\s*\[([^\]]+)\]\s*/g, (_, t) => { tag = t; return ' '; }).trim();
+    const q = name.match(/\s*\(([^)]*\d+[pi])\)\s*$/);
+    let quality = '';
+    if (q) { quality = q[1]; name = name.slice(0, q.index).trim(); }
+    if (!name) continue;
+    const g = grp.split(';').map(x => x.trim()).filter(Boolean);
+    out.push({ n: name, l: logo, g: g.length ? g : ['Other'], q: /geo/i.test(tag) ? 'Geo-blocked' : (quality || ''), u: url });
+    i = j;
+  }
+  return out;
+}
+
+function setPlaylist(text, save){
+  const list = parseM3U(text);
+  if (!list.length) { showToast('Is file mein koi channel nahi mila (#EXTINF lines chahiye)'); return false; }
+  CHANNELS = list; cat = 'All'; term = ''; dead.clear();
+  document.getElementById('searchInput').value = '';
+  buildChips(); render();
+  if (save) { try { localStorage.setItem(STORE_KEY, text); } catch (e) {} }
+  showToast(list.length + ' channels loaded');
+  return true;
+}
+
+function showLoader(){
+  const grid = document.getElementById('grid');
+  grid.innerHTML = `
+    <div class="loader">
+      <h3>News playlist load karein</h3>
+      <p>Apni news playlist (.m3u / .txt) select karein ya neeche paste karein. Ek baar load karne ke baad ye browser mein save rehti hai.</p>
+      <button class="go" type="button" id="pickBtn">Playlist file select karein</button>
+      <textarea id="pasteBox" placeholder="#EXTM3U ... yahan paste karein"></textarea>
+      <button class="go alt" type="button" id="pasteBtn">Paste se load karein</button>
+    </div>`;
+  document.getElementById('pickBtn').onclick = () => document.getElementById('fileInput').click();
+  document.getElementById('pasteBtn').onclick = () => setPlaylist(document.getElementById('pasteBox').value, true);
+}
+
+function openChannel(card){
+  const i = +card.dataset.i, c = CHANNELS[i];
+  dead.delete(i); card.classList.remove('dead');
+  window.currentIdx = i;
+  document.querySelectorAll('.channel-card.playing').forEach(x => x.classList.remove('playing'));
+  card.classList.add('playing');
+  playStream(c.u, c.n);
+}
+
+window.addEventListener('DOMContentLoaded', () => {
+  try { initPlayer(); } catch (e) { console.error(e); try { useVjs = false; initHlsPlayer(); } catch (e2) {} }
+  document.getElementById('fileInput').addEventListener('change', e => {
+    const f = e.target.files[0]; if (!f) return;
+    const r = new FileReader(); r.onload = () => setPlaylist(r.result, true); r.readAsText(f); e.target.value = '';
+  });
+  if (!CHANNELS.length) {
+    try { const saved = localStorage.getItem(STORE_KEY); if (saved) CHANNELS = parseM3U(saved); } catch (e) {}
+  }
+  buildChips();
+  render();
+
+  const grid = document.getElementById('grid');
+  grid.addEventListener('click', e => { const c = e.target.closest('.channel-card'); if (c) openChannel(c); });
+  grid.addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' ') { const c = e.target.closest('.channel-card'); if (c) { e.preventDefault(); openChannel(c); } } });
+  let st; document.getElementById('searchInput').addEventListener('input', e => { term = e.target.value; clearTimeout(st); st = setTimeout(render, 120); });
+  document.addEventListener('keydown', e => { if (e.key === 'Escape') closePlayer(); });
+});
+</script>
+</body>
+</html>
