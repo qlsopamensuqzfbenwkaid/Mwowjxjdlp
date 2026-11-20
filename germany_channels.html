@@ -1,0 +1,432 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="referrer" content="no-referrer">
+<title>SPRtix - Germany CHANNELS</title>
+<link href="https://vjs.zencdn.net/8.10.0/video-js.css" rel="stylesheet" />
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<style>
+*{margin:0;padding:0;box-sizing:border-box;font-family:'Poppins',sans-serif;-webkit-tap-highlight-color:transparent}
+body{background:radial-gradient(circle at top,#0f172a 0%,#030712 70%) fixed;background-color:#030712;color:#fff;min-height:100vh}
+.page{max-width:1100px;margin:0 auto;padding-bottom:40px}
+
+.top{position:sticky;top:0;z-index:30;background:rgba(3,7,18,.95);backdrop-filter:blur(10px);border-bottom:1px solid rgba(0,242,254,.2);padding:12px 16px 8px}
+.brand{display:flex;align-items:baseline;gap:10px;margin-bottom:10px}
+.brand b{font-size:20px;font-weight:700;letter-spacing:.5px}
+.brand span{font-size:9px;letter-spacing:1.5px;color:#94a3b8}
+.loadbtn{margin-left:auto;background:transparent;border:1px solid rgba(0,242,254,.5);color:#00f2fe;border-radius:999px;padding:4px 12px;font-size:11px;cursor:pointer}
+.loader{grid-column:1/-1;max-width:520px;margin:20px auto;text-align:center;display:flex;flex-direction:column;gap:12px;align-items:center}
+.loader h3{font-size:16px}.loader p{font-size:12px;color:#94a3b8;line-height:1.6}
+.loader textarea{width:100%;height:110px;background:#0f172a;border:1px solid rgba(0,242,254,.4);border-radius:10px;color:#fff;padding:10px;font-size:11px;resize:vertical;outline:none}
+.loader .go{background:#00f2fe;color:#030712;border:0;border-radius:999px;padding:8px 22px;font-weight:600;font-size:12px;cursor:pointer}
+.loader .go.alt{background:transparent;color:#00f2fe;border:1px solid #00f2fe}
+.search{width:100%;max-width:460px;background:#0f172a;border:1px solid #00f2fe;border-radius:20px;padding:8px 16px;color:#fff;font-size:13px;outline:none}
+.search::placeholder{color:#64748b}
+.chips{display:flex;gap:8px;overflow-x:auto;padding:10px 0 4px;scrollbar-width:none}
+.chips::-webkit-scrollbar{display:none}
+.chip{flex:none;background:transparent;border:1px solid rgba(255,255,255,.15);color:#94a3b8;border-radius:999px;padding:4px 13px;font-size:11px;cursor:pointer}
+.chip[aria-pressed=true]{background:#00f2fe;border-color:#00f2fe;color:#030712;font-weight:600}
+.count{font-size:10px;color:#64748b;padding:2px 2px 0}
+
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(104px,1fr));gap:10px;padding:14px 16px}
+.channel-card{position:relative;background:rgba(15,23,42,.7);border:1px solid rgba(255,255,255,.08);border-radius:12px;padding:12px 6px 8px;display:flex;flex-direction:column;align-items:center;gap:7px;cursor:pointer;transition:transform .2s,border-color .2s;min-width:0}
+.channel-card:hover{transform:translateY(-2px);border-color:#00f2fe}
+.channel-card.dead{opacity:.4}
+.thumb-wrap{position:relative;width:76px;height:76px;border-radius:50%;overflow:hidden;background:#111827;flex-shrink:0;border:2px solid rgba(0,242,254,.55);box-shadow:0 0 10px rgba(0,242,254,.25)}
+.thumb-bg{position:absolute;inset:-12px;width:calc(100% + 24px);height:calc(100% + 24px);object-fit:cover;filter:blur(12px) brightness(.55) saturate(1.3)}
+.card-thumb{position:relative;z-index:1;width:100%;height:100%;object-fit:contain;object-position:center;padding:15%;display:block}
+.ini{position:relative;z-index:1;width:100%;height:100%;display:grid;place-items:center;font-weight:700;font-size:20px;color:#00f2fe}
+.channel-logo-text{font-size:10.5px;font-weight:600;text-align:center;line-height:1.2;width:100%;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;padding:0 4px}
+.channel-footer{width:100%;display:flex;justify-content:space-between;align-items:center;font-size:8px;padding:0 4px}
+.live-badge{background:#ff0055;color:#fff;padding:2px 5px;border-radius:3px;font-weight:700;font-size:7px}
+.view-count{color:#94a3b8}
+.empty-msg{padding:30px 16px;font-size:13px;color:#94a3b8;grid-column:1/-1}
+
+/* ---- player modal: same as index.html ---- */
+.player-modal{position:sticky;top:0;background:#000;z-index:150;display:none;flex-direction:column;border-bottom:1px solid rgba(0,242,254,.3)}
+.player-modal.active{display:flex}
+.player-header{display:flex;justify-content:space-between;align-items:center;padding:12px 16px;background:rgba(3,7,18,.95);border-bottom:1px solid rgba(0,242,254,.2);flex-shrink:0}
+.player-title{font-size:13px;font-weight:700;color:#00f2fe;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:80%}
+.player-close{color:#fff;font-size:16px;cursor:pointer;background:#ff0055;width:26px;height:26px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.player-body{position:relative;background:#000;width:100%;aspect-ratio:16/9;max-height:45vh}
+body.playing .top{position:static}
+.channel-card.playing{border-color:#00f2fe;box-shadow:0 0 12px rgba(0,242,254,.45)}
+.player-body>video{position:absolute;inset:0;width:100%;height:100%;background:#000}
+.player-body .video-js{position:absolute;inset:0;width:100%;height:100%;background-color:#000}
+
+.toast-popup{position:fixed;top:70px;left:50%;transform:translateX(-50%) translateY(-15px);background:rgba(15,23,42,.95);border:1px solid #00f2fe;color:#fff;padding:8px 16px;border-radius:20px;font-size:11px;box-shadow:0 5px 15px rgba(0,0,0,.5);opacity:0;pointer-events:none;transition:.3s;z-index:300;max-width:90vw;text-align:center}
+.toast-popup.show{opacity:1;transform:translateX(-50%) translateY(0)}
+:focus-visible{outline:2px solid #00f2fe;outline-offset:2px}
+@media (min-width:700px){.thumb-wrap{width:88px;height:88px}.grid{grid-template-columns:repeat(auto-fill,minmax(124px,1fr))}}
+</style>
+</head>
+<body>
+
+<div class="page">
+<!-- Video Player Modal -->
+<div id="playerModal" class="player-modal">
+  <div class="player-header">
+    <div id="playerTitle" class="player-title">Playing Content</div>
+    <div class="player-close" onclick="closePlayer()"><i class="fa-solid fa-xmark"></i></div>
+  </div>
+  <div class="player-body">
+    <video id="videoPlayer" class="video-js vjs-default-skin vjs-big-play-centered" controls preload="auto" playsinline webkit-playsinline></video>
+  </div>
+</div>
+
+<script>let CHANNELS = [{"n":"1-2-3.tv","l":"https://i.imgur.com/slSUDNX.png","g":["Shop"],"q":"270p","u":"https://123tv-mx1.flex-cdn.net/index.m3u8"},{"n":"3sat","l":"https://upload.wikimedia.org/wikipedia/commons/thumb/8/81/3sat_2019.svg/960px-3sat_2019.svg.png","g":["General"],"q":"","u":"https://dash4.antik.sk/live/test_drei_sat_tizen/playlist.m3u8"},{"n":"90210","l":"https://images.pluto.tv/channels/65a67dd13af63d0008257f17/colorLogoPNG.png","g":["Series"],"q":"","u":"https://jmp2.uk/plu-65a67dd13af63d0008257f17.m3u8"},{"n":"Adria Music Television","l":"https://i.imgur.com/QoDpnKg.png","g":["Music"],"q":"","u":"https://adriaapp.b-cdn.net/1080p/index.m3u8"},{"n":"Adventure Earth","l":"https://d3b6luslimvglo.cloudfront.net/images/79/rlaxximages/channels-rescaled/icon-white/adventureearth_white.png","g":["Documentary"],"q":"1080p","u":"https://a57e9c69976649b582a8d7604c00e69a.mediatailor.us-east-1.amazonaws.com/v1/master/44f73ba4d03e9607dcd9bebdcb8494d86964f1d8/RlaxxTV-eu_AdventureEarth/playlist.m3u8"},{"n":"Alex Berlin","l":"https://i.imgur.com/eTmHk4e.png","g":["Undefined"],"q":"1080p","u":"https://alex-stream.rosebud-media.de/bounce/alexlivetv50.smil/index.m3u8"},{"n":"Alle hassen Chris","l":"https://images.pluto.tv/channels/622f6e1e2792150007e0b2ff/colorLogoPNG.png","g":["Comedy"],"q":"","u":"https://jmp2.uk/plu-622f6e1e2792150007e0b2ff.m3u8"},{"n":"Allgau TV","l":"https://upload.wikimedia.org/wikipedia/commons/thumb/8/8e/Allg%C3%A4u_TV_Logo_%282021%29.svg/960px-Allg%C3%A4u_TV_Logo_%282021%29.svg.png","g":["General"],"q":"1080p","u":"https://stream01.welocal.stream/stream/fhd-allgaeutv_25679/ngrp:stream_all/playlist.m3u8"},{"n":"Altenburg TV","l":"https://i.imgur.com/3JriZGR.png","g":["General"],"q":"1080p","u":"https://58de7a369a9c4.streamlock.net/abgtv/abgtv_1080p/playlist.m3u8"},{"n":"ANIMAL KINGDOM","l":"","g":["Outdoor"],"q":"720p","u":"https://cdn6.goprimetime.info/feed/202306140918/LC18/index.m3u8"},{"n":"Anixe +","l":"https://i.imgur.com/hvGJ2oa.png","g":["Entertainment"],"q":"360p","u":"https://ma.anixa.tv/clips/stream/anixesd/index.m3u8"},{"n":"Anixe HD Serie","l":"https://upload.wikimedia.org/wikipedia/commons/thumb/c/c0/Anixe_HD.svg/960px-Anixe_HD.svg.png","g":["Entertainment"],"q":"360p","u":"https://ma.anixa.tv/clips/stream/anixehd/index.m3u8"},{"n":"ARD-alpha","l":"https://upload.wikimedia.org/wikipedia/commons/thumb/4/4b/ARD_alpha.svg/960px-ARD_alpha.svg.png","g":["Education"],"q":"720p","u":"https://mcdn.br.de/br/fs/ard_alpha/hls/de/master.m3u8"},{"n":"Aristo TV","l":"https://i.imgur.com/DLVjeno.png","g":["Undefined"],"q":"360p","u":"https://ma.anixa.tv/clips/stream/aristo/index.m3u8"},{"n":"arte (Germany)","l":"https://i.imgur.com/ecXMjNl.png","g":["Entertainment"],"q":"Geo-blocked","u":"https://artesimulcast.akamaized.net/hls/live/2030993/artelive_de/index.m3u8"},{"n":"arte (Germany) HD","l":"https://i.imgur.com/ecXMjNl.png","g":["Entertainment"],"q":"","u":"https://dash4.antik.sk/live/test_arte_avc_25p/playlist.m3u8"},{"n":"Auction Hunters (Germany)","l":"https://i.imgur.com/4SPOVN7.png","g":["Entertainment"],"q":"","u":"https://jmp2.uk/plu-5ede45d077746000072be0fe.m3u8"},{"n":"Augsburg TV","l":"https://i.imgur.com/27AKMUL.png","g":["General"],"q":"1080p","u":"https://stream02.welocal.stream/stream/fhd-augsburgtv_104951/ngrp:stream_all/playlist.m3u8"},{"n":"Autentic History","l":"https://d3b6luslimvglo.cloudfront.net/images/79/rlaxximages/channels-rescaled/icon-white/autentichistory_white.png","g":["Documentary"],"q":"1080p","u":"https://9e754fa707344ccca6d84955c8fcaf36.mediatailor.us-east-1.amazonaws.com/v1/master/44f73ba4d03e9607dcd9bebdcb8494d86964f1d8/RlaxxTV-eu_AutenticHistory/playlist.m3u8"},{"n":"Autentic Travel","l":"https://d3b6luslimvglo.cloudfront.net/images/79/rlaxximages/channels-rescaled/icon-white/autentictravel_white.png","g":["Lifestyle"],"q":"1080p","u":"https://cb0c87cc605942ff9766a4e6744bbadc.mediatailor.us-east-1.amazonaws.com/v1/master/44f73ba4d03e9607dcd9bebdcb8494d86964f1d8/RlaxxTV-eu_AutenticTravel/playlist.m3u8"},{"n":"Awkward (Germany)","l":"https://images.pluto.tv/channels/62bc1784120ba80007935aaa/colorLogoPNG.png","g":["Series"],"q":"","u":"https://jmp2.uk/plu-62bc1784120ba80007935aaa.m3u8"},{"n":"AXN Black (Germany)","l":"https://i.imgur.com/Peo1QiZ.png","g":["Movies"],"q":"","u":"http://46.244.99.71:8181/stream/35/index.m3u8"},{"n":"AXN White (Germany)","l":"https://upload.wikimedia.org/wikipedia/commons/6/68/AXN_White_logo_%282015%29.svg","g":["Series"],"q":"","u":"http://46.244.99.71:8181/stream/50/index.m3u8"},{"n":"Baden TV","l":"https://i.imgur.com/L6vE9Bz.png","g":["General"],"q":"1080p","u":"http://badentv-stream2.siebnich.info/rtplive/btv.stream/live.m3u8"},{"n":"BBC Travel","l":"https://i.imgur.com/QiuYWs9.png","g":["Lifestyle"],"q":"","u":"https://jmp2.uk/plu-60e4519e6873180007d3cddb.m3u8"},{"n":"Becker (Germany)","l":"https://images.pluto.tv/channels/630348a54c48ce00077eb6c7/colorLogoPNG.png","g":["Comedy"],"q":"","u":"https://jmp2.uk/plu-630348a54c48ce00077eb6c7.m3u8"},{"n":"Bibel TV","l":"https://i.imgur.com/RLwmrk3.png","g":["Undefined"],"q":"720p","u":"https://bibint01.iptv-playoutcenter.de/bibint01/bibint01.stream_all/playlist.m3u8"},{"n":"Bibel TV Impuls","l":"https://i.imgur.com/k4tbW3W.png","g":["Undefined"],"q":"720p","u":"https://bibeltv02.iptv-playoutcenter.de/bibeltv02/bibeltv02.stream_1/playlist.m3u8"},{"n":"Bibel TV Musik","l":"https://i.imgur.com/yIqOcP5.png","g":["Music"],"q":"720p","u":"https://bibeltv03.iptv-playoutcenter.de/bibeltv03/bibeltv03.stream_1/playlist.m3u8"},{"n":"BIG BROTHER CLASSIC","l":"https://images.pluto.tv/channels/663e09e4b18d700008e48dcf/colorLogoPNG.png","g":["Entertainment"],"q":"","u":"https://jmp2.uk/plu-663e09e4b18d700008e48dcf.m3u8"},{"n":"BLK Regional TV","l":"https://i.imgur.com/JLgnPG1.png","g":["Undefined"],"q":"1080p","u":"https://58bd5b7a98e04.streamlock.net/medienasa-live/_definst_/mp4:BLKonline_high/playlist.m3u8"},{"n":"BR Fernsehen","l":"https://upload.wikimedia.org/wikipedia/commons/thumb/5/51/Logo_Bayerischer_Rundfunk_2024.svg/960px-Logo_Bayerischer_Rundfunk_2024.svg.png","g":["Undefined"],"q":"720p","u":"https://mcdn.br.de/br/fs/bfs_nord/hls/de/master.m3u8"},{"n":"BR Fernsehen Sud","l":"https://upload.wikimedia.org/wikipedia/commons/thumb/5/51/Logo_Bayerischer_Rundfunk_2024.svg/960px-Logo_Bayerischer_Rundfunk_2024.svg.png","g":["Undefined"],"q":"1080p","u":"https://mcdn.br.de/br/fs/bfs_sued/hls/de/master.m3u8"},{"n":"BTL TV (Netherlands)","l":"https://yt3.googleusercontent.com/ytc/APkrFKZYgQTsDhkbaqmPRCPZIf0UgZqF1wa6aG2eo8ti=s176-c-k-c0x00ffffff-no-rj-mo","g":["Religious"],"q":"1080p","u":"https://cdn.liveplustv.com/v1/live/btl-tv/master.m3u8"},{"n":"Cartoon Network CEE Germany","l":"https://upload.wikimedia.org/wikipedia/commons/thumb/8/80/Cartoon_Network_2010_logo.svg/960px-Cartoon_Network_2010_logo.svg.png","g":["Animation","Kids"],"q":"","u":"http://94.130.48.67:8042/stream/109/index.m3u8"},{"n":"CC Pluto TV","l":"https://images.pluto.tv/channels/5d4947590ba40f75dc29c26b/colorLogoPNG.png","g":["Comedy"],"q":"","u":"https://jmp2.uk/plu-5d4947590ba40f75dc29c26b.m3u8"},{"n":"Chaos City","l":"https://i.imgur.com/1UZNdRH.png","g":["Series"],"q":"","u":"https://jmp2.uk/plu-60afbad343e3840007164348.m3u8"},{"n":"Cira TV","l":"https://i.imgur.com/YFnmSLW.png","g":["Undefined"],"q":"1080p","u":"https://hlspackager.akamaized.net/live/DB/CIRA_TV/HLS/CIRA_TV.m3u8"},{"n":"Comedy Central (Germany)","l":"https://upload.wikimedia.org/wikipedia/commons/thumb/a/aa/Comedy_Central_2018.svg/960px-Comedy_Central_2018.svg.png","g":["Comedy"],"q":"","u":"https://ma.anixa.tv/clips/stream/comedy_central/playlist.php"},{"n":"Curiosity Channel","l":"https://upload.wikimedia.org/wikipedia/commons/thumb/e/ef/Curiosity_Channel_Logo_2023.svg/960px-Curiosity_Channel_Logo_2023.svg.png","g":["Education"],"q":"720p","u":"https://jmp2.uk/plu-6576c20fb3801200084786c9.m3u8"},{"n":"Das Erste HD","l":"https://upload.wikimedia.org/wikipedia/commons/thumb/d/d1/ARD_Dachmarke_2014.svg/960px-ARD_Dachmarke_2014.svg.png","g":["General"],"q":"1080p","u":"https://daserste-live.ard-mcdn.de/daserste/live/hls/int/master.m3u8"},{"n":"DASDING 90.8","l":"https://i.imgur.com/BmklHs8.png","g":["Music"],"q":"720p","u":"https://swrdasdingvr-hls.akamaized.net/hls/live/2018681/dasdingvr/master.m3u8"},{"n":"DAZN 1 Germany","l":"https://i.imgur.com/2Z2EmZF.png","g":["Sports"],"q":"","u":"http://45.142.104.86/stream/25/index.m3u8"},{"n":"DAZN 2 Germany","l":"https://i.imgur.com/OGj3qf5.png","g":["Sports"],"q":"","u":"http://45.142.104.86/stream/15/index.m3u8"},{"n":"DAZN Darts x Pluto TV","l":"https://images.pluto.tv/channels/64b67f0424ade50008a3be17/colorLogoPNG.png","g":["Sports"],"q":"","u":"https://jmp2.uk/plu-64b67f0424ade50008a3be17.m3u8"},{"n":"DAZN Heldinnen x Pluto TV","l":"https://images.pluto.tv/channels/64afe50c5dc16600087f3227/colorLogoPNG.png","g":["Sports"],"q":"","u":"https://jmp2.uk/plu-64afe50c5dc16600087f3227.m3u8"},{"n":"Deluxe Dance","l":"https://i.imgur.com/Qu7t15Y.png","g":["Music"],"q":"1080p","u":"https://sdn-global-live-streaming-packager-cache.3qsdn.com/64733/64733_264_live.m3u8"},{"n":"Deluxe Lounge","l":"https://i.imgur.com/pgCA35z.png","g":["Music"],"q":"720p","u":"https://jmp2.uk/stvp-CHAJ0500413A"},{"n":"Deluxe Music","l":"https://i.imgur.com/HimuPPb.png","g":["Music"],"q":"720p","u":"https://sdn-global-live-streaming-packager-cache.3qsdn.com/13456/13456_264_live.m3u8"},{"n":"Deluxe Rap","l":"https://i.imgur.com/s3h67hx.png","g":["Music"],"q":"1080p","u":"https://sdn-global-live-streaming-packager-cache.3qsdn.com/65183/65183_264_live.m3u8"},{"n":"Die Neue Zeit TV","l":"https://i.imgur.com/K3lvrog.png","g":["Religious"],"q":"576p","u":"https://bild-und-ton.stream/die-neue-zeit-tv-live/smil:dnz-de.smil/playlist.m3u8"},{"n":"Disney Channel (Germany)","l":"https://upload.wikimedia.org/wikipedia/commons/3/3d/2022_Disney_Channel_logo.svg","g":["Kids"],"q":"576p","u":"https://s6.hopslan.com/disneyX/index.m3u8"},{"n":"Disney Channel (Germany) HD","l":"https://upload.wikimedia.org/wikipedia/commons/3/3d/2022_Disney_Channel_logo.svg","g":["Kids"],"q":"","u":"http://109.85.181.77:9981/stream/channelid/652495718?profile=pass"},{"n":"DMAX (Germany)","l":"https://upload.wikimedia.org/wikipedia/commons/thumb/9/98/DMAX_BLACK.svg/960px-DMAX_BLACK.svg.png","g":["Lifestyle"],"q":"Geo-blocked","u":"http://5.180.164.197:8080/DMAX/index.m3u8"},{"n":"DMAX (Germany) HD","l":"https://upload.wikimedia.org/wikipedia/commons/thumb/9/98/DMAX_BLACK.svg/960px-DMAX_BLACK.svg.png","g":["Lifestyle"],"q":"576p","u":"https://s6.hopslan.com/dmaxX/index.m3u8"},{"n":"DMF","l":"https://i.imgur.com/sJaBU7X.jpeg","g":["Music"],"q":"1080p","u":"https://d-m-f.iptv-playoutcenter.de/dmf/dmf1/playlist.m3u8"},{"n":"Dokusat","l":"https://i.imgur.com/GadfTwF.png","g":["Documentary"],"q":"1080p","u":"https://muc3.iptv-playoutcenter.de/dokusat/dokusat1/playlist.m3u8"},{"n":"Drake & Josh","l":"https://images.pluto.tv/channels/65a67c494a10d800085cab06/colorLogoPNG.png","g":["Kids"],"q":"","u":"https://jmp2.uk/plu-65a67c494a10d800085cab06.m3u8"},{"n":"DW Russian","l":"https://i.imgur.com/8MRNFb9.png","g":["News"],"q":"1080p","u":"https://dwamdstream110.akamaized.net/hls/live/2017971/dwstream110/master.m3u8"},{"n":"EchtJetzt TV","l":"https://i.ibb.co/ccNRGVj/download-10.png","g":["Religious"],"q":"720p","u":"https://bibeltv03.iptv-playoutcenter.de/bibeltv03/bibeltv03.stream_all/playlist.m3u8"},{"n":"Erz-TV Stollberg","l":"https://i.imgur.com/6FHl9B1.png","g":["General"],"q":"576p","u":"https://5acade5fc0c29.streamlock.net/kabeljournal/live2020.stream/playlist.m3u8"},{"n":"Eurosport 1 Germany","l":"https://i.imgur.com/olQJgm7.png","g":["Sports"],"q":"","u":"http://90.183.52.46:4000/play/a06v/index.m3u8"},{"n":"Eurosport 2 Germany","l":"https://i.imgur.com/f56dHgR.png","g":["Sports"],"q":"","u":"http://46.244.99.71:8181/stream/74/index.m3u8"},{"n":"EWTN (Germany)","l":"https://i.imgur.com/NXeygNk.png","g":["Religious"],"q":"720p","u":"https://cdn3.wowza.com/1/ZUkxSDBrZHlMbjVn/ZkhNRFNZ/hls/live/playlist.m3u8"},{"n":"FIFA+ German","l":"https://upload.wikimedia.org/wikipedia/commons/thumb/9/9c/FIFA%2B_(2025).svg/960px-FIFA%2B_(2025).svg.png","g":["Sports"],"q":"720p","u":"https://4397879b.wurl.com/master/f36d25e7e52f1ba8d7e56eb859c636563214f541/UmFrdXRlblRWLWRlX0ZJRkFQbHVzR2VybWFuX0hMUw/playlist.m3u8"},{"n":"Filstalwelle","l":"https://i.imgur.com/19iKLvf.png","g":["General"],"q":"1080p","u":"https://h055.video-stream-hosting.de/filstalwelle-live/_definst_/mp4:livestream/playlist.m3u8"},{"n":"Finest TV","l":"https://i.imgur.com/1uoP10V.png","g":["Music"],"q":"288p","u":"https://media.finest.tv/hls/live.m3u8"},{"n":"Folx Music Television","l":"https://i.imgur.com/ze04puX.png","g":["Music"],"q":"","u":"https://folxapp.b-cdn.net/1080p/index.m3u8"},{"n":"Franken Fernsehen","l":"https://i.imgur.com/3pGGLLD.png","g":["General"],"q":"1080p","u":"https://frankentv.iptv-playoutcenter.de/frankentv/frankentv.stream_1/playlist.m3u8"},{"n":"Frasier: Beruhmte Gaste","l":"https://images.pluto.tv/channels/6790fa9e1cfc4aa96dfadcef/colorLogoPNG.png","g":["Comedy"],"q":"","u":"https://jmp2.uk/plu-6790fa9e1cfc4aa96dfadcef.m3u8"},{"n":"Germany Shore","l":"https://images.pluto.tv/channels/6447dea7e94c380008dba94c/colorLogoPNG.png","g":["Entertainment"],"q":"","u":"https://jmp2.uk/plu-6447dea7e94c380008dba94c.m3u8"},{"n":"Grjngo Western Movies","l":"https://i.imgur.com/wFqhK3p.png","g":["Movies"],"q":"720p","u":"https://amogonetworx-grjngo-3-dk.samsung.wurl.tv/playlist.m3u8"},{"n":"Hamburg 1","l":"https://i.imgur.com/df3yY8W.png","g":["Undefined"],"q":"1080p","u":"https://stream.hamburg1.de/live_abr/hamburg1_abr/playlist.m3u8"},{"n":"Handystar","l":"https://i.imgur.com/oMIygVf.png","g":["Shop"],"q":"404p","u":"https://sparhandytv.cdn.ses-ps.com/live/channel01/hls/index.m3u8"},{"n":"Hope Channel German","l":"https://i.imgur.com/I9BbJR0.png","g":["Religious"],"q":"1080p","u":"https://customer-x8zydurm357k8j9p.cloudflarestream.com/5b46490d20cdd87fcac238b0027813e0/manifest/video.m3u8"},{"n":"Horse & Country TV","l":"https://i.imgur.com/1x6zYZr.png","g":["Outdoor"],"q":"1080p","u":"https://hnc-free-viewlift.amagi.tv/HNC_AUSTRALIA.m3u8"},{"n":"hr-fernsehen","l":"https://upload.wikimedia.org/wikipedia/commons/thumb/e/ea/HR-Fernsehen_Logo_2023.svg/960px-HR-Fernsehen_Logo_2023.svg.png","g":["General"],"q":"1080p","u":"https://hrhls.akamaized.net/hls/live/2024525/hrhls/index.m3u8"},{"n":"hr-fernsehen HD","l":"https://upload.wikimedia.org/wikipedia/commons/thumb/e/ea/HR-Fernsehen_Logo_2023.svg/960px-HR-Fernsehen_Logo_2023.svg.png","g":["General"],"q":"","u":"https://dash4.antik.sk/live/test_hr_tizen/playlist.m3u8"},{"n":"HSE","l":"https://i.imgur.com/IecRNCk.png","g":["Shop"],"q":"1080p","u":"https://hse24.akamaized.net/hls/live/2006663/hse24/playlist.m3u8"},{"n":"HSE Extra","l":"https://i.imgur.com/nvMpbip.png","g":["Shop"],"q":"1080p","u":"https://hse24extra.akamaized.net/hls/live/2006596/hse24extra/playlist.m3u8"},{"n":"HSE Trend","l":"https://i.imgur.com/qwh2urX.png","g":["Shop"],"q":"576p","u":"https://hse24trend.akamaized.net/hls/live/2006597/hse24trend/playlist.m3u8"},{"n":"Ice Pilots","l":"https://i.imgur.com/F8GBYq3.png","g":["Series"],"q":"","u":"https://jmp2.uk/plu-5ce40f42ba7f7f5ea9518fe1.m3u8"},{"n":"iSTUFF","l":"https://i.imgur.com/1V3UXVb.jpg","g":["Education"],"q":"720p","u":"https://relay2.cdn.fem-net.de/hls/loop/istuff_live/istuff_live-720p.m3u8"},{"n":"Juwelo (Germany)","l":"https://i.imgur.com/vmX8Qin.png","g":["Shop"],"q":"720p","u":"https://sdn-global-live-streaming-packager-cache.3qsdn.com/7441/7441_264_live.m3u8"},{"n":"kabel eins","l":"https://i.imgur.com/6pulSHZ.png","g":["Entertainment"],"q":"","u":"https://dash4.antik.sk/live/test_kabel_eins_tizen/playlist.m3u8"},{"n":"kabel eins Doku","l":"https://upload.wikimedia.org/wikipedia/commons/thumb/0/07/Kabel_eins_Doku_Logo_2016.svg/960px-Kabel_eins_Doku_Logo_2016.svg.png","g":["Documentary"],"q":"720p","u":"https://s6.hopslan.com/dokuX/index.m3u8"},{"n":"Kanal12 Spremberg TV","l":"https://i.ibb.co/1LzJz7Y/Channels4-profile-7.jpg","g":["General"],"q":"404p","u":"https://58de7a369a9c4.streamlock.net/sprembergtv/live/playlist.m3u8"},{"n":"KaufBei TV","l":"https://i.imgur.com/CVJWiM0.png","g":["Shop"],"q":"720p","u":"https://elephant.t62a.com/hls/8103/index.m3u8"},{"n":"KiKA","l":"https://i.imgur.com/vZdNp5S.png","g":["Kids"],"q":"1080p","u":"https://kikahls.akamaized.net/hls/live/2022690/livetvkika_ww/master.m3u8"},{"n":"KiKA HD","l":"https://i.imgur.com/vZdNp5S.png","g":["Kids"],"q":"","u":"https://dash4.antik.sk/live/test_kika_tizen/playlist.m3u8"},{"n":"KulturMD","l":"https://i.imgur.com/io7cJ1Z.png","g":["Culture"],"q":"1080p","u":"http://58bd5b7a98e04.streamlock.net/medienasa-live/kulturmd_high/playlist.m3u8"},{"n":"labor14","l":"https://www.tlm.de/assets/uploads/general/Sonstiges/LogoExt/_500xAUTO_crop_center-center_none/21labor14.jpg","g":["Undefined"],"q":"720p","u":"https://5acade5fc0c29.streamlock.net/OKGera/tmbz_live_high.stream/playlist.m3u8"},{"n":"Lausitzwelle","l":"https://i.imgur.com/4kYF4bK.png","g":["Music"],"q":"1080p","u":"https://h056.video-stream-hosting.de/easycast11-live/_definst_/mp4:livestreamhd2/playlist.m3u8?ref="},{"n":"Light Channel (Germany)","l":"https://i.imgur.com/0OmBlfE.png","g":["Religious"],"q":"576p","u":"http://streamer1.streamhost.org:1935/salive/lctvde/playlist.m3u8"},{"n":"Love The Planet DE","l":"https://i.imgur.com/RBcD49X.png","g":["Documentary"],"q":"Geo-blocked","u":"https://amg01821-amg01821c12-rlaxx-gb-10461.playouts.now.amagi.tv/playlist.m3u8"},{"n":"MagentaMusik 360","l":"https://i.imgur.com/R74gG7U.png","g":["Music"],"q":"1080p","u":"https://streaming.magentamusik.de/csm/573870/magentamusik1/index.m3u8"},{"n":"MC TV","l":"https://upload.wikimedia.org/wikipedia/tr/c/ca/MC_TV_logosu.png","g":["Entertainment"],"q":"720p","u":"https://rrr.sz.xlcdn.com/?account=mceutv&file=mc2&output=playlist.m3u8&protocol=https&service=wowza&type=live"},{"n":"McLeods Tochter","l":"https://images.pluto.tv/channels/66c6fcfc6838ee00085beb1a/colorLogoPNG.png","g":["Series"],"q":"","u":"https://jmp2.uk/plu-66c6fcfc6838ee00085beb1a.m3u8"},{"n":"MDF.1","l":"https://i.imgur.com/IFGXK6u.png","g":["General"],"q":"1080p","u":"http://58bd5b7a98e04.streamlock.net/medienasa-live/mdf1_high/playlist.m3u8"},{"n":"MDR Fernsehen","l":"https://upload.wikimedia.org/wikipedia/commons/thumb/6/61/MDR_Logo_2017.svg/960px-MDR_Logo_2017.svg.png","g":["General"],"q":"Geo-blocked","u":"https://mdrtvsnhls.akamaized.net/hls/live/2016928/mdrtvsn/index.m3u8"},{"n":"MDR Fernsehen Sachsen Anhalt","l":"https://upload.wikimedia.org/wikipedia/commons/thumb/6/61/MDR_Logo_2017.svg/960px-MDR_Logo_2017.svg.png","g":["General"],"q":"Geo-blocked","u":"https://mdrtvsahls.akamaized.net/hls/live/2016879/mdrtvsa/index.m3u8"},{"n":"MDR Fernsehen Thuringen","l":"https://upload.wikimedia.org/wikipedia/commons/thumb/6/61/MDR_Logo_2017.svg/960px-MDR_Logo_2017.svg.png","g":["General"],"q":"","u":"https://dash4.antik.sk/live/test_mdr_tizen/playlist.m3u8"},{"n":"More Than Sports TV","l":"https://i.imgur.com/SLrjImc.png","g":["Sports"],"q":"1080p","u":"https://mts1.iptv-playoutcenter.de/mts/mts-web/playlist.m3u8"},{"n":"Motorvision+","l":"https://i.imgur.com/5cs5GkJ.png","g":["Auto"],"q":"720p","u":"https://r.eu.cdn-redge.media/livehls/oeu/mt/live/motorvision_en/live.livx/playlist.m3u8"},{"n":"Moviedome","l":"https://i.imgur.com/8c54ycg.png","g":["Movies"],"q":"720p","u":"https://jmp2.uk/plu-615c1e5ce3039400070a0547.m3u8"},{"n":"MTV (Germany)","l":"https://upload.wikimedia.org/wikipedia/commons/thumb/6/68/MTV_2021_%28brand_version%29.svg/960px-MTV_2021_%28brand_version%29.svg.png","g":["Entertainment"],"q":"","u":"https://ma.anixa.tv/clips/stream/mtv/playlist.php"},{"n":"Munchen TV","l":"https://i.imgur.com/lt7xNWW.png","g":["General"],"q":"1080p","u":"https://muenchentv.iptv-playoutcenter.de/muenchentv/muenchentv.stream_1/playlist.m3u8"},{"n":"N24 Doku","l":"https://upload.wikimedia.org/wikipedia/commons/thumb/3/3f/N24Doku.svg/960px-N24Doku.svg.png","g":["Documentary"],"q":"","u":"https://jmp2.uk/plu-60080e8a4bf36000076a81b1.m3u8"},{"n":"n-tv","l":"https://upload.wikimedia.org/wikipedia/commons/thumb/f/f6/N-tv_logo-september2017.svg/960px-N-tv_logo-september2017.svg.png","g":["General"],"q":"","u":"https://dash4.antik.sk/live/test_ntv_tizen/playlist.m3u8"},{"n":"Nachrichten 360","l":"https://tvpnlogopeu.samsungcloud.tv/platform/image/sourcelogo/vc/00/02/34/DE4300003MR_20251209T125847SQUARE.png","g":["News"],"q":"Geo-blocked","u":"https://cdn-apse1-prod.tsv2.amagi.tv/linear/amg01821-lovetvfast-nachrichten360-samsungde/playlist.m3u8"},{"n":"Naruto Germany","l":"https://i.imgur.com/M8X3Kvc.png","g":["Animation"],"q":"720p","u":"https://jmp2.uk/plu-65d5fc39a25d5e00082895c4.m3u8"},{"n":"NDR Fernsehen","l":"https://upload.wikimedia.org/wikipedia/commons/thumb/e/e9/Logo_NDR_Fernsehen_2017.svg/960px-Logo_NDR_Fernsehen_2017.svg.png","g":["General"],"q":"720p","u":"https://mcdn.ndr.de/ndr/hls/ndr_fs/ndr_hh/master.m3u8"},{"n":"NDR Fernsehen Mecklenburg Vorpommern","l":"https://upload.wikimedia.org/wikipedia/commons/thumb/e/e9/Logo_NDR_Fernsehen_2017.svg/960px-Logo_NDR_Fernsehen_2017.svg.png","g":["General"],"q":"720p","u":"https://mcdn.ndr.de/ndr/hls/ndr_fs/ndr_mv/master.m3u8"},{"n":"NDR Fernsehen Niedersachsen","l":"https://upload.wikimedia.org/wikipedia/commons/thumb/e/e9/Logo_NDR_Fernsehen_2017.svg/960px-Logo_NDR_Fernsehen_2017.svg.png","g":["General"],"q":"720p","u":"https://mcdn.ndr.de/ndr/hls/ndr_fs/ndr_nds/master.m3u8"},{"n":"NDR Fernsehen Schleswig Holstein","l":"https://upload.wikimedia.org/wikipedia/commons/thumb/e/e9/Logo_NDR_Fernsehen_2017.svg/960px-Logo_NDR_Fernsehen_2017.svg.png","g":["General"],"q":"720p","u":"https://mcdn.ndr.de/ndr/hls/ndr_fs/ndr_sh/master.m3u8"},{"n":"Nick Jr. (Germany)","l":"https://upload.wikimedia.org/wikipedia/commons/thumb/c/c5/Nick_Jr._logo_2023_(outline).svg/960px-Nick_Jr._logo_2023_(outline).svg.png","g":["Kids"],"q":"","u":"http://94.130.48.67:8042/stream/111/index.m3u8"},{"n":"Nick Jr. Club (Germany)","l":"https://images.pluto.tv/channels/67f3eb1c443f0671bc03ece8/colorLogoPNG_1748329104247.png","g":["Kids"],"q":"720p","u":"https://jmp2.uk/plu-67f3eb1c443f0671bc03ece8.m3u8"},{"n":"Nick/Comedy Central +1","l":"https://i.imgur.com/08ZUI9k.png","g":["Comedy","Kids"],"q":"","u":"http://90.183.52.46:4000/play/a046/index.m3u8"},{"n":"Nickelodeon (Germany)","l":"https://i.imgur.com/E84jnP8.png","g":["Kids"],"q":"","u":"https://ma.anixa.tv/clips/stream/nickelodeon/playlist.php"},{"n":"Nickelodeon Classics","l":"https://images.pluto.tv/channels/67f3eb800a1beb98767ca748/colorLogoPNG_1749200817646.png","g":["Kids"],"q":"720p","u":"https://jmp2.uk/plu-67f3eb800a1beb98767ca748.m3u8"},{"n":"Nicktoons (Germany)","l":"https://upload.wikimedia.org/wikipedia/commons/d/d8/Nicktoons_UK_Logo_2014.png","g":["Kids"],"q":"","u":"http://94.130.48.67:8042/stream/112/index.m3u8"},{"n":"Niederbayern TV","l":"https://i.imgur.com/9uaMgTk.png","g":["General"],"q":"720p","u":"https://stream03.welocal.stream/stream/sat-nby/ngrp:sat-nby.stream_all/index.m3u8"},{"n":"Niederbayern TV Deggendorf & Straubing","l":"https://i.imgur.com/mAaIh3C.png","g":["General"],"q":"1080p","u":"https://stream03.welocal.stream/stream/fhd-nbydeggendorf_99148/ngrp:stream_all/index.m3u8"},{"n":"Niederbayern TV Landshut","l":"https://i.imgur.com/5sHzZAh.png","g":["General"],"q":"1080p","u":"https://stream03.welocal.stream/stream/fhd-nbylandshut_75262/ngrp:stream_all/index.m3u8"},{"n":"Niederbayern TV Passau","l":"https://i.imgur.com/0wnFhNi.png","g":["General"],"q":"1080p","u":"https://stream03.welocal.stream/stream/fhd-nbypassau_49171/ngrp:stream_all/index.m3u8"},{"n":"Nitro","l":"https://upload.wikimedia.org/wikipedia/commons/thumb/8/87/Nitro_Logo.svg/960px-Nitro_Logo.svg.png","g":["Entertainment"],"q":"","u":"https://dash4.antik.sk/live/test_rtl_nitro_tizen/playlist.m3u8"},{"n":"noa4 Hamburg","l":"https://i.imgur.com/7A2LRKI.png","g":["General"],"q":"1080p","u":"https://hls1.wtnet.de/noa4hh/apple/wifi6500.m3u8"},{"n":"noa4 Norderstedt","l":"https://i.imgur.com/941nrGb.png","g":["General"],"q":"1080p","u":"https://hls1.wtnet.de/noa4/apple/wifi6500.m3u8"},{"n":"NRWision","l":"https://i.imgur.com/RkF2Kmx.png","g":["Education"],"q":"1080p","u":"https://fms.nrwision.de/live/ngrp:livestreamHD.stream/playlist.m3u8"},{"n":"Oberpfalz TV","l":"https://i.imgur.com/ISI5KDd.png","g":["General"],"q":"1080p","u":"https://oberpfalztv.iptv-playoutcenter.de/oberpfalztv/oberpfalztv.stream_1/playlist.m3u8"},{"n":"OF-TV Offenbach","l":"https://i.imgur.com/WAcxCJr.png","g":["General"],"q":"720p","u":"https://5864df9ceac85.streamlock.net/germanpictures-live/_definst_/mp4:streamschedule/playlist.m3u8"},{"n":"OK4","l":"https://i.imgur.com/cUlMOlt.png","g":["General"],"q":"Geo-blocked","u":"https://s.ok54.de/abr_ok4/live/playlist.m3u8"},{"n":"OK54","l":"https://ok54.de/wp-content/uploads/2013/04/ok54_logo_schwarz.png","g":["General"],"q":"Geo-blocked","u":"https://s.ok54.de/ott/webstream/tv/webstream_720p/playlist.m3u8"},{"n":"OK Dessau","l":"https://i.imgur.com/nx4Wc8l.png","g":["General"],"q":"1080p","u":"http://58bd5b7a98e04.streamlock.net/medienasa-live/ok-dessau_high/playlist.m3u8"},{"n":"OK Flensburg","l":"https://i.imgur.com/NPbfgQC.png","g":["General"],"q":"576p","u":"https://live-cdn.oksh.de/play/hls/flensburgtv/index.m3u8"},{"n":"OK Kaiserslautern","l":"https://i.imgur.com/MRrETTh.png","g":["General"],"q":"Geo-blocked","u":"https://s.ok54.de/abr_okkl/webstream/playlist.m3u8"},{"n":"OK Kassel","l":"https://i.imgur.com/igZ9sx2.png","g":["General"],"q":"Geo-blocked","u":"https://s.ok54.de/mok-ks/kassel/playlist.m3u8"},{"n":"OK Kiel","l":"https://i.imgur.com/eToHabX.png","g":["General"],"q":"576p","u":"https://live-cdn.oksh.de/play/hls/kieltv/index.m3u8"},{"n":"OK Magdeburg","l":"https://i.imgur.com/zftoymR.png","g":["General"],"q":"1080p","u":"http://58bd5b7a98e04.streamlock.net/medienasa-live/ok-magdeburg_high/playlist.m3u8"},{"n":"OK Merseburg-Querfurt","l":"https://i.imgur.com/QfzdESc.png","g":["General"],"q":"1080p","u":"http://58bd5b7a98e04.streamlock.net/medienasa-live/ok-merseburg_high/playlist.m3u8"},{"n":"OK Rhein-Main","l":"https://i.imgur.com/XsmPI4N.jpg","g":["General"],"q":"Geo-blocked","u":"https://s.ok54.de/mok-rm/mok-rm/playlist.m3u8"},{"n":"OK Salzwedel","l":"https://i.imgur.com/jDmiTOS.png","g":["General"],"q":"1080p","u":"http://58bd5b7a98e04.streamlock.net/medienasa-live/ok-salzwedel_high/playlist.m3u8"},{"n":"OK Stendal","l":"https://i.imgur.com/s9wo85l.png","g":["General"],"q":"1080p","u":"http://58bd5b7a98e04.streamlock.net/medienasa-live/ok-stendal_high/playlist.m3u8"},{"n":"OK Trier","l":"https://i.imgur.com/nq32HIs.png","g":["General"],"q":"Geo-blocked","u":"https://s.ok54.de/ott/webstream/playlist.m3u8"},{"n":"OK Weinstrasse Neustadt","l":"https://i.imgur.com/bjTajXb.png","g":["General"],"q":"Geo-blocked","u":"https://s.ok54.de/okweinstrasse/okweinstrasse/playlist.m3u8"},{"n":"OK Wernigerode","l":"https://i.imgur.com/3gQvhSy.png","g":["General"],"q":"1080p","u":"http://58bd5b7a98e04.streamlock.net/medienasa-live/mp4:ok-wernigerode_high/playlist.m3u8"},{"n":"OK-TV Ludwigshafen","l":"https://i.imgur.com/xiDeF8Y.png","g":["General"],"q":"Geo-blocked","u":"https://s.ok54.de/oklu/livestream/playlist.m3u8"},{"n":"One Adria","l":"https://i.imgur.com/NYkMamU.png","g":["Music"],"q":"","u":"https://oneadriaapp.b-cdn.net/1080p/index.m3u8"},{"n":"One Music Television","l":"https://i.imgur.com/dLgoKJ0.png","g":["Music"],"q":"","u":"https://oneapp.b-cdn.net/1080p/index.m3u8"},{"n":"Ost West 24","l":"https://i.imgur.com/voeQ6x1.png","g":["Culture","News"],"q":"1080p","u":"http://stream.mcquack.net/455/index.m3u8"},{"n":"Parlamentsfernsehen 1","l":"https://i.imgur.com/mksEgwx.png","g":["Legislative"],"q":"1080p","u":"https://cldf-hlsgw.r53.cdn.tv1.eu/1000153copo/hk1.m3u8"},{"n":"Parlamentsfernsehen 2","l":"https://i.imgur.com/mksEgwx.png","g":["Legislative"],"q":"1080p","u":"https://bttv-live-z.r53.cdn.tv1.eu/13014bundestag-hk2/_definst_/live/video/hk2_de.smil/playlist.m3u8"},{"n":"Parlamentsfernsehen 3","l":"https://i.imgur.com/mksEgwx.png","g":["Legislative"],"q":"1080p","u":"https://bttv-live-z.r53.cdn.tv1.eu/13014bundestag-hk3/_definst_/live/video/hk3_de.smil/playlist.m3u8"},{"n":"Parlamentsfernsehen 4","l":"https://i.imgur.com/mksEgwx.png","g":["Legislative"],"q":"1080p","u":"https://bttv-live-z.r53.cdn.tv1.eu/13014bundestag-hk4/_definst_/live/video/hk4_de.smil/playlist.m3u8"},{"n":"phoenix","l":"https://i.imgur.com/T1532t9.png","g":["Undefined"],"q":"Geo-blocked","u":"https://zdf-hls-19.akamaized.net/hls/live/2016502/de/high/master.m3u8"},{"n":"Pluto TV Adult Animation","l":"https://images.pluto.tv/channels/67f68bd2135aeda9ddf0ef54/colorLogoPNG_1746816413112.png","g":["Animation","Comedy"],"q":"","u":"https://jmp2.uk/plu-67f68bd2135aeda9ddf0ef54.m3u8"},{"n":"Pluto TV Animals","l":"https://images.pluto.tv/channels/5d767ae7b456c8cf265ce922/colorLogoPNG.png","g":["Documentary"],"q":"","u":"https://jmp2.uk/plu-5d767ae7b456c8cf265ce922.m3u8"},{"n":"Pluto TV Britische Serien","l":"https://images.pluto.tv/channels/677e5a3d7bffa6000808dbf2/colorLogoPNG.png","g":["Series"],"q":"","u":"https://jmp2.uk/plu-677e5a3d7bffa6000808dbf2.m3u8"},{"n":"Pluto TV Bud & Terence (Germany)","l":"https://images.pluto.tv/channels/64be7398e4391c0008cdedfe/colorLogoPNG_1776936976930.png","g":["Movies"],"q":"","u":"https://jmp2.uk/plu-64be7398e4391c0008cdedfe.m3u8"},{"n":"Pluto TV Comedy Therapie","l":"https://images.pluto.tv/channels/69b968ba255fecb01f602257/colorLogoPNG_1777380677093.png","g":["Comedy"],"q":"","u":"https://jmp2.uk/plu-69b968ba255fecb01f602257.m3u8"},{"n":"Pluto TV Crime","l":"https://images.pluto.tv/channels/5e7b6c60fd20c50007910bf5/colorLogoPNG.png","g":["Series"],"q":"","u":"https://jmp2.uk/plu-5e7b6c60fd20c50007910bf5.m3u8"},{"n":"Pluto TV Deutsche Comedy","l":"https://images.pluto.tv/channels/6672f49f61a39900089db68e/colorLogoPNG_1748857141516.png","g":["Comedy"],"q":"","u":"https://jmp2.uk/plu-6672f49f61a39900089db68e.m3u8"},{"n":"Pluto TV Explore","l":"https://images.pluto.tv/channels/5ad9b8551b95267e225e59c1/colorLogoPNG.png","g":["Documentary"],"q":"","u":"https://jmp2.uk/plu-5ad9b8551b95267e225e59c1.m3u8"},{"n":"Pluto TV Ferne Galaxien","l":"https://images.pluto.tv/channels/68ada46d5190a45dc9c45af1/colorLogoPNG_1773754781519.png","g":["Movies"],"q":"","u":"https://jmp2.uk/plu-68ada46d5190a45dc9c45af1.m3u8"},{"n":"Pluto TV Food","l":"https://images.pluto.tv/channels/5dc280c9aa218c0009724b4b/colorLogoPNG_1769092247484.png","g":["Cooking","Documentary"],"q":"","u":"https://jmp2.uk/plu-5dc280c9aa218c0009724b4b.m3u8"},{"n":"Pluto TV Fran: Beste Mama-Momente","l":"https://images.pluto.tv/channels/69b968e011fc7b9e27c0d958/colorLogoPNG_1777469414817.png","g":["Comedy"],"q":"","u":"https://jmp2.uk/plu-69b968e011fc7b9e27c0d958.m3u8"},{"n":"Pluto TV Haialarm","l":"https://images.pluto.tv/channels/69b015c5d29cc97de7da4af8/colorLogoPNG_1779802132594.png","g":["Movies","Series"],"q":"","u":"https://jmp2.uk/plu-69b015c5d29cc97de7da4af8.m3u8"},{"n":"Pluto TV Historische Serien","l":"https://images.pluto.tv/channels/68ada3395190a45dc9c445cf/colorLogoPNG_1760957063422.png","g":["Series"],"q":"","u":"https://jmp2.uk/plu-68ada3395190a45dc9c445cf.m3u8"},{"n":"Pluto TV Horror-Serien","l":"https://images.pluto.tv/channels/67ff7d9c7fc25e0e72451bc9/colorLogoPNG_1749796239058.png","g":["Series"],"q":"","u":"https://jmp2.uk/plu-67ff7d9c7fc25e0e72451bc9.m3u8"},{"n":"Pluto TV Kult Comedies","l":"https://images.pluto.tv/channels/66337de656fc840008ff7a65/colorLogoPNG.png","g":["Comedy","Movies"],"q":"","u":"https://jmp2.uk/plu-66337de656fc840008ff7a65.m3u8"},{"n":"Pluto TV Kultfilme","l":"https://images.pluto.tv/channels/5dde47b63585b500099f74ec/colorLogoPNG.png","g":["Movies"],"q":"","u":"https://jmp2.uk/plu-5dde47b63585b500099f74ec.m3u8"},{"n":"Pluto TV Laughs in Spanish","l":"https://images.pluto.tv/channels/69a554179a3f3bb488c7d2be/colorLogoPNG_1774964411015.png","g":["Comedy"],"q":"","u":"https://jmp2.uk/plu-69a554179a3f3bb488c7d2be.m3u8"},{"n":"Pluto TV Movies","l":"https://images.pluto.tv/channels/5c5c3b948002db3c3e0b262e/colorLogoPNG.png","g":["Movies"],"q":"","u":"https://jmp2.uk/plu-5c5c3b948002db3c3e0b262e.m3u8"},{"n":"Pluto TV Mystery","l":"https://images.pluto.tv/channels/617aad99b68ef100072608cd/colorLogoPNG.png","g":["Documentary"],"q":"","u":"https://jmp2.uk/plu-617aad99b68ef100072608cd.m3u8"},{"n":"Pluto TV Nature","l":"https://images.pluto.tv/channels/5be1c3f9851dd5632e2c91b2/colorLogoPNG.png","g":["Documentary"],"q":"","u":"https://jmp2.uk/plu-5be1c3f9851dd5632e2c91b2.m3u8"},{"n":"Pluto TV Nordic Crime","l":"https://images.pluto.tv/channels/67d984408d8dc3d7754dccf2/colorLogoPNG_1746817551952.png","g":["Series"],"q":"","u":"https://jmp2.uk/plu-67d984408d8dc3d7754dccf2.m3u8"},{"n":"Pluto TV Polizeiserien","l":"https://images.pluto.tv/channels/64be64445dc166000899ce75/colorLogoPNG_1753350668041.png","g":["Series"],"q":"","u":"https://jmp2.uk/plu-64be64445dc166000899ce75.m3u8"},{"n":"Pluto TV Reportagen","l":"https://images.pluto.tv/channels/68ada3edf84960586ad31c7d/colorLogoPNG_1760078189640.png","g":["Documentary"],"q":"","u":"https://jmp2.uk/plu-68ada3edf84960586ad31c7d.m3u8"},{"n":"Pluto TV Serie","l":"https://images.pluto.tv/channels/5dc190f7bfed110009d934c3/colorLogoPNG.png","g":["Series"],"q":"","u":"https://jmp2.uk/plu-5dc190f7bfed110009d934c3.m3u8"},{"n":"Pluto TV Sitcoms","l":"https://images.pluto.tv/channels/5d767ab2b456c8cf265ce921/colorLogoPNG.png","g":["Comedy","Series"],"q":"","u":"https://jmp2.uk/plu-5d767ab2b456c8cf265ce921.m3u8"},{"n":"Pluto TV Space (Germany)","l":"https://images.pluto.tv/channels/61409f8d6feb30000766b675/colorLogoPNG.png","g":["Documentary"],"q":"","u":"https://jmp2.uk/plu-61409f8d6feb30000766b675.m3u8"},{"n":"Pluto TV Star Trek (Germany)","l":"https://images.pluto.tv/channels/6152ee71bf99590007893a11/colorLogoPNG.png","g":["Movies","Series"],"q":"","u":"https://jmp2.uk/plu-6152ee71bf99590007893a11.m3u8"},{"n":"Pluto TV Star Trek: Animation","l":"https://images.pluto.tv/channels/69492467ae33e24d916e56cf/colorLogoPNG_1770896970638.png","g":["Animation"],"q":"","u":"https://jmp2.uk/plu-69492467ae33e24d916e56cf.m3u8"},{"n":"Pluto TV Weihnachten im Sommer","l":"https://images.pluto.tv/channels/642ad072283aa4000806148c/colorLogoPNG.png","g":["Movies"],"q":"","u":"https://jmp2.uk/plu-642ad072283aa4000806148c.m3u8"},{"n":"Pluto TV Western","l":"https://images.pluto.tv/channels/630dd3b2605f140007e002f5/colorLogoPNG_1732030684562.png","g":["Movies"],"q":"","u":"https://jmp2.uk/plu-630dd3b2605f140007e002f5.m3u8"},{"n":"Pluto TV Western Serien","l":"https://images.pluto.tv/channels/682453215c646751955e1204/colorLogoPNG_1758265241676.png","g":["Series"],"q":"","u":"https://jmp2.uk/plu-682453215c646751955e1204.m3u8"},{"n":"Pluto TV Worst of Bundy","l":"https://images.pluto.tv/channels/69b968ca1c36025fd0a3d92d/colorLogoPNG_1777369824096.png","g":["Comedy"],"q":"","u":"https://jmp2.uk/plu-69b968ca1c36025fd0a3d92d.m3u8"},{"n":"ProSieben","l":"https://i.imgur.com/zZOk3nh.png","g":["Undefined"],"q":"1080p","u":"https://dash4.antik.sk/live/test_pro_sieben_tizen/playlist.m3u8"},{"n":"ProSieben Maxx","l":"https://upload.wikimedia.org/wikipedia/commons/thumb/e/e2/ProSieben_MAXX_Logo.svg/960px-ProSieben_MAXX_Logo.svg.png","g":["Undefined"],"q":"576p","u":"https://s6.hopslan.com/pro7maxxX/index.m3u8"},{"n":"ProSieben Maxx HD","l":"https://upload.wikimedia.org/wikipedia/commons/thumb/e/e2/ProSieben_MAXX_Logo.svg/960px-ProSieben_MAXX_Logo.svg.png","g":["Undefined"],"q":"360p","u":"https://lb.iptvnetwork.net/ls28/10828/playlist.m3u8"},{"n":"PUNKTum Fernsehen","l":"https://i.imgur.com/3yamOmw.png","g":["Undefined"],"q":"1080p","u":"http://58bd5b7a98e04.streamlock.net/medienasa-live/punktum_high/playlist.m3u8"},{"n":"QVC (Germany)","l":"https://i.imgur.com/EybRtsI.png","g":["Shop"],"q":"720p","u":"https://qvcde-live.akamaized.net/hls/live/2097104/qvc/master.m3u8"},{"n":"QVC Style (Germany)","l":"https://i.imgur.com/DwdkHGj.png","g":["Shop"],"q":"540p","u":"https://qvcde-live.akamaized.net/hls/live/2097104/qby/master.m3u8"},{"n":"QVC Zwei","l":"https://i.imgur.com/f94kPed.png","g":["Shop"],"q":"540p","u":"https://qvcde-live.akamaized.net/hls/live/2097104/qps/master.m3u8"},{"n":"Radio 21 TV","l":"https://i.imgur.com/u8OhwI1.png","g":["Music"],"q":"720p","u":"https://live.creacast.com/radio21/smil:radio21.smil/playlist.m3u8"},{"n":"Radio Bremen Fernsehen","l":"https://i.imgur.com/wsTOcuX.png","g":["Undefined"],"q":"Geo-blocked","u":"https://rbhlslive.akamaized.net/hls/live/2020435/rbfs/master.m3u8"},{"n":"Radio Weser TV Bremen","l":"","g":["Music"],"q":"576p","u":"https://5857499ee635b.streamlock.net/radiowesertv-live/_definst_/mp4:livestreamTV/playlist.m3u8"},{"n":"Rakuten TV Action Movies Germany","l":"https://i.imgur.com/Meew6eX.png","g":["Movies"],"q":"1080p","u":"https://284824cf70404fdfb6ddf9349009c710.mediatailor.eu-west-1.amazonaws.com/v1/master/0547f18649bd788bec7b67b746e47670f558b6b2/production-LiveChannel-6066/master.m3u8"},{"n":"Rakuten TV Comedy Movies Germany","l":"https://i.imgur.com/Meew6eX.png","g":["Movies"],"q":"1080p","u":"https://ecac08c9e2214375b907d6825aaf9a01.mediatailor.eu-west-1.amazonaws.com/v1/master/0547f18649bd788bec7b67b746e47670f558b6b2/production-LiveChannel-6182/master.m3u8"},{"n":"Rakuten TV Drama Movies Germany","l":"https://i.imgur.com/Meew6eX.png","g":["Movies"],"q":"1080p","u":"https://968754c2483045c1a9a7f677caec35b6.mediatailor.eu-west-1.amazonaws.com/v1/master/0547f18649bd788bec7b67b746e47670f558b6b2/production-LiveChannel-6096/master.m3u8"},{"n":"Rakuten TV Family Movies Germany","l":"https://i.imgur.com/Meew6eX.png","g":["Family","Movies"],"q":"1080p","u":"https://af230031eeac45f3b78d4f8a13265105.mediatailor.eu-west-1.amazonaws.com/v1/master/0547f18649bd788bec7b67b746e47670f558b6b2/production-LiveChannel-6209/master.m3u8"},{"n":"Rakuten TV Top Movies Germany","l":"https://i.imgur.com/Meew6eX.png","g":["Movies"],"q":"1080p","u":"https://cbb622b29f5d43b598991f3fa19de291.mediatailor.eu-west-1.amazonaws.com/v1/master/0547f18649bd788bec7b67b746e47670f558b6b2/production-LiveChannel-5985/master.m3u8"},{"n":"RAN1","l":"https://i.imgur.com/zRg2BEa.png","g":["Undefined"],"q":"1080p","u":"http://58bd5b7a98e04.streamlock.net/medienasa-live/ran1_high/playlist.m3u8"},{"n":"rbb Fernsehen","l":"https://upload.wikimedia.org/wikipedia/commons/thumb/e/ec/Rbb_Fernsehen_Logo_2017.08.svg/960px-Rbb_Fernsehen_Logo_2017.08.svg.png","g":["Undefined"],"q":"","u":"https://dash2.antik.sk/live/test_rbb_tizen/playlist.m3u8"},{"n":"rbb Fernsehen Berlin","l":"https://upload.wikimedia.org/wikipedia/commons/thumb/e/ec/Rbb_Fernsehen_Logo_2017.08.svg/960px-Rbb_Fernsehen_Logo_2017.08.svg.png","g":["Undefined"],"q":"Geo-blocked","u":"https://rbb-hls-berlin.akamaized.net/hls/live/2017824/rbb_berlin/index.m3u8"},{"n":"rbb Fernsehen Brandenburg","l":"https://upload.wikimedia.org/wikipedia/commons/thumb/e/ec/Rbb_Fernsehen_Logo_2017.08.svg/960px-Rbb_Fernsehen_Logo_2017.08.svg.png","g":["Undefined"],"q":"Geo-blocked","u":"https://rbb-hls-brandenburg.akamaized.net/hls/live/2017825/rbb_brandenburg/master.m3u8"},{"n":"RBW","l":"https://i.imgur.com/A0UKdix.png","g":["Undefined"],"q":"1080p","u":"http://58bd5b7a98e04.streamlock.net/medienasa-live/rbw_high/playlist.m3u8"},{"n":"Red Bull TV DE","l":"https://images.pluto.tv/channels/5e7cb84a172a0f0007da69e4/colorLogoPNG.png","g":["Outdoor","Sports"],"q":"1080p","u":"https://46cfeb23c7f74853bba7a256655a3119.mediatailor.us-west-2.amazonaws.com/v1/master/ba62fe743df0fe93366eba3a257d792884136c7f/LINEAR-582-WORBDACHDEFAST-WHALETVPLUS/582/whaletvplus/hls/master/playlist.m3u8"},{"n":"Regio TV Bodensee","l":"https://i.imgur.com/3koyLef.png","g":["Undefined"],"q":"1080p","u":"https://regiotv-b.iptv-playoutcenter.de/regiotv-b/regiotv-b.stream_1/playlist.m3u8"},{"n":"Regio TV Stuttgart","l":"https://i.imgur.com/3koyLef.png","g":["Undefined"],"q":"1080p","u":"https://regiotv-s.iptv-playoutcenter.de/regiotv-s/regiotv-s.stream_1/playlist.m3u8"},{"n":"RFH","l":"https://i.imgur.com/8DZa7in.png","g":["General"],"q":"1080p","u":"http://58bd5b7a98e04.streamlock.net/medienasa-live/RFH_high/playlist.m3u8"},{"n":"RFO","l":"https://i.imgur.com/902BHGL.png","g":["General"],"q":"1080p","u":"https://stream01.stream.welocal.world/stream/fhd-rfo_66876/ngrp:stream_all/playlist.m3u8"},{"n":"RiC","l":"https://i.imgur.com/4wMZ8Em.png","g":["Family","Kids"],"q":"1080p","u":"https://rictv.iptv-playoutcenter.de/rictv/rictv-web/playlist.m3u8"},{"n":"RiC.today","l":"","g":["Undefined"],"q":"","u":"http://88.212.7.14/live/test_ric_international_avc_25p/playlist.m3u8"},{"n":"Rock Antenne","l":"https://i.imgur.com/nvFXRjH.png","g":["Undefined"],"q":"","u":"https://stream.rockantenne.de/rockantenne/stream/mp3"},{"n":"Rockland TV","l":"https://i.imgur.com/6ve1FTN.png","g":["Undefined"],"q":"480p","u":"https://live.creacast.com/rockland-radio/smil:rockland-radio.smil/playlist.m3u8"},{"n":"RT DE","l":"https://i.imgur.com/v1PIbB2.png","g":["News"],"q":"1080p","u":"https://rt-ger.rttv.com/dvr/rtdeutsch/playlist.m3u8"},{"n":"RTL (Germany)","l":"https://i.imgur.com/94K94k2.png","g":["Undefined"],"q":"","u":"https://dash4.antik.sk/live/test_rtl_ger_tizen/playlist.m3u8"},{"n":"RTL Super","l":"https://i.imgur.com/KbdK8t9.png","g":["Undefined"],"q":"","u":"https://dash4.antik.sk/live/test_super_rtl_tizen/playlist.m3u8"},{"n":"RTL Super HD","l":"https://i.imgur.com/KbdK8t9.png","g":["Undefined"],"q":"576p","u":"https://s6.hopslan.com/superX/index.m3u8"},{"n":"RTL Zwei","l":"https://upload.wikimedia.org/wikipedia/commons/thumb/f/f1/RTLZWEI_Logo_2019.svg/960px-RTLZWEI_Logo_2019.svg.png","g":["Undefined"],"q":"","u":"https://dash4.antik.sk/live/test_rtl_zwei_tizen/playlist.m3u8"},{"n":"RTL Zwei HD","l":"https://upload.wikimedia.org/wikipedia/commons/thumb/f/f1/RTLZWEI_Logo_2019.svg/960px-RTLZWEI_Logo_2019.svg.png","g":["Undefined"],"q":"576p","u":"https://s6.hopslan.com/rtl2q/index.m3u8"},{"n":"RTLup","l":"https://upload.wikimedia.org/wikipedia/commons/thumb/9/9a/RTLup_Logo_2021.svg/960px-RTLup_Logo_2021.svg.png","g":["Undefined"],"q":"576p","u":"https://s6.hopslan.com/rtltupz/index.m3u8"},{"n":"Saarland Fernsehen 1","l":"https://i.imgur.com/OodehFV.png","g":["Undefined"],"q":"1080p","u":"https://saarland1.iptv-playoutcenter.de/saarland1/saarland1.stream_1/playlist.m3u8"},{"n":"Saarland Fernsehen 2","l":"https://i.imgur.com/Yv7j4ia.png","g":["Undefined"],"q":"720p","u":"https://saarland2.iptv-playoutcenter.de/saarland2/saarland2.stream_2/playlist.m3u8"},{"n":"Sabrina: Total verhext!","l":"https://images.pluto.tv/channels/622f40c901d4b70007ad7609/colorLogoPNG.png","g":["Comedy"],"q":"","u":"https://jmp2.uk/plu-622f40c901d4b70007ad7609.m3u8"},{"n":"Sachsen Eins","l":"https://i.imgur.com/2EXNdd8.png","g":["Undefined"],"q":"1080p","u":"https://sachsen1.iptv-playoutcenter.de/sachsen1/sachsen1.stream_1/playlist.m3u8"},{"n":"Sachsen Fernsehen Chemnitz","l":"https://i.imgur.com/4SEAbVf.png","g":["Undefined"],"q":"1080p","u":"https://chemnitz.iptv-playoutcenter.de/chemnitz/chemnitzfernsehen.stream_1/playlist.m3u8"},{"n":"Sachsen Fernsehen Dresden","l":"https://i.imgur.com/rnvprGj.png","g":["Undefined"],"q":"1080p","u":"https://dresden.iptv-playoutcenter.de/dresden/dresdenfernsehen.stream_1/playlist.m3u8"},{"n":"Sachsen Fernsehen Leipzig","l":"https://i.imgur.com/easmJUw.png","g":["Undefined"],"q":"1080p","u":"https://leipzig.iptv-playoutcenter.de/leipzig/leipzigfernsehen.stream_1/playlist.m3u8"},{"n":"Salve TV","l":"https://i.imgur.com/GhKjHMG.png","g":["Undefined"],"q":"720p","u":"https://58de7a369a9c4.streamlock.net/salvetv/ngrp:stream_720p_web/playlist.m3u8"},{"n":"SAT.1 Gold","l":"https://upload.wikimedia.org/wikipedia/commons/thumb/6/6d/Sat.1_Gold_Logo_2019.svg/960px-Sat.1_Gold_Logo_2019.svg.png","g":["Undefined"],"q":"576p","u":"https://dash4.antik.sk/live/test_sat_eins_gold_tizen/playlist.m3u8"},{"n":"Seenluft24","l":"https://i.imgur.com/3TgBg9v.jpg","g":["Undefined"],"q":"1080p","u":"https://h056.video-stream-hosting.de/easycast7-live/_definst_/mp4:livestreamhd20/playlist.m3u8?ref="},{"n":"Sender Neu Jerusalem","l":"","g":["Undefined"],"q":"576p","u":"https://bild-und-ton.stream/snj-de/snj-de.smil/.m3u8"},{"n":"sixx","l":"https://upload.wikimedia.org/wikipedia/commons/thumb/1/12/Sixx_Logo.svg/960px-Sixx_Logo.svg.png","g":["Undefined"],"q":"","u":"https://dash4.antik.sk/live/test_sixx_tizen/playlist.m3u8"},{"n":"Sky Sport F1","l":"https://upload.wikimedia.org/wikipedia/commons/thumb/e/eb/Sky_Sport_F1_-_Logo_2020.svg/960px-Sky_Sport_F1_-_Logo_2020.svg.png","g":["Sports"],"q":"","u":"http://94.130.48.67:8042/stream/51/index.m3u8"},{"n":"Sky Sport Golf","l":"https://i.imgur.com/nhhbHvs.png","g":["Sports"],"q":"","u":"http://94.130.48.67:8042/stream/56/index.m3u8"},{"n":"Sky Sport Mix","l":"https://i.imgur.com/erx02nr.png","g":["Sports"],"q":"","u":"http://94.130.48.67:8042/stream/53/index.m3u8"},{"n":"Sky Sport News","l":"https://upload.wikimedia.org/wikipedia/de/thumb/c/cc/Sky_Sport_News_2020.svg/960px-Sky_Sport_News_2020.svg.png","g":["Sports"],"q":"","u":"http://94.130.48.67:8042/stream/49/index.m3u8"},{"n":"Sky Sport Tennis","l":"https://upload.wikimedia.org/wikipedia/commons/thumb/c/c8/Sky_Sport_Tennis.svg/960px-Sky_Sport_Tennis.svg.png","g":["Sports"],"q":"","u":"http://94.130.48.67:8042/stream/55/index.m3u8"},{"n":"Sky Sport Top Event","l":"https://i.imgur.com/kQ6cVNx.png","g":["Sports"],"q":"","u":"http://94.130.48.67:8042/stream/50/index.m3u8"},{"n":"Sonnenklar TV","l":"https://i.imgur.com/g4QeXwF.png","g":["Undefined"],"q":"1080p","u":"http://euvia.cdn.ses-ps.com/HLS-Live/index.m3u8"},{"n":"Sonus FM","l":"https://i.imgur.com/h29rUcG.png","g":["Undefined"],"q":"1080p","u":"http://www.sonus.fm:1935/public/stream_source/playlist.m3u8"},{"n":"Sophia TV (Germany)","l":"https://i.imgur.com/1hNgHbB.png","g":["Religious"],"q":"720p","u":"https://bild-und-ton.stream/sophiatv-en/smil:sophia-tv-en.smil/playlist.m3u8"},{"n":"Sophia TV Espanol","l":"https://i.imgur.com/T2JPCq2.png","g":["Undefined"],"q":"720p","u":"https://bild-und-ton.stream/sophiatv-es/smil:sophia-tv-es.smil/playlist.m3u8"},{"n":"Sophia TV Francais","l":"https://i.imgur.com/T2JPCq2.png","g":["Religious"],"q":"720p","u":"https://bild-und-ton.stream/sophiatv-fr/smil:sophia-tv-fr.smil/playlist.m3u8"},{"n":"South Park: Butters Collection (Germany)","l":"https://images.pluto.tv/channels/646b14a0e94c3800082a8d3a/colorLogoPNG.png","g":["Animation","Comedy"],"q":"","u":"https://jmp2.uk/plu-646b14a0e94c3800082a8d3a.m3u8"},{"n":"South Park: Cartman Collection (Germany)","l":"https://images.pluto.tv/channels/646b14747cb4b1000875724d/colorLogoPNG.png","g":["Animation","Comedy"],"q":"","u":"https://jmp2.uk/plu-646b14747cb4b1000875724d.m3u8"},{"n":"South Park: Kenny Collection (Germany)","l":"https://images.pluto.tv/channels/646b1404ee6a2f00082b5d66/colorLogoPNG.png","g":["Animation","Comedy"],"q":"","u":"https://jmp2.uk/plu-646b1404ee6a2f00082b5d66.m3u8"},{"n":"South Park: Kyle Collection (Germany)","l":"https://images.pluto.tv/channels/646b14d0e1979c0008915a09/colorLogoPNG.png","g":["Animation","Comedy"],"q":"","u":"https://jmp2.uk/plu-646b14d0e1979c0008915a09.m3u8"},{"n":"South Park: Original Version","l":"https://images.pluto.tv/channels/646b150a15939400089e2702/colorLogoPNG.png","g":["Animation","Comedy"],"q":"","u":"https://jmp2.uk/plu-646b150a15939400089e2702.m3u8"},{"n":"South Park: Stan Collection (Germany)","l":"https://images.pluto.tv/channels/646b1438e94c3800082a8cff/colorLogoPNG.png","g":["Animation","Comedy"],"q":"","u":"https://jmp2.uk/plu-646b1438e94c3800082a8cff.m3u8"},{"n":"SpongeBob Schwammkopf","l":"https://images.pluto.tv/channels/5d00e8adaab96b5635b2a005/colorLogoPNG.png","g":["Kids"],"q":"720p","u":"https://jmp2.uk/plu-5d00e8adaab96b5635b2a005.m3u8"},{"n":"Sport1 (Germany)","l":"https://i.imgur.com/Tsjt7v9.png","g":["Sports"],"q":"540p","u":"https://r.eu.cdn-redge.media/livehls/oeu/mt/live/sport1/live.livx/playlist.m3u8"},{"n":"SR Fernsehen","l":"https://upload.wikimedia.org/wikipedia/commons/thumb/9/9c/SR_Fernsehen_Logo_2023.svg/960px-SR_Fernsehen_Logo_2023.svg.png","g":["Undefined"],"q":"720p","u":"https://srfs.akamaized.net/hls/live/689649/srfsgeo/index.m3u8"},{"n":"SRF","l":"https://i.imgur.com/92XNBmr.png","g":["General"],"q":"1080p","u":"https://58de7a369a9c4.streamlock.net/srf/stream_720p/playlist.m3u8"},{"n":"Star Trek: The Next Generation (Germany)","l":"https://images.pluto.tv/channels/69776ce979545c21a1220bff/colorLogoPNG_1769434849537.png","g":["Movies","Series"],"q":"","u":"https://jmp2.uk/plu-69776ce979545c21a1220bff.m3u8"},{"n":"Star Trek: The Original Series (Germany)","l":"https://images.pluto.tv/channels/69776b58036e883f39e5ab8a/colorLogoPNG_1769434091096.png","g":["Movies","Series"],"q":"","u":"https://jmp2.uk/plu-69776b58036e883f39e5ab8a.m3u8"},{"n":"Strongman","l":"https://i.imgur.com/bVQBF6R.png","g":["Sports"],"q":"720p","u":"https://rightsboosterltd-scl-2-eu.rakuten.wurl.tv/playlist.m3u8"},{"n":"SWR 3 Visual Radio","l":"https://i.imgur.com/PxSgxRO.jpg","g":["Undefined"],"q":"720p","u":"https://swrswr3vr-hls.akamaized.net/hls/live/2018683/swr3vr/master.m3u8"},{"n":"SWR Fernsehen Baden-Wurttemberg","l":"https://upload.wikimedia.org/wikipedia/commons/thumb/2/26/SWR_Logo_2023.svg/960px-SWR_Logo_2023.svg.png","g":["Undefined"],"q":"Geo-blocked","u":"https://swrbwd-hls.akamaized.net/hls/live/2018672/swrbwd/master.m3u8"},{"n":"SWR Fernsehen HD","l":"https://upload.wikimedia.org/wikipedia/commons/thumb/2/26/SWR_Logo_2023.svg/960px-SWR_Logo_2023.svg.png","g":["Undefined"],"q":"","u":"https://dash4.antik.sk/live/test_swr_tizen/playlist.m3u8"},{"n":"SWR Fernsehen Rheinland-Pfalz","l":"https://upload.wikimedia.org/wikipedia/commons/thumb/2/26/SWR_Logo_2023.svg/960px-SWR_Logo_2023.svg.png","g":["Undefined"],"q":"Geo-blocked","u":"https://swrrpd-hls.akamaized.net/hls/live/2018676/swrrpd/master.m3u8"},{"n":"tagesschau24","l":"https://i.imgur.com/LH0Gctv.png","g":["Undefined"],"q":"720p","u":"https://tagesschau.akamaized.net/hls/live/2020115/tagesschau/tagesschau_1/master.m3u8"},{"n":"Takeshi's Castle","l":"https://images.pluto.tv/channels/6054a9f4bc8a5f000771504c/colorLogoPNG.png","g":["Comedy"],"q":"","u":"https://jmp2.uk/plu-6054a9f4bc8a5f000771504c.m3u8"},{"n":"TELE 5","l":"https://upload.wikimedia.org/wikipedia/commons/thumb/5/5a/Tele_5_Logo_2021.svg/500px-Tele_5_Logo_2021.svg.png","g":["Undefined"],"q":"576p","u":"https://s6.hopslan.com/tele5X/index.m3u8"},{"n":"teltOwkanal","l":"https://i.imgur.com/G0cImlU.png","g":["Undefined"],"q":"1080p","u":"https://h056.video-stream-hosting.de/easycast8-live/_definst_/mp4:livestreamhd8/playlist.m3u8"},{"n":"Terra Mater WILD","l":"https://i.imgur.com/EbMK3Ph.png","g":["Documentary"],"q":"1080p","u":"https://53ff3982.wurl.com/master/f36d25e7e52f1ba8d7e56eb859c636563214f541/UmxheHhUVi1ldV9UZXJyYU1hdGVyV2lsZF9ITFM/playlist.m3u8"},{"n":"The Graham Norton Show","l":"https://image.tmdb.org/t/p/w500/xZkWYamzlT6nFu9MI2Rr6NkjedX.png","g":["Entertainment"],"q":"1080p","u":"https://amg00654-itv-amg00654c35-rakuten-gb-7598.playouts.now.amagi.tv/playlist.m3u8"},{"n":"The L Word – Wenn Frauen lieben","l":"https://images.pluto.tv/channels/68d2759a59fd82da3226492d/colorLogoPNG_1769617985920.png","g":["Series"],"q":"","u":"https://jmp2.uk/plu-68d2759a59fd82da3226492d.m3u8"},{"n":"Tide TV","l":"https://raw.githubusercontent.com/jnk22/kodinerds-iptv/master/logos/tv/tidetv.png","g":["Undefined"],"q":"1080p","u":"https://5889e7d0d6e28.streamlock.net/tide-live/_definst_/smil:livestream.smil/playlist.m3u8"},{"n":"TLC (Germany)","l":"https://upload.wikimedia.org/wikipedia/commons/thumb/7/74/TLC_Logo.svg/960px-TLC_Logo.svg.png","g":["Lifestyle"],"q":"576p","u":"https://s6.hopslan.com/tlcX/index.m3u8"},{"n":"TNT International","l":"https://i.imgur.com/l0RGbRI.png","g":["Entertainment"],"q":"480p","u":"http://91.228.35.249:8001/1:0:1:6a7:3138:13e:820000:0:0:0:"},{"n":"Totally Turtles (Germany)","l":"https://images.pluto.tv/channels/5d6792bd6be2998ad0ccce30/colorLogoPNG.png","g":["Kids"],"q":"720p","u":"https://jmp2.uk/plu-5d6792bd6be2998ad0ccce30.m3u8"},{"n":"TV38 Sudost-Niedersachen","l":"https://i.imgur.com/ob9JJPU.png","g":["Undefined"],"q":"1080p","u":"https://h057.video-stream-hosting.de/tv38-live/_definst_/smil:livestream.smil/playlist.m3u8?ref="},{"n":"TV Ingolstadt","l":"https://i.imgur.com/Ymh11VV.png","g":["Undefined"],"q":"1080p","u":"https://stream01.welocal.stream/stream/fhd-tvingolstadt_44349/ngrp:stream_all/playlist.m3u8"},{"n":"TV Mainfranken","l":"https://raw.githubusercontent.com/jnk22/kodinerds-iptv/master/logos/tv/tvmainfranken.png","g":["Undefined"],"q":"1080p","u":"https://tvtouringw.iptv-playoutcenter.de/tvtouringw/tvtouringw.stream_1/playlist.m3u8"},{"n":"TV Oberfranken","l":"https://i.imgur.com/tjD9fX2.png","g":["General"],"q":"1080p","u":"https://tvoberfranken.iptv-playoutcenter.de/tvoberfranken/tvoberfranken.stream_1/playlist.m3u8"},{"n":"TVA (Germany)","l":"https://i.imgur.com/Gg6d4Jb.png","g":["Undefined"],"q":"1080p","u":"https://tvaktuellr.iptv-playoutcenter.de/tvaktuellr/tvaktuellr.stream_1/playlist.m3u8"},{"n":"TVRUS","l":"https://i.imgur.com/2mJKi7g.png","g":["Undefined"],"q":"","u":"http://213.91.179.28:8000/play/a082"},{"n":"TVRUS+","l":"https://i.postimg.cc/BQpQRvFS/tv-rus-plus.png","g":["Series"],"q":"576p","u":"http://91.235.255.32:8001/1:0:1:6AC:3138:13E:820000:0:0:0"},{"n":"Unserding","l":"https://i.imgur.com/4j4MZTT.png","g":["Undefined"],"q":"Geo-blocked","u":"https://srde.akamaized.net/hls/live/2031842/visualradio-unserding/index.m3u8"},{"n":"Volksmusik TV","l":"https://i.imgur.com/EsWuCJ3.png","g":["Music"],"q":"1080p","u":"https://vmtv.iptv-playoutcenter.de/vmtv/vmtv1/playlist.m3u8"},{"n":"VOX","l":"https://i.imgur.com/QPcmfZb.png","g":["Undefined"],"q":"","u":"https://dash4.antik.sk/live/test_vox_tizen/playlist.m3u8"},{"n":"Voxup","l":"https://i.imgur.com/tUTspbW.png","g":["Undefined"],"q":"576p","u":"https://s6.hopslan.com/voxupz/index.m3u8"},{"n":"WDR 1 Live","l":"https://i.imgur.com/RbqDMYx.png","g":["Entertainment"],"q":"720p","u":"https://wdrfs247.akamaized.net/hls/live/681509/wdr_msl4_fs247/index.m3u8"},{"n":"WDR Fernsehen","l":"https://upload.wikimedia.org/wikipedia/commons/thumb/2/22/WDR_Fernsehen_Logo_2018.svg/960px-WDR_Fernsehen_Logo_2018.svg.png","g":["General"],"q":"720p","u":"https://wdr-live.ard-mcdn.de/wdr/live/hls/de/master.m3u8"},{"n":"WDR Fernsehen Aachen","l":"https://upload.wikimedia.org/wikipedia/commons/thumb/2/22/WDR_Fernsehen_Logo_2018.svg/960px-WDR_Fernsehen_Logo_2018.svg.png","g":["General"],"q":"Geo-blocked","u":"https://wdrlokalzeit.akamaized.net/hls/live/2018019-b/wdrlz_aachen/master.m3u8"},{"n":"WDR Fernsehen Bielefeld","l":"https://upload.wikimedia.org/wikipedia/commons/thumb/2/22/WDR_Fernsehen_Logo_2018.svg/960px-WDR_Fernsehen_Logo_2018.svg.png","g":["General"],"q":"Geo-blocked","u":"https://wdrlokalzeit.akamaized.net/hls/live/2018026-b/wdrlz_bielefeld/master.m3u8"},{"n":"WDR Fernsehen Bonn","l":"https://upload.wikimedia.org/wikipedia/commons/thumb/2/22/WDR_Fernsehen_Logo_2018.svg/960px-WDR_Fernsehen_Logo_2018.svg.png","g":["General"],"q":"Geo-blocked","u":"https://wdrlokalzeit.akamaized.net/hls/live/2018021-b/wdrlz_bonn/master.m3u8"},{"n":"WDR Fernsehen Dortmund","l":"https://upload.wikimedia.org/wikipedia/commons/thumb/2/22/WDR_Fernsehen_Logo_2018.svg/960px-WDR_Fernsehen_Logo_2018.svg.png","g":["General"],"q":"Geo-blocked","u":"https://wdrlokalzeit.akamaized.net/hls/live/2018022-b/wdrlz_dortmund/master.m3u8"},{"n":"WDR Fernsehen Duisburg","l":"https://upload.wikimedia.org/wikipedia/commons/thumb/2/22/WDR_Fernsehen_Logo_2018.svg/960px-WDR_Fernsehen_Logo_2018.svg.png","g":["General"],"q":"Geo-blocked","u":"https://wdrlokalzeit.akamaized.net/hls/live/2018024-b/wdrlz_duisburg/master.m3u8"},{"n":"WDR Fernsehen Dusseldorf","l":"https://upload.wikimedia.org/wikipedia/commons/thumb/2/22/WDR_Fernsehen_Logo_2018.svg/960px-WDR_Fernsehen_Logo_2018.svg.png","g":["General"],"q":"Geo-blocked","u":"https://wdrlokalzeit.akamaized.net/hls/live/2018023-b/wdrlz_duesseldorf/master.m3u8"},{"n":"WDR Fernsehen Essen","l":"https://upload.wikimedia.org/wikipedia/commons/thumb/2/22/WDR_Fernsehen_Logo_2018.svg/960px-WDR_Fernsehen_Logo_2018.svg.png","g":["General"],"q":"Geo-blocked","u":"https://wdrlokalzeit.akamaized.net/hls/live/2018027-b/wdrlz_essen/master.m3u8"},{"n":"WDR Fernsehen Munster","l":"https://upload.wikimedia.org/wikipedia/commons/thumb/2/22/WDR_Fernsehen_Logo_2018.svg/960px-WDR_Fernsehen_Logo_2018.svg.png","g":["General"],"q":"Geo-blocked","u":"https://wdrlokalzeit.akamaized.net/hls/live/2018025-b/wdrlz_muensterland/master.m3u8"},{"n":"WDR Fernsehen Siegen","l":"https://upload.wikimedia.org/wikipedia/commons/thumb/2/22/WDR_Fernsehen_Logo_2018.svg/960px-WDR_Fernsehen_Logo_2018.svg.png","g":["General"],"q":"Geo-blocked","u":"https://wdrlokalzeit.akamaized.net/hls/live/2018020-b/wdrlz_siegen/master.m3u8"},{"n":"WDR Fernsehen Wuppertal","l":"https://upload.wikimedia.org/wikipedia/commons/thumb/2/22/WDR_Fernsehen_Logo_2018.svg/960px-WDR_Fernsehen_Logo_2018.svg.png","g":["General"],"q":"Geo-blocked","u":"https://wdrlokalzeit.akamaized.net/hls/live/2018028-b/wdrlz_wuppertal/master.m3u8"},{"n":"WELT","l":"https://i.imgur.com/s4TZoxx.png","g":["News"],"q":"","u":"https://dash4.antik.sk/live/test_welt_tizen/playlist.m3u8"},{"n":"Welt der Wunder TV","l":"https://i.imgur.com/DLXssJe.png","g":["Undefined"],"q":"576p","u":"https://wdw.iptv-playoutcenter.de/wdw/wdw1/playlist.m3u8"},{"n":"World of Freesports","l":"https://i.imgur.com/lta5Mog.png","g":["Sports"],"q":"1080p","u":"https://mainstreammedia-worldoffreesportsintl-rakuten.amagi.tv/playlist.m3u8"},{"n":"World Poker Tour Germany","l":"https://i.imgur.com/98kLMjj.png","g":["Sports"],"q":"","u":"https://jmp2.uk/plu-5ad9b7aae738977e2c312132.m3u8"},{"n":"XITE Hits Germany","l":"https://i.imgur.com/N51Rp7E.png","g":["Music"],"q":"1080p","u":"https://d726x48n2pd5h.cloudfront.net/v1/master/3722c60a815c199d9c0ef36c5b73da68a62b09d1/cc-skxr1pazhltvp/XITE_Hits.m3u8"},{"n":"YOL TV","l":"https://i.imgur.com/rTBX6lS.png","g":["General"],"q":"720p","u":"https://live.yoltv.com/hls/stream.m3u8"},{"n":"ZDF","l":"https://i.imgur.com/rtLb6m9.png","g":["Undefined"],"q":"","u":"https://dash4.antik.sk/live/test_zdf_avc_25p/playlist.m3u8"},{"n":"ZDF HD","l":"https://i.imgur.com/rtLb6m9.png","g":["Undefined"],"q":"540p","u":"https://r.eu.cdn-redge.media/livehls/oeu/mt/live/zdf/live.livx/playlist.m3u8"},{"n":"ZDFinfo","l":"https://i.imgur.com/vtq1IWp.png","g":["Undefined"],"q":"720p","u":"https://r.eu.cdn-redge.media/livehls/oeu/mt/live/zdfinfo/live.livx/playlist.m3u8"},{"n":"ZDFneo","l":"https://i.imgur.com/1JIIGgL.png","g":["Undefined"],"q":"1080p","u":"https://r.eu.cdn-redge.media/livehls/oeu/mt/live/zdfneo/live.livx/playlist.m3u8"},{"n":"Zee One German","l":"https://upload.wikimedia.org/wikipedia/commons/2/24/Zee_One_Logo_2025.png","g":["Entertainment"],"q":"720p","u":"https://e4955b54.wurl.com/master/f36d25e7e52f1ba8d7e56eb859c636563214f541/U2Ftc3VuZy1kZV9aZWVPbmVfSExT/playlist.m3u8"},{"n":"Zwei Music Television","l":"https://i.imgur.com/RbdpCNf.png","g":["Music"],"q":"","u":"https://zweiapp.b-cdn.net/1080p/index.m3u8"}];</script>
+  <div class="top">
+    <div class="brand"><b>SPRtix</b><span>Germany CHANNELS</span></div>
+    <input type="search" id="searchInput" class="search" placeholder="Search channels..." autocomplete="off" aria-label="Search channels">
+    <div class="chips" id="chips" role="group" aria-label="Categories"></div>
+    <div class="count" id="count"></div>
+  </div>
+  <div class="grid" id="grid"></div>
+</div>
+
+<div id="toastPopup" class="toast-popup">Message</div>
+<input type="file" id="fileInput" accept=".m3u,.m3u8,.txt,text/plain,audio/x-mpegurl,application/vnd.apple.mpegurl" style="display:none">
+
+<!-- Video.js 8 already includes HLS (m3u8) support -->
+<script src="https://vjs.zencdn.net/8.10.0/video.min.js"></script>
+<script>if(!window.videojs){document.write('<script src="https://cdn.jsdelivr.net/npm/video.js@8.10.0/dist/video.min.js"><\/script>');}</script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/hls.js/1.5.13/hls.min.js"></script>
+<script>if(!window.Hls){document.write('<script src="https://cdn.jsdelivr.net/npm/hls.js@1.5.13/dist/hls.min.js"><\/script>');}</script>
+<script>
+const PLACEHOLDER = 'data:image/svg+xml;utf8,' + encodeURIComponent(
+  '<svg xmlns="http://www.w3.org/2000/svg" width="100" height="70" viewBox="0 0 100 70"><rect width="100" height="70" fill="#0f172a"/><text x="50" y="40" font-size="14" fill="#00f2fe" text-anchor="middle" font-family="Arial">SPRtix</text></svg>'
+);
+let playerInstance = null;
+let playerOpen = false, pushedState = false;
+let cat = 'All', term = '';
+const dead = new Set();
+
+function esc(str){return String(str==null?'':str).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
+function safeImg(url){return esc(url||PLACEHOLDER);}
+let toastTimer;
+function showToast(msg){
+  const t=document.getElementById('toastPopup'); t.textContent=msg; t.classList.add('show');
+  clearTimeout(toastTimer); toastTimer=setTimeout(()=>t.classList.remove('show'),3500);
+}
+
+/* ---------------- PLAYER (index.html wala same player) ---------------- */
+let hls = null, triedNative = false;
+function destroyHls(){ if (hls) { try { hls.destroy(); } catch(e){} hls = null; } }
+function initHlsPlayer(){
+  const v = document.getElementById('videoPlayer');
+  v.addEventListener('error', () => {
+    if (!v.getAttribute('src')) return;
+    if (window.currentIdx != null) markDead(window.currentIdx);
+    showToast('Stream error: link offline, blocked ya geo-restricted ho sakta hai');
+  });
+  playerInstance = {
+    pause(){ v.pause(); },
+    reset(){ destroyHls(); v.pause(); v.removeAttribute('src'); v.load(); }
+  };
+}
+
+function detectType(url){
+  const u = url.split('?')[0].split('#')[0].toLowerCase();
+  if (u.endsWith('.mp4') || u.endsWith('.m4v')) return 'video/mp4';
+  if (u.endsWith('.webm')) return 'video/webm';
+  if (u.endsWith('.ogv') || u.endsWith('.ogg')) return 'video/ogg';
+  if (u.endsWith('.mkv')) return 'video/webm';
+  if (u.endsWith('.mpd')) return 'application/dash+xml';
+  // .m3u8, and also links with no extension (most live TV / IPTV links) are treated as HLS
+  return 'application/x-mpegURL';
+}
+
+function playStreamHls(url, title){
+  url = (url || '').trim();
+  if (!url) { showToast('Stream URL not available!'); return; }
+  document.getElementById('playerTitle').innerText = title || 'Live Stream';
+  document.getElementById('playerModal').classList.add('active');
+  document.body.classList.add('playing');
+  if (!playerOpen) {
+    playerOpen = true;
+    try { history.pushState({player:1}, ''); pushedState = true; } catch(e) { pushedState = false; }
+  }
+  window.scrollTo({top:0, behavior:'smooth'});
+  const v = document.getElementById('videoPlayer');
+  playerInstance.reset();
+  triedNative = false;
+  const type = detectType(url);
+  const tryPlay = () => { const p = v.play(); if (p && p.catch) p.catch(() => {}); };
+  const playNative = () => { v.src = url; v.load(); tryPlay(); };
+
+  if (type !== 'application/x-mpegURL') { playNative(); return; }   // mp4 / webm etc.
+
+  if (window.Hls && Hls.isSupported()) {
+    hls = new Hls({ enableWorker: false, lowLatencyMode: false, maxBufferLength: 30, manifestLoadingMaxRetry: 2, levelLoadingMaxRetry: 2, fragLoadingMaxRetry: 3 });
+    const myHls = hls;
+    hls.on(Hls.Events.MANIFEST_PARSED, tryPlay);
+    hls.on(Hls.Events.ERROR, (ev, d) => {
+      if (!d.fatal || hls !== myHls) return;
+      if (d.type === Hls.ErrorTypes.MEDIA_ERROR) { myHls.recoverMediaError(); return; }
+      // network / manifest problem: ek baar browser ke native player se koshish
+      destroyHls();
+      if (!triedNative && v.canPlayType('application/vnd.apple.mpegurl')) { triedNative = true; playNative(); return; }
+      if (window.currentIdx != null) markDead(window.currentIdx);
+      showToast('Stream error: link offline, blocked (CORS) ya geo-restricted ho sakta hai');
+    });
+    hls.loadSource(url);
+    hls.attachMedia(v);
+  } else {
+    playNative();   // Safari / native HLS
+  }
+}
+
+let useVjs = false;
+function initPlayer(){
+  if (typeof videojs === 'undefined') { useVjs = false; initHlsPlayer(); return; }
+  playerInstance = videojs('videoPlayer', {
+    fill: true, controls: true, autoplay: false, preload: 'auto', playsinline: true,
+    html5: {
+      vhs: { overrideNative: true, enableLowInitialPlaylist: true, smoothQualityChange: true, withCredentials: false },
+      nativeAudioTracks: false, nativeVideoTracks: false
+    }
+  });
+  useVjs = true;
+  playerInstance.on('error', () => {
+    const err = playerInstance.error();
+    if (err) {
+      console.error('Player error:', err);
+      if (window.currentIdx != null) markDead(window.currentIdx);
+      showToast('Stream error: link may be offline, blocked (CORS) or http on https');
+    }
+  });
+}
+
+function playStream(url, title){
+  if (!useVjs) { playStreamHls(url, title); return; }
+  url = (url || '').trim();
+  if (!url) { showToast('Stream URL not available!'); return; }
+  document.getElementById('playerTitle').innerText = title || 'Live Stream';
+  document.getElementById('playerModal').classList.add('active');
+  document.body.classList.add('playing');
+  if (!playerOpen) {
+    playerOpen = true;
+    try { history.pushState({player:1}, ''); pushedState = true; } catch(e) { pushedState = false; }
+  }
+  window.scrollTo({top:0, behavior:'smooth'});
+  playerInstance.pause();
+  playerInstance.reset();
+  playerInstance.src({ src: url, type: detectType(url) });
+  playerInstance.load();
+  const p = playerInstance.play();
+  if (p && p.catch) p.catch(() => {});
+}
+
+function doClosePlayer(){
+  document.getElementById('playerModal').classList.remove('active');
+  document.body.classList.remove('playing');
+  document.querySelectorAll('.channel-card.playing').forEach(c => c.classList.remove('playing'));
+  playerInstance.pause();
+  playerInstance.reset(); // fully stops the stream so it stops downloading in background
+  window.currentIdx = null;
+  playerOpen = false;
+}
+// X button / Escape: agar history entry push hui thi to back() chalao, popstate player band karega
+function closePlayer(){
+  if (!playerOpen) return;
+  if (pushedState) { pushedState = false; history.back(); }
+  else doClosePlayer();
+}
+// Phone/browser Back button: pehle player band hoga, dobara back dabane par page wapis jayega
+window.addEventListener('popstate', () => { if (playerOpen) { pushedState = false; doClosePlayer(); } });
+
+function markDead(i){
+  dead.add(i);
+  const c = document.querySelector('.channel-card[data-i="'+i+'"]'); if (c) c.classList.add('dead');
+}
+
+/* ---- AUTO background colour: image ke kinaron ka sab se zyada aane wala rang (index.html se) ---- */
+const bgColorCache = {};
+function applyAutoBg(wrap, url){
+  if (!url) return;
+  const paint = (rgb) => {
+    wrap.style.backgroundColor = rgb;
+    const blurImg = wrap.querySelector('.thumb-bg');
+    if (blurImg) blurImg.style.display = 'none';
+  };
+  if (bgColorCache[url]) { paint(bgColorCache[url]); return; }
+  const probe = new Image();
+  probe.crossOrigin = 'anonymous';
+  probe.onload = () => {
+    try {
+      const S = 40;
+      const cv = document.createElement('canvas'); cv.width = S; cv.height = S;
+      const ctx = cv.getContext('2d', { willReadFrequently: true });
+      ctx.drawImage(probe, 0, 0, S, S);
+      const d = ctx.getImageData(0, 0, S, S).data;
+      const buckets = {}; let best = null, bestCount = 0, opaque = 0;
+      const take = (x, y) => {
+        const i = (y * S + x) * 4;
+        if (d[i + 3] < 40) return;
+        opaque++;
+        const key = (d[i] >> 5) + ',' + (d[i + 1] >> 5) + ',' + (d[i + 2] >> 5);
+        const b = buckets[key] || (buckets[key] = { n: 0, r: 0, g: 0, b: 0 });
+        b.n++; b.r += d[i]; b.g += d[i + 1]; b.b += d[i + 2];
+        if (b.n > bestCount) { bestCount = b.n; best = b; }
+      };
+      for (let k = 0; k < S; k++) { take(k, 0); take(k, S - 1); take(0, k); take(S - 1, k); }
+      if (!best || opaque < S) return;
+      const rgb = `rgb(${Math.round(best.r / best.n)},${Math.round(best.g / best.n)},${Math.round(best.b / best.n)})`;
+      bgColorCache[url] = rgb; paint(rgb);
+    } catch (e) { /* CORS block: blur wala background hi chalega */ }
+  };
+  probe.src = url;
+}
+
+/* ---------------- GRID ---------------- */
+function initials(n){return (n.replace(/[^A-Za-z0-9 ]/g,'').trim().split(/\s+/).slice(0,2).map(w=>w[0]).join('')||'?').toUpperCase();}
+
+function buildCard(i){
+  const c = CHANNELS[i];
+  const card = document.createElement('div');
+  card.className = 'channel-card' + (dead.has(i) ? ' dead' : '');
+  card.dataset.i = i;
+  card.setAttribute('role','button'); card.tabIndex = 0;
+  card.innerHTML = `
+    <div class="thumb-wrap"></div>
+    <div class="channel-logo-text">${esc(c.n)}</div>
+    <div class="channel-footer">
+      <span class="live-badge">LIVE</span>
+      <span class="view-count">${esc(c.q || 'Online')}</span>
+    </div>`;
+  const wrap = card.querySelector('.thumb-wrap');
+  const fallback = () => { wrap.innerHTML = '<div class="ini">'+esc(initials(c.n))+'</div>'; wrap.style.backgroundColor='#111827'; };
+  if (!c.l) fallback();
+  else {
+    wrap.innerHTML = `<img src="${safeImg(c.l)}" class="thumb-bg" alt="" referrerpolicy="no-referrer"><img src="${safeImg(c.l)}" class="card-thumb" loading="lazy" alt="" referrerpolicy="no-referrer">`;
+    const px = 'https://wsrv.nl/?url=' + encodeURIComponent(c.l.replace(/^https?:\/\//,'')) + '&w=200';
+    wrap.querySelectorAll('img').forEach(im => {
+      let retried = false;
+      im.onerror = () => { if (!retried) { retried = true; im.src = px; } else fallback(); };
+    });
+    applyAutoBg(wrap, c.l);
+  }
+  return card;
+}
+
+function render(){
+  const t = term.trim().toLowerCase();
+  const grid = document.getElementById('grid');
+  grid.innerHTML = '';
+  const frag = document.createDocumentFragment();
+  let n = 0;
+  CHANNELS.forEach((c,i) => {
+    if (cat !== 'All' && !c.g.includes(cat)) return;
+    if (t && !c.n.toLowerCase().includes(t)) return;
+    frag.appendChild(buildCard(i)); n++;
+  });
+  grid.appendChild(frag);
+  if (!CHANNELS.length) { showLoader(); document.getElementById('count').textContent = ''; return; }
+  if (!n) grid.innerHTML = '<div class="empty-msg">No channels found.</div>';
+  document.getElementById('count').textContent = n + ' of ' + CHANNELS.length + ' channels';
+}
+
+function buildChips(){
+  const counts = {};
+  CHANNELS.forEach(c => c.g.forEach(g => counts[g] = (counts[g]||0)+1));
+  const names = ['All', ...Object.keys(counts).sort((a,b)=>((b==='Pakistan')-(a==='Pakistan'))||(counts[b]-counts[a]))];
+  const box = document.getElementById('chips');
+  box.innerHTML = '';
+  names.forEach(n => {
+    const b = document.createElement('button');
+    b.className = 'chip'; b.textContent = n === 'All' ? 'All' : n + ' ' + counts[n];
+    b.setAttribute('aria-pressed', n === cat);
+    b.onclick = () => { cat = n; [...box.children].forEach((x,k)=>x.setAttribute('aria-pressed', names[k]===cat)); render(); };
+    box.appendChild(b);
+  });
+}
+
+
+/* ---------------- PLAYLIST LOADER ---------------- */
+const STORE_KEY = 'sprtix_news_playlist';
+
+function parseM3U(text){
+  const lines = String(text).split(/\r?\n/), out = [];
+  for (let i = 0; i < lines.length; i++) {
+    const l = lines[i].trim();
+    if (!l.startsWith('#EXTINF')) continue;
+    const m = l.match(/,([^,]*)$/);                       // naam hamesha aakhri comma ke baad hota hai
+    let name = (m ? m[1] : '').trim();
+    const logo = (l.match(/tvg-logo="([^"]*)"/) || [])[1] || '';
+    const grp  = (l.match(/group-title="([^"]*)"/) || [])[1] || '';
+    let j = i + 1;
+    while (j < lines.length && lines[j].trim() && lines[j].trim().startsWith('#') && !lines[j].trim().startsWith('#EXTINF')) j++;
+    while (j < lines.length && !lines[j].trim()) j++;
+    const url = (lines[j] || '').trim();
+    if (!url || url.startsWith('#')) continue;            // URL missing: is entry ko chor do
+    let tag = '';
+    name = name.replace(/\s*\[([^\]]+)\]\s*/g, (_, t) => { tag = t; return ' '; }).trim();
+    const q = name.match(/\s*\(([^)]*\d+[pi])\)\s*$/);
+    let quality = '';
+    if (q) { quality = q[1]; name = name.slice(0, q.index).trim(); }
+    if (!name) continue;
+    const g = grp.split(';').map(x => x.trim()).filter(Boolean);
+    out.push({ n: name, l: logo, g: g.length ? g : ['Other'], q: /geo/i.test(tag) ? 'Geo-blocked' : (quality || ''), u: url });
+    i = j;
+  }
+  return out;
+}
+
+function setPlaylist(text, save){
+  const list = parseM3U(text);
+  if (!list.length) { showToast('Is file mein koi channel nahi mila (#EXTINF lines chahiye)'); return false; }
+  CHANNELS = list; cat = 'All'; term = ''; dead.clear();
+  document.getElementById('searchInput').value = '';
+  buildChips(); render();
+  if (save) { try { localStorage.setItem(STORE_KEY, text); } catch (e) {} }
+  showToast(list.length + ' channels loaded');
+  return true;
+}
+
+function showLoader(){
+  const grid = document.getElementById('grid');
+  grid.innerHTML = `
+    <div class="loader">
+      <h3>News playlist load karein</h3>
+      <p>Apni news playlist (.m3u / .txt) select karein ya neeche paste karein. Ek baar load karne ke baad ye browser mein save rehti hai.</p>
+      <button class="go" type="button" id="pickBtn">Playlist file select karein</button>
+      <textarea id="pasteBox" placeholder="#EXTM3U ... yahan paste karein"></textarea>
+      <button class="go alt" type="button" id="pasteBtn">Paste se load karein</button>
+    </div>`;
+  document.getElementById('pickBtn').onclick = () => document.getElementById('fileInput').click();
+  document.getElementById('pasteBtn').onclick = () => setPlaylist(document.getElementById('pasteBox').value, true);
+}
+
+function openChannel(card){
+  const i = +card.dataset.i, c = CHANNELS[i];
+  dead.delete(i); card.classList.remove('dead');
+  window.currentIdx = i;
+  document.querySelectorAll('.channel-card.playing').forEach(x => x.classList.remove('playing'));
+  card.classList.add('playing');
+  playStream(c.u, c.n);
+}
+
+window.addEventListener('DOMContentLoaded', () => {
+  try { initPlayer(); } catch (e) { console.error(e); try { useVjs = false; initHlsPlayer(); } catch (e2) {} }
+  document.getElementById('fileInput').addEventListener('change', e => {
+    const f = e.target.files[0]; if (!f) return;
+    const r = new FileReader(); r.onload = () => setPlaylist(r.result, true); r.readAsText(f); e.target.value = '';
+  });
+  if (!CHANNELS.length) {
+    try { const saved = localStorage.getItem(STORE_KEY); if (saved) CHANNELS = parseM3U(saved); } catch (e) {}
+  }
+  buildChips();
+  render();
+
+  const grid = document.getElementById('grid');
+  grid.addEventListener('click', e => { const c = e.target.closest('.channel-card'); if (c) openChannel(c); });
+  grid.addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' ') { const c = e.target.closest('.channel-card'); if (c) { e.preventDefault(); openChannel(c); } } });
+  let st; document.getElementById('searchInput').addEventListener('input', e => { term = e.target.value; clearTimeout(st); st = setTimeout(render, 120); });
+  document.addEventListener('keydown', e => { if (e.key === 'Escape') closePlayer(); });
+});
+</script>
+</body>
+</html>
