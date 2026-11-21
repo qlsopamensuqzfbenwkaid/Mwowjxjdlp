@@ -31,11 +31,21 @@ jobs:
           IMAGE: ${{ inputs.image }}
         run: |
           set -euo pipefail
-          if [ -z "${ONESIGNAL_API_KEY:-}" ]; then echo "Secret ONESIGNAL_REST_API_KEY set nahi hai"; exit 1; fi
+          if [ -z "${ONESIGNAL_API_KEY:-}" ]; then echo "::error::Secret ONESIGNAL_REST_API_KEY set nahi hai"; exit 1; fi
           body=$(jq -n --arg app "$ONESIGNAL_APP_ID" --arg t "$TITLE" --arg m "$MESSAGE" --arg u "$URL" --arg i "$IMAGE" \
             '{app_id:$app, included_segments:["Subscribed Users"], headings:{en:$t}, contents:{en:$m}} + (if $u != "" then {url:$u} else {} end) + (if $i != "" then {big_picture:$i} else {} end)')
           code=$(curl -sS -o resp.json -w '%{http_code}' -X POST https://api.onesignal.com/notifications \
             -H "Content-Type: application/json" -H "Authorization: Key $ONESIGNAL_API_KEY" -d "$body")
           echo "HTTP $code"
-          jq -r 'if .id then "Notification ID: " + .id else (.errors | tostring) end' resp.json
-          [ "$code" -lt 300 ]
+          jq . resp.json || cat resp.json
+          id=$(jq -r '.id // empty' resp.json || true)
+          if [ "$code" -ge 300 ] || [ -z "$id" ]; then
+            echo "::error::OneSignal ne push nahi bheja: $(jq -c '.errors // .' resp.json || cat resp.json)"
+            exit 1
+          fi
+          echo "Notification ID: $id"
+          sleep 12
+          curl -sS "https://api.onesignal.com/notifications/$id?app_id=$ONESIGNAL_APP_ID" -H "Authorization: Key $ONESIGNAL_API_KEY" -o stat.json || true
+          jq '{successful, failed, errored, remaining, converted}' stat.json || cat stat.json
+          ok=$(jq -r '.successful // 0' stat.json 2>/dev/null || echo 0)
+          if [ "$ok" = "0" ]; then echo "::warning::Abhi tak kisi device ko push nahi gayi (subscription ya FCM check karein)"; fi
