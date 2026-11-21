@@ -1,0 +1,13 @@
+{
+  "enabled": "no",
+  "title": "SPRtix",
+  "subtitle": "Live TV & Sports",
+  "backgroundColor": "#030712",
+  "titleColor": "#ffffff",
+  "subtitleColor": "#94a3b8",
+  "accentColor": "#00f2fe",
+  "animation": "pulse",
+  "showProgress": "yes",
+  "minDurationMs": 1200,
+  "maxDurationMs": 3000
+}
