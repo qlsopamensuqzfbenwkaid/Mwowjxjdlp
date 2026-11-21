@@ -1,0 +1,18 @@
+[
+  {
+    "id": "imwqqbgc24ep",
+    "network": "startio",
+    "format": "banner",
+    "unitId": "210241838",
+    "priority": 10,
+    "enabled": "yes"
+  },
+  {
+    "id": "imwqqbuksenp",
+    "network": "startio",
+    "format": "interstitial",
+    "unitId": "210241838",
+    "priority": 2,
+    "enabled": "yes"
+  }
+]
