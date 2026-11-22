@@ -5,7 +5,8 @@
     "format": "banner",
     "unitId": "210241838",
     "priority": 10,
-    "enabled": "yes"
+    "enabled": "yes",
+    "name": "Home banner"
   },
   {
     "id": "imwqqbuksenp",
