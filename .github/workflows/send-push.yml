@@ -30,22 +30,39 @@ jobs:
           URL: ${{ inputs.url }}
           IMAGE: ${{ inputs.image }}
         run: |
-          set -euo pipefail
-          if [ -z "${ONESIGNAL_API_KEY:-}" ]; then echo "::error::Secret ONESIGNAL_REST_API_KEY set nahi hai"; exit 1; fi
-          body=$(jq -n --arg app "$ONESIGNAL_APP_ID" --arg t "$TITLE" --arg m "$MESSAGE" --arg u "$URL" --arg i "$IMAGE" \
-            '{app_id:$app, included_segments:["Subscribed Users"], headings:{en:$t}, contents:{en:$m}} + (if $u != "" then {url:$u} else {} end) + (if $i != "" then {big_picture:$i} else {} end)')
-          code=$(curl -sS -o resp.json -w '%{http_code}' -X POST https://api.onesignal.com/notifications \
-            -H "Content-Type: application/json" -H "Authorization: Key $ONESIGNAL_API_KEY" -d "$body")
-          echo "HTTP $code"
-          jq . resp.json || cat resp.json
-          id=$(jq -r '.id // empty' resp.json || true)
-          if [ "$code" -ge 300 ] || [ -z "$id" ]; then
-            echo "::error::OneSignal ne push nahi bheja: $(jq -c '.errors // .' resp.json || cat resp.json)"
-            exit 1
+          set -uo pipefail
+          fail() { echo "::error::$1"; echo "### Push fail: $1" >> "$GITHUB_STEP_SUMMARY"; exit 1; }
+          [ -n "${ONESIGNAL_API_KEY:-}" ] || fail "Secret ONESIGNAL_REST_API_KEY is repo (Mwowjxjdlp) me set nahi hai"
+          if printf '%s' "$ONESIGNAL_API_KEY" | grep -q '[[:space:]]'; then fail "Key me space ya nayi line hai. Secret dobara paste karein"; fi
+          case "$ONESIGNAL_API_KEY" in
+            os_v2_app_*) AUTH="Key $ONESIGNAL_API_KEY"; kfmt="new App API key" ;;
+            os_v2_org_*) AUTH="Key $ONESIGNAL_API_KEY"; kfmt="ORGANIZATION key (is se push nahi jati, App API Key chahiye)"; echo "::warning::Ye organization key lagti hai. Settings > Keys & IDs se is app ki App API Key lein" ;;
+            *) AUTH="Basic $ONESIGNAL_API_KEY"; kfmt="purani REST API key" ;;
+          esac
+          echo "Key format: $kfmt, length: ${#ONESIGNAL_API_KEY}"
+          id=""; last=""
+          for seg in "Subscribed Users" "Total Subscriptions" "Active Subscriptions"; do
+            body=$(jq -n --arg app "$ONESIGNAL_APP_ID" --arg seg "$seg" --arg t "$TITLE" --arg m "$MESSAGE" --arg u "$URL" --arg i "$IMAGE" \
+              '{app_id:$app, target_channel:"push", included_segments:[$seg], headings:{en:$t}, contents:{en:$m}} + (if $u != "" then {url:$u} else {} end) + (if $i != "" then {big_picture:$i} else {} end)')
+            code=$(curl -sS -o resp.json -w '%{http_code}' -X POST https://api.onesignal.com/notifications \
+              -H "Content-Type: application/json" -H "Authorization: $AUTH" -d "$body" || echo 000)
+            echo "Segment '$seg' -> HTTP $code"
+            jq -c . resp.json 2>/dev/null || cat resp.json
+            id=$(jq -r '.id // empty' resp.json 2>/dev/null || true)
+            [ -n "$id" ] && break
+            last="HTTP $code: $(jq -c '.errors // .' resp.json 2>/dev/null || cat resp.json)"
+            case "$code" in 401|403) break ;; esac
+          done
+          if [ -z "$id" ]; then
+            hint=""
+            echo "$last" | grep -qi "not subscribed\|no subscribed" && hint=" | Koi device subscribed nahi: phone me app kholo, notification Allow karo, OneSignal Audience > Subscriptions dekhein"
+            case "$last" in HTTP\ 401*|HTTP\ 403*) hint=" | API key ghalat hai ya kisi aur app ki hai" ;; esac
+            fail "OneSignal ne push nahi bheja. $last$hint"
           fi
           echo "Notification ID: $id"
+          echo "### Push bheji gayi: $id" >> "$GITHUB_STEP_SUMMARY"
           sleep 12
-          curl -sS "https://api.onesignal.com/notifications/$id?app_id=$ONESIGNAL_APP_ID" -H "Authorization: Key $ONESIGNAL_API_KEY" -o stat.json || true
-          jq '{successful, failed, errored, remaining, converted}' stat.json || cat stat.json
+          curl -sS "https://api.onesignal.com/notifications/$id?app_id=$ONESIGNAL_APP_ID" -H "Authorization: $AUTH" -o stat.json || true
+          jq '{successful, failed, errored, remaining, converted}' stat.json 2>/dev/null || cat stat.json
           ok=$(jq -r '.successful // 0' stat.json 2>/dev/null || echo 0)
           if [ "$ok" = "0" ]; then echo "::warning::Abhi tak kisi device ko push nahi gayi (subscription ya FCM check karein)"; fi
