@@ -1,14 +1,14 @@
 {
   "enabled": "yes",
   "title": "SPRtix",
-  "backgroundColor": "#030712",
-  "titleColor": "#ffffff",
-  "subtitleColor": "#94a3b8",
-  "accentColor": "#00f2fe",
-  "animation": "bounce",
+  "backgroundColor": "#000000",
+  "titleColor": "#0000ff",
+  "subtitleColor": "#ff00ff",
+  "accentColor": "#ffffff",
+  "animation": "rotate",
   "showProgress": "yes",
   "minDurationMs": 1200,
   "maxDurationMs": 3000,
-  "subtitle": "Thanks For Join ☺️",
-  "logoUrl": "https://raw.githubusercontent.com/qlsopamensuqzfbenwkaid/Mwowjxjdlp/main/data/images/257149141-1791482725315643-rem-mwrndbob.png"
+  "logoUrl": "https://raw.githubusercontent.com/qlsopamensuqzfbenwkaid/Mwowjxjdlp/main/data/images/257149141-1791482725315643-rem-mwrndbob.png",
+  "subtitle": "Live Channels And Movies"
 }
