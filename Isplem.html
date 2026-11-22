@@ -1604,5 +1604,43 @@ function showToast(message) {
 }
 
     </script>
+    <script>
+/* SPRtix ads hooks for the Android app. Does nothing in a normal browser (no bridge = plays immediately). */
+(function () {
+  try {
+    var PENDING = {}, SEQ = 0, BUSY = false;
+    function bridge() {
+      var a = window.SPRtixApp, n = window.SPRtixNative;
+      if (a && typeof a.requestPlay === 'function') return a;
+      if (n && typeof n.requestPlay === 'function') return n;
+      return null;
+    }
+    window.SPRtixPlayAllowed = function (t) { var f = PENDING[t]; if (f) { try { f(); } catch (e) { } } };
+    var origPlay = window.playStream, origHide = window.hidePlayer;
+    if (typeof origPlay === 'function') {
+      window.playStream = function () {
+        var self = this, args = arguments, b = bridge();
+        if (!b) return origPlay.apply(self, args);
+        if (BUSY) return;                       // an ad is already being prepared: ignore extra taps
+        var t = 'p' + (++SEQ) + '_' + Date.now(), done = false, timer = null;
+        function go() {
+          if (done) return; done = true; clearTimeout(timer); delete PENDING[t]; BUSY = false;
+          try { origPlay.apply(self, args); } catch (e) { }
+        }
+        BUSY = true; PENDING[t] = go;
+        timer = setTimeout(go, window.SPRTIX_GATE_TIMEOUT_MS || 45000);   // safety: never block playback
+        try { b.requestPlay(t); } catch (e) { go(); }
+      };
+    }
+    if (typeof origHide === 'function') {
+      window.hidePlayer = function () {
+        var wasOpen = !!window.playerOpen, r = origHide.apply(this, arguments);
+        if (wasOpen) { try { var b = bridge(); if (b && typeof b.onPlayerClosed === 'function') b.onPlayerClosed(); } catch (e) { } }
+        return r;
+      };
+    }
+  } catch (e) { }
+})();
+</script>
 </body>
 </html>
