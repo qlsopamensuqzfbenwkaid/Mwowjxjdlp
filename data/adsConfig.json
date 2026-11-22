@@ -4,13 +4,11 @@
   "waterfallOrder": "startio,unity,admaven",
   "bannerEnabled": "yes",
   "interstitialEnabled": "yes",
-  "interstitialFirstDelaySeconds": 60,
   "interstitialIntervalSeconds": 120,
   "interstitialMaxPerSession": 6,
   "rewardedEnabled": "yes",
   "rewardedEveryNClicks": 2,
   "rewardedLoadTimeoutSeconds": 8,
   "rewardedMaxWaitSeconds": 40,
-  "admavenKey": "",
-  "unityGameId": ""
+  "interstitialFirstDelaySeconds": 10
 }
