@@ -3,7 +3,7 @@
     "id": "imwqqbgc24ep",
     "network": "startio",
     "format": "banner",
-    "unitId": "210241838",
+    "unitId": "206268061",
     "priority": 10,
     "enabled": "yes",
     "name": "Home banner"
@@ -12,7 +12,7 @@
     "id": "imwqqbuksenp",
     "network": "startio",
     "format": "interstitial",
-    "unitId": "210241838",
+    "unitId": "206268061",
     "priority": 2,
     "enabled": "yes"
   }
