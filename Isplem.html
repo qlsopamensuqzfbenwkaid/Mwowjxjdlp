@@ -1,7 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta name='admaven-placement' content=BpjaHpjY8>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>SPRtix - Live TV & Movies</title>
@@ -176,11 +175,7 @@
         .m-head { font-size: 12px; font-weight: 600; display: flex; align-items: center; gap: 6px; padding-right: 60px; white-space: nowrap; overflow: hidden; text-transform: uppercase; }
         .m-head img { width: 15px; height: 15px; object-fit: contain; border-radius: 3px; flex-shrink: 0; }
         .m-head span { overflow: hidden; text-overflow: ellipsis; }
-        .m-hot { position: absolute; top: 0; right: 0; z-index: 2; display: flex; align-items: center; gap: 5px; background: linear-gradient(135deg, #ffb300 0%, #ff4d2e 55%, #e0005a 100%); color: #fff; font-size: 11px; font-weight: 800; letter-spacing: .8px; padding: 4px 14px 5px 11px; border-bottom-left-radius: 16px; box-shadow: 0 0 12px rgba(255, 80, 40, .55); }
-        .m-hot i { font-size: 13px; color: #fff3b0; filter: drop-shadow(0 0 4px #ffb300); transform-origin: 50% 100%; animation: flameDance .9s ease-in-out infinite alternate; }
-        @keyframes flameDance { from { transform: scale(1) rotate(-7deg); } to { transform: scale(1.28) rotate(7deg); } }
-        .match-card.hot { border-color: rgba(255, 110, 50, .6); box-shadow: 0 0 14px rgba(255, 90, 40, .2); }
-        .match-card.hot .m-head { padding-right: 84px; }
+        .m-hot { position: absolute; top: 0; right: 0; background: #12c4d6; color: #fff; font-size: 12px; font-weight: 700; padding: 3px 16px 4px 20px; border-bottom-left-radius: 16px; }
         .m-body { display: flex; align-items: center; justify-content: space-between; gap: 6px; margin-top: 8px; }
         .m-team { display: flex; align-items: center; gap: 9px; flex: 1; min-width: 0; }
         .m-team.right { flex-direction: row-reverse; text-align: right; }
@@ -410,39 +405,11 @@ var DATA_BASE = location.hostname.endsWith('github.io')
     ? 'data/'
     : "https://raw.githubusercontent.com/".concat(GH_USER, "/").concat(GH_REPO, "/").concat(GH_BRANCH, "/data/");
 // Converts a JSON array [{id,...}] into an object {id: {...}} so the rest of the code works unchanged
-// "hidden" (set from the Admin Panel eye button): true / "true" / "yes" / 1  =>  the item does not exist in the app
-function isHiddenItem(it) { return !!it && typeof it === 'object' && (it.hidden === true || it.hidden === 'true' || it.hidden === 'yes' || it.hidden === 1 || it.hidden === '1'); }
-var HIDDEN_IDS = {}; // section -> { id: 1 }  (used to also hide favourites of hidden items)
-function noteHidden(name, raw) {
-    var m = {};
-    if (Array.isArray(raw))
-        raw.forEach(function (it) { if (isHiddenItem(it))
-            m[String(it.id)] = 1; });
-    HIDDEN_IDS[name] = m;
-}
-function isFavHidden(key) {
-    for (var n in HIDDEN_IDS)
-        if (HIDDEN_IDS[n] && HIDDEN_IDS[n][key])
-            return true;
-    return false;
-}
-// keys in the SAME order as the Admin Panel list (plain objects sort number-like ids, so the order is stored separately)
-function okeys(o) { return (o && o.__order) ? o.__order : Object.keys(o || {}); }
 function normalize(data) {
     if (Array.isArray(data)) {
-        var o_1 = {}, order = [];
-        data.forEach(function (it, i) {
-            if (!it || isHiddenItem(it))
-                return; // hidden from the Admin Panel
-            var k = String(it.id || ('i' + i));
-            if (!(k in o_1))
-                order.push(k);
-            o_1[k] = it;
-        });
-        try {
-            Object.defineProperty(o_1, '__order', { value: order, enumerable: false });
-        }
-        catch (e) { }
+        var o_1 = {};
+        data.forEach(function (it, i) { if (it)
+            o_1[String(it.id || ('i' + i))] = it; });
         return o_1;
     }
     return data;
@@ -474,18 +441,11 @@ var database = {
                     lastText = text;
                     var val = null;
                     try {
-                        var raw = JSON.parse(text);
-                        noteHidden(name, raw);
-                        val = normalize(raw);
+                        val = normalize(JSON.parse(text));
                     }
                     catch (e) { }
-                    var empty = !val || (typeof val === 'object' && okeys(val).length === 0);
+                    var empty = !val || (typeof val === 'object' && Object.keys(val).length === 0);
                     cb({ val: function () { return (empty ? null : val); }, exists: function () { return !empty; } });
-                    try {
-                        if (name !== 'settings')
-                            renderFavourites();
-                    }
-                    catch (e) { } // favourites of a hidden item disappear / come back
                 };
                 // 1) show the data saved on the phone immediately (fast + works offline)
                 try {
@@ -766,12 +726,11 @@ function detectType(url) {
 }
 function hasNativePlayer() { return !!(window.SPRtixNative && window.SPRtixNative.play); }
 function streamErrorText(err, spec) {
-    // simple message for the user (technical details stay in the console)
-    try {
-        console.warn('Stream failed:', err && err.message ? err.message : err);
+    if (spec && spec.hasHeaders && !hasNativePlayer() && !String((globalSettings && globalSettings.proxyUrl) || '').trim()) {
+        return 'This stream needs special headers (Referer / User-Agent). Use the native player or set a proxy URL in the Admin Panel settings.';
     }
-    catch (e) { }
-    return 'The channel is not working right now. Please try again after a while...';
+    var m = err && err.message ? ' (' + err.message + ')' : '';
+    return 'Stream error: the link may be offline, blocked (CORS) or http on https.' + m;
 }
 function showEngine(name) {
     var v = document.getElementById('videoPlayer');
@@ -1022,6 +981,21 @@ function buildCard(prefix, key, item, opts) {
     return card;
 }
 // One single click handler for every card (works for cloned cards too)
+// Notify the native Android ad bridge only for real channel selections.
+// The Android side owns the 3-click counter and decides when to show AdMaven.
+function notifyNativeChannelClick(source) {
+    try {
+        if (window.AndroidAds && typeof window.AndroidAds.onChannelClicked === 'function') {
+            window.AndroidAds.onChannelClicked();
+            console.log('[SPRtix Ads] Channel click sent to Android (' + (source || 'channel') + ')');
+        } else {
+            console.log('[SPRtix Ads] AndroidAds bridge unavailable');
+        }
+    } catch (err) {
+        console.error('[SPRtix Ads] Channel bridge error:', err);
+    }
+}
+
 function onDocumentClick(e) {
     var card = e.target.closest('.channel-card');
     if (!card)
@@ -1050,6 +1024,12 @@ function onDocumentClick(e) {
             window.open(url, '_blank');
         return;
     }
+    // Count only playable channel cards (Live TV, Trending Live, and saved channel cards).
+    // Explore links and non-channel cards must not trigger advertising.
+    var cardPrefix = String(card.dataset.id || '').split('_')[0];
+    if (url && (cardPrefix === 'tv' || cardPrefix === 'live' || cardPrefix === 'fav')) {
+        notifyNativeChannelClick(cardPrefix);
+    }
     playStream(url, name);
 }
 function emptyMsg(text) { return "<div class=\"empty-msg\">".concat(text, "</div>"); }
@@ -1063,7 +1043,7 @@ function fetchDatabaseData() {
     // Live Events (Admin Panel -> Live Events)
     database.ref('events').on('value', function (snap) {
         var data = snap.val();
-        allEvents = data ? okeys(data).map(function (k) { return normalizeEvent(data[k]); }) : [];
+        allEvents = data ? Object.values(data).map(normalizeEvent) : [];
         eventsLoaded = true;
         renderMatches();
     });
@@ -1078,7 +1058,7 @@ function fetchDatabaseData() {
             container.innerHTML = emptyMsg('No channels yet.');
             return;
         }
-        okeys(data).forEach(function (key) {
+        Object.keys(data).forEach(function (key) {
             var item = data[key];
             container.appendChild(buildCard('live', key, item, { sub: item.subtitle || '', badge: 'LIVE', icon: 'fa-eye', right: item.views || '1K' }));
         });
@@ -1092,7 +1072,7 @@ function fetchDatabaseData() {
             grid.innerHTML = emptyMsg('No channels yet.');
             return;
         }
-        okeys(data).forEach(function (key) {
+        Object.keys(data).forEach(function (key) {
             var item = data[key];
             grid.appendChild(buildCard('tv', key, item, { sub: item.category || 'LIVE TV', badge: 'HD', icon: 'fa-signal', right: 'Online' }));
         });
@@ -1109,7 +1089,7 @@ function fetchDatabaseData() {
             newsGrid.innerHTML = emptyMsg('No news yet.');
             return;
         }
-        okeys(data).forEach(function (key) {
+        Object.keys(data).forEach(function (key) {
             var item = data[key];
             var o = { sub: item.category || 'NEWS', badge: 'NEWS', badgeStyle: 'background:#00f2fe; color:#030712;', icon: 'fa-broadcast-tower', right: '24/7' };
             homeNews.appendChild(buildCard('news', key, item, o));
@@ -1125,7 +1105,7 @@ function fetchDatabaseData() {
             grid.innerHTML = emptyMsg('Nothing here yet.');
             return;
         }
-        okeys(data).forEach(function (key) {
+        Object.keys(data).forEach(function (key) {
             var item = data[key];
             grid.appendChild(buildCard('exp', key, item, { link: true, sub: item.category || 'EXPLORE', badge: 'GO', badgeStyle: 'background:#7000ff;', icon: 'fa-link', right: 'Link' }));
         });
@@ -1139,7 +1119,7 @@ function fetchDatabaseData() {
             grid.innerHTML = emptyMsg('Nothing here yet.');
             return;
         }
-        okeys(data).forEach(function (key) {
+        Object.keys(data).forEach(function (key) {
             var item = data[key];
             grid.appendChild(buildCard('ww', key, item, { link: true, sub: item.category || 'WORLDWIDE', badge: 'GO', badgeStyle: 'background:#7000ff;', icon: 'fa-link', right: 'Link' }));
         });
@@ -1199,7 +1179,7 @@ function renderFavourites() {
     var savedGrid = document.getElementById('savedGrid');
     favContainer.innerHTML = '';
     savedGrid.innerHTML = '';
-    var keys = Object.keys(favourites).filter(function (k) { return !isFavHidden(k); });
+    var keys = Object.keys(favourites);
     if (keys.length === 0) {
         favContainer.innerHTML = emptyMsg('No favourites added yet.');
         savedGrid.innerHTML = emptyMsg('No saved items found.');
@@ -1347,7 +1327,7 @@ function eventCardHTML(e, st) {
         mid = '<div class="m-time done">Finished</div>' + (ok ? "<div class=\"m-date\">".concat(fmtDate(e.startMs), "</div>") : '');
     }
     var head = (e.leagueLogo ? "<img src=\"".concat(esc(e.leagueLogo), "\" alt=\"\" onerror=\"this.style.display='none'\">") : '') + "<span>".concat(esc(sm[0])).concat(e.league ? ' | ' + esc(e.league) : '', "</span>");
-    return "<div class=\"match-card" + (e.hot ? " hot" : "") + "\" data-eid=\"".concat(esc(e.id), "\" data-search=\"").concat(esc(e.search), "\">\n                ").concat(e.hot ? '<div class="m-hot"><i class="fa-solid fa-fire-flame-curved"></i>HOT</div>' : '', "\n                <div class=\"m-head\">").concat(head, "</div>\n                <div class=\"m-body\">\n                    <div class=\"m-team\">").concat(logoHTML(e.t1), "<div class=\"m-name\">").concat(esc(e.t1.name), "</div></div>\n                    <div class=\"m-mid\">").concat(mid, "</div>\n                    <div class=\"m-team right\">").concat(logoHTML(e.t2), "<div class=\"m-name\">").concat(esc(e.t2.name), "</div></div>\n                </div>\n                ").concat(bottom, "\n            </div>");
+    return "<div class=\"match-card\" data-eid=\"".concat(esc(e.id), "\" data-search=\"").concat(esc(e.search), "\">\n                ").concat(e.hot ? '<div class="m-hot">HOT</div>' : '', "\n                <div class=\"m-head\">").concat(head, "</div>\n                <div class=\"m-body\">\n                    <div class=\"m-team\">").concat(logoHTML(e.t1), "<div class=\"m-name\">").concat(esc(e.t1.name), "</div></div>\n                    <div class=\"m-mid\">").concat(mid, "</div>\n                    <div class=\"m-team right\">").concat(logoHTML(e.t2), "<div class=\"m-name\">").concat(esc(e.t2.name), "</div></div>\n                </div>\n                ").concat(bottom, "\n            </div>");
 }
 function renderMatches() {
     var now = Date.now();
@@ -1430,8 +1410,11 @@ document.addEventListener('click', function (e) {
     if (ch) {
         var c = currentChannels[+ch.dataset.ch];
         closeLayerForNext('popup', hidePopup);
-        if (c)
+        if (c) {
+            // Selecting a channel from a live-event channel list is also a genuine channel click.
+            notifyNativeChannelClick('event-channel');
             playStream(c.url, currentEventTitle);
+        }
         return;
     }
     var card = e.target.closest('#matchList .match-card');
@@ -1477,7 +1460,7 @@ catch (e) {
     return [];
 } }
 function checkNotifications(obj) {
-    var items = okeys(obj || {}).map(function (k) { return obj[k]; });
+    var items = Object.values(obj || {});
     notifIds = items.map(function (n) { return String(n.id); });
     var seen = getSeen();
     var unseen = items.filter(function (n) { return !seen.includes(String(n.id)); }).reverse(); // newest first
@@ -1605,43 +1588,5 @@ function showToast(message) {
 }
 
     </script>
-    <script>
-/* SPRtix ads hooks for the Android app. Does nothing in a normal browser (no bridge = plays immediately). */
-(function () {
-  try {
-    var PENDING = {}, SEQ = 0, BUSY = false;
-    function bridge() {
-      var a = window.SPRtixApp, n = window.SPRtixNative;
-      if (a && typeof a.requestPlay === 'function') return a;
-      if (n && typeof n.requestPlay === 'function') return n;
-      return null;
-    }
-    window.SPRtixPlayAllowed = function (t) { var f = PENDING[t]; if (f) { try { f(); } catch (e) { } } };
-    var origPlay = window.playStream, origHide = window.hidePlayer;
-    if (typeof origPlay === 'function') {
-      window.playStream = function () {
-        var self = this, args = arguments, b = bridge();
-        if (!b) return origPlay.apply(self, args);
-        if (BUSY) return;                       // an ad is already being prepared: ignore extra taps
-        var t = 'p' + (++SEQ) + '_' + Date.now(), done = false, timer = null;
-        function go() {
-          if (done) return; done = true; clearTimeout(timer); delete PENDING[t]; BUSY = false;
-          try { origPlay.apply(self, args); } catch (e) { }
-        }
-        BUSY = true; PENDING[t] = go;
-        timer = setTimeout(go, window.SPRTIX_GATE_TIMEOUT_MS || 45000);   // safety: never block playback
-        try { b.requestPlay(t); } catch (e) { go(); }
-      };
-    }
-    if (typeof origHide === 'function') {
-      window.hidePlayer = function () {
-        var wasOpen = !!window.playerOpen, r = origHide.apply(this, arguments);
-        if (wasOpen) { try { var b = bridge(); if (b && typeof b.onPlayerClosed === 'function') b.onPlayerClosed(); } catch (e) { } }
-        return r;
-      };
-    }
-  } catch (e) { }
-})();
-</script>
 </body>
 </html>
