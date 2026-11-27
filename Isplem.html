@@ -3,6 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="sprtix-ads" content="manual">
     <title>SPRtix - Live TV & Movies</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -1006,7 +1007,7 @@ function onDocumentClick(e) {
     if (e.target.closest('[data-action="fav"]')) {
         e.preventDefault();
         e.stopPropagation();
-        toggleFavourite(card.dataset.key, item);
+        toggleFavourite(card.dataset.key, item, card.dataset.action);
         return;
     }
     var name = item.name || item.title || 'Live Stream';
@@ -1108,8 +1109,10 @@ function fetchDatabaseData() {
         }
         Object.keys(data).forEach(function (key) {
             var item = data[key];
+            linkKeys[key] = 1;
             grid.appendChild(buildCard('exp', key, item, { link: true, sub: item.category || 'EXPLORE', badge: 'GO', badgeStyle: 'background:#7000ff;', icon: 'fa-link', right: 'Link' }));
         });
+        renderFavourites();
     });
     // Worldwide (categories, same as Explore)
     database.ref('worldwide').on('value', function (snap) {
@@ -1122,8 +1125,10 @@ function fetchDatabaseData() {
         }
         Object.keys(data).forEach(function (key) {
             var item = data[key];
+            linkKeys[key] = 1;
             grid.appendChild(buildCard('ww', key, item, { link: true, sub: item.category || 'WORLDWIDE', badge: 'GO', badgeStyle: 'background:#7000ff;', icon: 'fa-link', right: 'Link' }));
         });
+        renderFavourites();
     });
     renderFavourites();
 }
@@ -1155,13 +1160,14 @@ function refreshData() {
     });
 }
 /* ---------------- FAVOURITES ---------------- */
-function toggleFavourite(key, item) {
+var linkKeys = {}; // keys of Explore / Worldwide link cards
+function toggleFavourite(key, item, kind) {
     if (favourites[key]) {
         delete favourites[key];
         showToast('Removed from Favourites');
     }
     else {
-        favourites[key] = item;
+        favourites[key] = (kind === 'link') ? Object.assign({}, item, { _link: true }) : item;
         showToast('Added to Favourites');
     }
     try {
@@ -1188,7 +1194,10 @@ function renderFavourites() {
     }
     keys.forEach(function (key) {
         var item = favourites[key];
-        var o = { sub: item.category || item.subtitle || 'FAVOURITE', badge: 'SAVED', icon: 'fa-play', right: 'Play' };
+        var isLink = !!(item._link || linkKeys[key]);
+        var o = isLink
+            ? { link: true, sub: item.category || item.subtitle || 'FAVOURITE', badge: 'SAVED', badgeStyle: 'background:#7000ff;', icon: 'fa-link', right: 'Link' }
+            : { sub: item.category || item.subtitle || 'FAVOURITE', badge: 'SAVED', icon: 'fa-play', right: 'Play' };
         var c1 = buildCard('fav', key, item, o);
         c1.classList.add('saved');
         var c2 = buildCard('fav', key, item, o);
