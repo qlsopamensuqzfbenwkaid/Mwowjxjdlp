@@ -1011,12 +1011,14 @@ function onDocumentClick(e) {
     }
     var name = item.name || item.title || 'Live Stream';
     var url = (item.url || '').trim();
+    var cardPrefix = String(card.dataset.id || '').split('_')[0];
     if (card.dataset.action === 'link') {
         e.preventDefault();
         if (!url) {
             showToast('Link not available!');
             return;
         }
+        notifyNativeChannelClick(cardPrefix);
         // playlist items that are streams play in-app, other links open normally
         if (/\.(m3u8|mp4|mpd)$/.test(cleanPath(parseStreamSpec(url).url)))
             playStream(url, name);
@@ -1026,8 +1028,7 @@ function onDocumentClick(e) {
     }
     // Count only playable channel cards (Live TV, Trending Live, and saved channel cards).
     // Explore links and non-channel cards must not trigger advertising.
-    var cardPrefix = String(card.dataset.id || '').split('_')[0];
-    if (url && (cardPrefix === 'tv' || cardPrefix === 'live' || cardPrefix === 'fav')) {
+    if (url && (cardPrefix === 'tv' || cardPrefix === 'live' || cardPrefix === 'fav' || cardPrefix === 'news')) {
         notifyNativeChannelClick(cardPrefix);
     }
     playStream(url, name);
@@ -1397,12 +1398,14 @@ document.addEventListener('click', function (e) {
     var chip = e.target.closest('#catChips .sport-chip');
     if (chip) {
         sportFilter = chip.dataset.sport;
+        notifyNativeChannelClick('event-category');
         renderMatches();
         return;
     }
     var pill = e.target.closest('#statusPills .pill');
     if (pill) {
         statusFilter = pill.dataset.st;
+        notifyNativeChannelClick('event-status');
         renderMatches();
         return;
     }
@@ -1418,8 +1421,10 @@ document.addEventListener('click', function (e) {
         return;
     }
     var card = e.target.closest('#matchList .match-card');
-    if (card)
+    if (card) {
+        notifyNativeChannelClick('event-card');
         openEvent(card.dataset.eid);
+    }
 });
 // if a logo fails to load, show a round circle with initials
 document.addEventListener('error', function (e) {
