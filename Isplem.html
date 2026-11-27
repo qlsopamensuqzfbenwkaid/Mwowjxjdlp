@@ -109,6 +109,13 @@
         .player-header { display: flex; justify-content: space-between; align-items: center; padding: 12px 16px; background: rgba(3, 7, 18, 0.95); border-bottom: 1px solid rgba(0, 242, 254, 0.2); flex-shrink: 0; }
         .player-title { font-size: 13px; font-weight: 700; color: #00f2fe; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 80%; }
         .player-close { color: #fff; font-size: 16px; cursor: pointer; background: #ff0055; width: 26px; height: 26px; border-radius: 50%; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+        .player-actions { display: flex; align-items: center; gap: 10px; flex-shrink: 0; }
+        .quality-btn { display: none; align-items: center; gap: 5px; color: #fff; font-size: 11px; font-weight: 700; background: rgba(255, 255, 255, 0.12); border: 1px solid rgba(0, 242, 254, 0.35); border-radius: 14px; padding: 4px 10px; cursor: pointer; }
+        .quality-btn i { color: #00f2fe; font-size: 11px; }
+        .quality-menu { display: none; position: absolute; top: 54px; right: 12px; z-index: 160; min-width: 130px; max-height: 60%; overflow-y: auto; background: rgba(3, 7, 18, 0.97); border: 1px solid rgba(0, 242, 254, 0.3); border-radius: 10px; padding: 4px; box-shadow: 0 8px 20px rgba(0, 0, 0, 0.6); }
+        .quality-menu.active { display: block; }
+        .q-item { padding: 9px 14px; color: #fff; font-size: 13px; border-radius: 7px; cursor: pointer; }
+        .q-item.active { background: rgba(0, 242, 254, 0.18); color: #00f2fe; font-weight: 700; }
         .player-body { flex: 1; position: relative; background: #000; min-height: 0; }
         .player-body .video-js { position: absolute; top: 0; right: 0; bottom: 0; left: 0; width: 100%; height: 100%; background-color: #000; }
 
@@ -252,8 +259,12 @@
         <div id="playerModal" class="player-modal">
             <div class="player-header">
                 <div id="playerTitle" class="player-title">Playing Content</div>
-                <div class="player-close" onclick="closePlayer()"><i class="fa-solid fa-xmark"></i></div>
+                <div class="player-actions">
+                    <div id="qualityBtn" class="quality-btn" onclick="toggleQualityMenu()"><i class="fa-solid fa-gear"></i><span id="qualityLabel">Auto</span></div>
+                    <div class="player-close" onclick="closePlayer()"><i class="fa-solid fa-xmark"></i></div>
+                </div>
             </div>
+            <div id="qualityMenu" class="quality-menu"></div>
             <div class="player-body">
                 <video id="videoPlayer" class="video-js vjs-default-skin vjs-big-play-centered" controls preload="auto" playsinline webkit-playsinline></video>
                 <video id="nativeVideo" controls playsinline webkit-playsinline preload="auto"></video>
@@ -659,6 +670,9 @@ function initPlayer() {
             nativeAudioTracks: false, nativeVideoTracks: false
         }
     });
+    ['loadedmetadata', 'loadeddata', 'playing'].forEach(function (ev) {
+        playerInstance.on(ev, function () { buildQualityMenu('vjs'); });
+    });
     playerInstance.on('error', function () {
         var err = playerInstance.error();
         if (err && playerOpen) {
@@ -793,6 +807,7 @@ function playStream(spec, title) {
                         openLayer('player', hidePlayer);
                     }
                     stopAllPlayers();
+                    resetQuality();
                     url = s.url;
                     proxy = String((globalSettings && globalSettings.proxyUrl) || '').trim();
                     if (s.hasHeaders && proxy) {
@@ -884,6 +899,7 @@ function playWithShaka(url, clearKey, token) {
                     _a.sent();
                     if (token !== playToken)
                         return [2 /*return*/];
+                    buildQualityMenu('shaka');
                     pr = nv.play();
                     if (pr && pr.catch)
                         pr.catch(function () { });
@@ -898,7 +914,118 @@ function hidePlayer() {
     document.getElementById('playerModal').classList.remove('active');
     document.getElementById('playerLoading').style.display = 'none';
     stopAllPlayers();
+    resetQuality();
+    // Opened from an event's channel list? Go back to that list instead of the Live Event screen.
+    if (returnToEventId) {
+        var rid = returnToEventId;
+        returnToEventId = null;
+        setTimeout(function () {
+            if (!playerOpen && !document.getElementById('popupOverlay').classList.contains('active'))
+                openEvent(rid);
+        }, 250);
+    }
 }
+var returnToEventId = null;
+
+/* ---------------- QUALITY (HLS via Video.js, DASH via Shaka) ----------------
+   The button appears only when the stream really offers 2 or more qualities. */
+var qualityEngine = '', qualityKeys = [], qualityCurrent = 'auto';
+function qLabel(h, bw) { return h ? h + 'p' : (bw ? Math.round(bw / 1000) + ' kbps' : ''); }
+function resetQuality() {
+    qualityEngine = '';
+    qualityKeys = [];
+    qualityCurrent = 'auto';
+    var b = document.getElementById('qualityBtn'), m = document.getElementById('qualityMenu'), l = document.getElementById('qualityLabel');
+    if (b)
+        b.style.display = 'none';
+    if (m) {
+        m.classList.remove('active');
+        m.innerHTML = '';
+    }
+    if (l)
+        l.textContent = 'Auto';
+}
+function collectLevels(engine) {
+    var out = {};
+    var add = function (h, bw) {
+        var k = qLabel(h, bw);
+        if (!k)
+            return;
+        if (!out[k] || (bw || 0) > out[k].bw)
+            out[k] = { key: k, h: h || 0, bw: bw || 0 };
+    };
+    try {
+        if (engine === 'vjs' && playerInstance) {
+            var vhs = playerInstance.tech({ IWillNotUseThisInPlugins: true }).vhs;
+            (vhs && vhs.representations ? vhs.representations() : []).forEach(function (r) { add(r.height, r.bandwidth); });
+        }
+        else if (engine === 'shaka' && shakaPlayer) {
+            shakaPlayer.getVariantTracks().forEach(function (t) { add(t.height, t.bandwidth); });
+        }
+    }
+    catch (e) { }
+    return Object.keys(out).map(function (k) { return out[k]; }).sort(function (a, b) { return (b.h - a.h) || (b.bw - a.bw); });
+}
+function buildQualityMenu(engine) {
+    if (!playerOpen)
+        return;
+    var lv = collectLevels(engine);
+    if (lv.length < 2)
+        return;
+    var keys = lv.map(function (l) { return l.key; });
+    if (qualityEngine === engine && qualityKeys.join(',') === keys.join(','))
+        return;
+    qualityEngine = engine;
+    qualityKeys = keys;
+    var m = document.getElementById('qualityMenu');
+    m.innerHTML = ['auto'].concat(keys).map(function (k) {
+        return '<div class="q-item' + (k === qualityCurrent ? ' active' : '') + '" data-q="' + esc(k) + '">' + (k === 'auto' ? 'Auto' : esc(k)) + '</div>';
+    }).join('');
+    document.getElementById('qualityBtn').style.display = 'flex';
+}
+function toggleQualityMenu() {
+    document.getElementById('qualityMenu').classList.toggle('active');
+}
+function setQuality(key) {
+    qualityCurrent = key;
+    try {
+        if (qualityEngine === 'vjs') {
+            var vhs = playerInstance.tech({ IWillNotUseThisInPlugins: true }).vhs;
+            vhs.representations().forEach(function (r) { r.enabled(key === 'auto' || qLabel(r.height, r.bandwidth) === key); });
+        }
+        else if (qualityEngine === 'shaka' && shakaPlayer) {
+            if (key === 'auto') {
+                shakaPlayer.configure({ abr: { enabled: true } });
+            }
+            else {
+                var best = null;
+                shakaPlayer.getVariantTracks().forEach(function (t) {
+                    if (qLabel(t.height, t.bandwidth) === key && (!best || t.bandwidth > best.bandwidth))
+                        best = t;
+                });
+                if (best) {
+                    shakaPlayer.configure({ abr: { enabled: false } });
+                    shakaPlayer.selectVariantTrack(best, true);
+                }
+            }
+        }
+    }
+    catch (e) {
+        console.error(e);
+    }
+    document.getElementById('qualityLabel').textContent = key === 'auto' ? 'Auto' : key;
+    document.querySelectorAll('#qualityMenu .q-item').forEach(function (el) { el.classList.toggle('active', el.dataset.q === key); });
+    document.getElementById('qualityMenu').classList.remove('active');
+}
+document.addEventListener('click', function (e) {
+    var it = e.target.closest('#qualityMenu .q-item');
+    if (it) {
+        setQuality(it.dataset.q);
+        return;
+    }
+    if (!e.target.closest('#qualityBtn') && !e.target.closest('#qualityMenu'))
+        document.getElementById('qualityMenu').classList.remove('active');
+});
 function closePlayer() { popLayerUI('player'); hidePlayer(); }
 /* ---------------- CARDS ---------------- */
 /* ---- AUTO background colour: most common colour along the image edges ---- */
@@ -1241,7 +1368,7 @@ var SPORT_META = {
     rugby: ['Rugby', 'fa-football'], volleyball: ['Volleyball', 'fa-volleyball'], golf: ['Golf', 'fa-golf-ball-tee'], other: ['Other', 'fa-trophy']
 };
 var allEvents = [], sportFilter = 'all', statusFilter = 'all', eventsLoaded = false;
-var currentChannels = [], currentEventTitle = '';
+var currentChannels = [], currentEventTitle = '', currentEventId = null;
 function cleanText(x) { return String(x == null ? '' : x).replace(/\s+/g, ' ').trim(); }
 function hashColor(str) { var h = 0; for (var i = 0; i < str.length; i++)
     h = (h * 31 + str.charCodeAt(i)) >>> 0; return "hsl(".concat(h % 360, ", 45%, 38%)"); }
@@ -1390,6 +1517,7 @@ function openEvent(id) {
     }
     currentChannels = e.channels;
     currentEventTitle = e.title;
+    currentEventId = id;
     openPopup("\n                <div class=\"popup-head\"><i class=\"fa-solid fa-tv\"></i> ".concat(esc(e.title), "</div>\n                <div class=\"popup-body\">").concat(e.channels.map(function (c, i) { return "\n                    <a class=\"connect-row\" data-ch=\"".concat(i, "\"><i class=\"fa-solid fa-circle-play\" style=\"color:#00f2fe\"></i><span>").concat(esc(c.name), "</span><i class=\"fa-solid fa-chevron-right arrow\"></i></a>"); }).join(''), "</div>\n                <div class=\"popup-btns\"><button class=\"popup-btn secondary\" onclick=\"closePopup()\">Close</button></div>"), 'channels');
 }
 function updateTicker() {
@@ -1421,11 +1549,23 @@ document.addEventListener('click', function (e) {
     var ch = e.target.closest('#popupBox [data-ch]');
     if (ch) {
         var c = currentChannels[+ch.dataset.ch];
-        closeLayerForNext('popup', hidePopup);
         if (c) {
+            var sp = parseStreamSpec(c.url);
+            var nativeBound = hasNativePlayer() && (sp.hasHeaders || sp.clearKey);
             // Selecting a channel from a live-event channel list is also a genuine channel click.
             notifyNativeChannelClick('event-channel');
-            playStream(c.url, currentEventTitle);
+            if (nativeBound) {
+                // external native player: keep the channel list open underneath
+                playStream(c.url, currentEventTitle);
+            }
+            else {
+                closeLayerForNext('popup', hidePopup);
+                returnToEventId = currentEventId;
+                playStream(c.url, currentEventTitle);
+            }
+        }
+        else {
+            closeLayerForNext('popup', hidePopup);
         }
         return;
     }
