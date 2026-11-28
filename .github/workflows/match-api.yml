@@ -1,0 +1,28 @@
+name: Update match API
+on:
+  schedule:
+    - cron: '*/20 * * * *'
+  workflow_dispatch:
+permissions:
+  contents: write
+concurrency:
+  group: match-api
+  cancel-in-progress: true
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - name: Fetch matches
+        run: node scripts/fetch_matches.js
+        env:
+          MATCH_API_KEY: ${{ secrets.MATCH_API_KEY }}
+      - name: Save
+        run: |
+          git config user.name "match-bot"
+          git config user.email "match-bot@users.noreply.github.com"
+          git add data/matchApi.json
+          git diff --cached --quiet || (git commit -m "update matches" && git push)
