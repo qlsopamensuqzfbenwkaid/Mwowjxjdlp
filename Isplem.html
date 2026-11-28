@@ -198,6 +198,9 @@
         .m-status.live::before { content: ''; display: block; width: 5px; height: 5px; margin: 0 auto 2px; border-radius: 50%; background: #ff3b5c; animation: pulse 1.2s infinite; }
         @keyframes pulse { 0%,100% { opacity: 1; transform: scale(1); } 50% { opacity: .35; transform: scale(.7); } }
         .m-timer { text-align: center; margin-top: 4px; font-size: 13px; font-weight: 600; font-variant-numeric: tabular-nums; }
+        .m-tx { flex: 1; min-width: 0; }
+        .m-score { font-size: 12px; font-weight: 700; color: #00d4e6; margin-top: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font-variant-numeric: tabular-nums; }
+        .m-note { margin-top: 7px; padding-top: 6px; border-top: 1px solid #27344f; font-size: 11px; color: #94a3b8; text-align: center; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
         .m-starts { text-align: center; margin-top: 4px; font-size: 11.5px; font-weight: 600; color: #e2e8f0; }
 
         /* ===== PLAYER EXTRAS ===== */
@@ -1167,14 +1170,26 @@ function fetchDatabaseData() {
         if (snap.exists()) {
             globalSettings = snap.val();
             updateTicker();
+            try {
+                setupMatchApi();
+            }
+            catch (e) {
+                console.warn('[Match API]', e);
+            }
         }
     });
     // Live Events (Admin Panel -> Live Events)
     database.ref('events').on('value', function (snap) {
         var data = snap.val();
-        allEvents = data ? Object.values(data).map(normalizeEvent) : [];
+        adminEvents = data ? Object.values(data).map(normalizeEvent) : [];
         eventsLoaded = true;
-        renderMatches();
+        rebuildEvents();
+    });
+    // Match list / live score published by the GitHub Action (data/matchApi.json)
+    database.ref('matchApi').on('value', function (snap) {
+        publishedApi = snap.exists() ? snap.val() : null;
+        if (apiUrls().length)
+            loadMatchApis();
     });
     // Notifications (popup when the app opens; not shown again after Skip)
     database.ref('notifications').on('value', function (snap) { return checkNotifications(snap.val()); });
@@ -1447,7 +1462,7 @@ function logoHTML(t, cls) {
         return "<img class=\"m-logo ".concat(cls || '', "\" src=\"").concat(esc(t.logo), "\" alt=\"\" loading=\"lazy\" data-i=\"").concat(init, "\" data-c=\"").concat(col, "\">");
     return "<div class=\"m-logo ph\" style=\"background:".concat(col, "\">").concat(init, "</div>");
 }
-function eventCardHTML(e, st) {
+function eventCardHTMLBase(e, st) {
     var sm = sportMeta(e.sport);
     var mid, bottom = '';
     var ok = !isNaN(e.startMs);
@@ -1465,6 +1480,19 @@ function eventCardHTML(e, st) {
     }
     var head = (e.leagueLogo ? "<img src=\"".concat(esc(e.leagueLogo), "\" alt=\"\" onerror=\"this.style.display='none'\">") : '') + "<span>".concat(esc(sm[0])).concat(e.league ? ' | ' + esc(e.league) : '', "</span>");
     return "<div class=\"match-card\" data-eid=\"".concat(esc(e.id), "\" data-search=\"").concat(esc(e.search), "\">\n                ").concat(e.hot ? '<div class="m-hot">HOT</div>' : '', "\n                <div class=\"m-head\">").concat(head, "</div>\n                <div class=\"m-body\">\n                    <div class=\"m-team\">").concat(logoHTML(e.t1), "<div class=\"m-name\">").concat(esc(e.t1.name), "</div></div>\n                    <div class=\"m-mid\">").concat(mid, "</div>\n                    <div class=\"m-team right\">").concat(logoHTML(e.t2), "<div class=\"m-name\">").concat(esc(e.t2.name), "</div></div>\n                </div>\n                ").concat(bottom, "\n            </div>");
+}
+function eventCardHTML(e, st) {
+    var html = eventCardHTMLBase(e, st);
+    if (!e.score1 && !e.score2 && !e.note)
+        return html;
+    [[e.t1.name, e.score1], [e.t2.name, e.score2]].forEach(function (p) {
+        var old = '<div class="m-name">' + esc(p[0]) + '</div></div>';
+        var sc = st !== 'upcoming' && p[1] ? '<div class="m-score">' + esc(p[1]) + '</div>' : '';
+        html = html.replace(old, function () { return '<div class="m-tx"><div class="m-name">' + esc(p[0]) + '</div>' + sc + '</div></div>'; });
+    });
+    if (e.note)
+        html = html.replace(/<\/div>\s*$/, function () { return '<div class="m-note">' + esc(e.note) + '</div></div>'; });
+    return html;
 }
 function renderMatches() {
     var now = Date.now();
@@ -1503,6 +1531,267 @@ function renderMatches() {
     if (q)
         filterCategories(q);
 }
+/* ============ MATCH LIST / LIVE SCORE APIs (set from Admin Panel -> settings) ============
+   settings/matchApiUrls    : one API per line   URL  [| Header=value | Header2=value]
+   settings/matchApiRefresh : minutes between refreshes (default 15, minimum 5)
+   settings/matchApiEnabled : 'no' switches the APIs off
+   Supported answers: CricketData (cricapi), football-data.org, API-Football, TheSportsDB. */
+var adminEvents = [], apiEvents = [], apiSig = '', apiTimer = null, apiBusy = false;
+var API_CACHE_KEY = 'sprtix_match_api_v1';
+var TEAM_ALIAS = { ind: 'India', aus: 'Australia', pak: 'Pakistan', eng: 'England', sa: 'South Africa', rsa: 'South Africa', nz: 'New Zealand',
+    sl: 'Sri Lanka', ban: 'Bangladesh', wi: 'West Indies', afg: 'Afghanistan', zim: 'Zimbabwe', ire: 'Ireland', nep: 'Nepal' };
+function h32(s) { var h = 0; s = String(s); for (var i = 0; i < s.length; i++)
+    h = (h * 31 + s.charCodeAt(i)) >>> 0; return h.toString(36); }
+// "INDIA" / "india" / " India  [IND] " / "Ind"  ->  "India"
+function fixTeamName(n) {
+    n = cleanText(String(n == null ? '' : n).replace(/\[[^\]]*\]/g, ' '));
+    if (!n)
+        return '';
+    if (/^(tbc|tba|tbd)$/i.test(n))
+        return 'TBA';
+    if (TEAM_ALIAS[n.toLowerCase()])
+        return TEAM_ALIAS[n.toLowerCase()];
+    if ((n === n.toUpperCase() && n.length > 4) || n === n.toLowerCase()) {
+        n = n.toLowerCase().replace(/(^|[\s\-'.])([a-z])/g, function (m, p, c) { return p + c.toUpperCase(); });
+    }
+    return n;
+}
+function apiTime(s) {
+    if (s == null || s === '')
+        return NaN;
+    if (typeof s === 'number')
+        return s < 1e12 ? s * 1000 : s;
+    s = String(s).trim().replace(' ', 'T');
+    if (/^\d{4}-\d\d-\d\d$/.test(s))
+        s += 'T00:00:00Z';
+    else if (!/(z|[+-]\d\d:?\d\d)$/i.test(s))
+        s += 'Z';
+    return Date.parse(s);
+}
+function mkApiEvent(o) {
+    var e = {
+        id: 'api_' + o.id, sport: cleanText(o.sport || 'other').toLowerCase(),
+        league: cleanText(o.league), leagueLogo: o.leagueLogo || '',
+        t1: { name: fixTeamName(o.n1) || 'TBA', logo: o.l1 || '' }, t2: { name: fixTeamName(o.n2) || 'TBA', logo: o.l2 || '' },
+        startMs: o.startMs, durMs: o.durMs || 6 * 3600000, manual: o.state || 'upcoming', hot: false, channels: [], api: true,
+        score1: o.s1 || '', score2: o.s2 || '', note: cleanText(o.note)
+    };
+    e.title = e.t1.name + ' vs ' + e.t2.name;
+    e.search = (e.t1.name + ' ' + e.t2.name + ' ' + e.league + ' ' + e.sport).toLowerCase();
+    return e;
+}
+function cricScore(m, name, short) {
+    var nm = cleanText(name).toLowerCase(), sh = cleanText(short).toLowerCase();
+    return (m.score || []).filter(function (s) {
+        var inn = String(s.inning || '').toLowerCase();
+        return (nm && inn.indexOf(nm) === 0) || (sh && inn.indexOf(sh) === 0);
+    }).map(function (s) { return s.r + '/' + s.w + (s.o != null ? ' (' + s.o + ')' : ''); }).join(' & ');
+}
+function parseCricApi(j) {
+    return (j.data || []).filter(function (m) { return m && m.id; }).map(function (m) {
+        var info = m.teamInfo || [], names = m.teams || [], n1, n2;
+        if (names.length >= 2) {
+            n1 = names[0];
+            n2 = names[1];
+        }
+        else if (info.length >= 2) {
+            n1 = info[0].name;
+            n2 = info[1].name;
+        }
+        else {
+            var p = String(m.name || '').split(',')[0].split(/\s+vs\.?\s+/i);
+            n1 = p[0];
+            n2 = p[1];
+        }
+        var l1 = '', l2 = '', sh1 = '', sh2 = '';
+        info.forEach(function (ti) {
+            var k = cleanText(ti.name).toLowerCase();
+            if (k === cleanText(n1).toLowerCase()) {
+                l1 = ti.img || '';
+                sh1 = ti.shortname || '';
+            }
+            else if (k === cleanText(n2).toLowerCase()) {
+                l2 = ti.img || '';
+                sh2 = ti.shortname || '';
+            }
+        });
+        var nm = String(m.name || ''), c = nm.indexOf(',');
+        var type = String(m.matchType || '').toLowerCase();
+        var state = m.matchEnded ? 'finished' : (m.matchStarted ? 'live' : 'upcoming');
+        return mkApiEvent({
+            id: m.id, sport: 'cricket', n1: n1, n2: n2, l1: l1, l2: l2,
+            league: (c > -1 ? nm.slice(c + 1) : '') || String(m.matchType || '').toUpperCase(),
+            startMs: apiTime(m.dateTimeGMT || m.date), state: state,
+            durMs: type === 'test' ? 120 * 3600000 : (type === 'odi' ? 9 * 3600000 : 4.5 * 3600000),
+            s1: cricScore(m, n1, sh1), s2: cricScore(m, n2, sh2), note: state === 'upcoming' ? m.venue : m.status
+        });
+    });
+}
+function fdState(s) { s = String(s || '').toUpperCase(); return /IN_PLAY|PAUSED|LIVE/.test(s) ? 'live' : (/FINISHED|AWARDED/.test(s) ? 'finished' : 'upcoming'); }
+function parseFootballData(j) {
+    return (j.matches || []).filter(function (m) { return m && m.id; }).map(function (m) {
+        var ft = (m.score && m.score.fullTime) || {}, st = fdState(m.status);
+        return mkApiEvent({
+            id: m.id, sport: 'football', n1: m.homeTeam && (m.homeTeam.name || m.homeTeam.shortName), n2: m.awayTeam && (m.awayTeam.name || m.awayTeam.shortName),
+            l1: m.homeTeam && m.homeTeam.crest, l2: m.awayTeam && m.awayTeam.crest,
+            league: m.competition && m.competition.name, leagueLogo: m.competition && m.competition.emblem,
+            startMs: apiTime(m.utcDate), state: st, durMs: 3 * 3600000,
+            s1: st !== 'upcoming' && ft.home != null ? String(ft.home) : '', s2: st !== 'upcoming' && ft.away != null ? String(ft.away) : ''
+        });
+    });
+}
+function parseApiFootball(j) {
+    return (j.response || []).filter(function (m) { return m && m.fixture; }).map(function (m) {
+        var sh = String((m.fixture.status && m.fixture.status.short) || '').toUpperCase();
+        var st = /^(1H|HT|2H|ET|BT|P|LIVE|INT)$/.test(sh) ? 'live' : (/^(FT|AET|PEN|AWD|WO)$/.test(sh) ? 'finished' : 'upcoming');
+        var g = m.goals || {}, t = m.teams || {}, lg = m.league || {};
+        return mkApiEvent({
+            id: m.fixture.id, sport: 'football', n1: t.home && t.home.name, n2: t.away && t.away.name, l1: t.home && t.home.logo, l2: t.away && t.away.logo,
+            league: lg.name, leagueLogo: lg.logo, startMs: apiTime(m.fixture.date), state: st, durMs: 3 * 3600000,
+            s1: st !== 'upcoming' && g.home != null ? String(g.home) : '', s2: st !== 'upcoming' && g.away != null ? String(g.away) : ''
+        });
+    });
+}
+function parseSportsDb(j) {
+    return (j.events || j.event || []).filter(function (m) { return m && m.idEvent; }).map(function (m) {
+        var stx = String(m.strStatus || ''), has = m.intHomeScore != null && m.intHomeScore !== '';
+        var st = /finish|^ft$|final|aet|pen/i.test(stx) ? 'finished' : (/not started|^ns$|postponed|cancel|^$/i.test(stx) && !has ? 'upcoming' : (has ? 'live' : 'upcoming'));
+        return mkApiEvent({
+            id: m.idEvent, sport: m.strSport || 'other', n1: m.strHomeTeam, n2: m.strAwayTeam, l1: m.strHomeTeamBadge, l2: m.strAwayTeamBadge,
+            league: m.strLeague, startMs: apiTime(m.strTimestamp || (m.dateEvent ? m.dateEvent + 'T' + (m.strTime || '00:00:00') : '')),
+            state: st, durMs: 3 * 3600000, s1: has ? String(m.intHomeScore) : '', s2: has && m.intAwayScore != null ? String(m.intAwayScore) : ''
+        });
+    });
+}
+function parseMatchApi(j) {
+    if (!j || typeof j !== 'object')
+        return [];
+    if (j.status === 'failure')
+        throw new Error('API said: ' + (j.reason || 'failure'));
+    if (Array.isArray(j.data))
+        return parseCricApi(j);
+    if (Array.isArray(j.matches))
+        return parseFootballData(j);
+    if (Array.isArray(j.response))
+        return parseApiFootball(j);
+    if (Array.isArray(j.events) || Array.isArray(j.event))
+        return parseSportsDb(j);
+    return [];
+}
+function apiUrls() {
+    var st = globalSettings || {};
+    if (String(st.matchApiEnabled == null ? '' : st.matchApiEnabled).toLowerCase() === 'no' || st.matchApiEnabled === false)
+        return [];
+    return String(st.matchApiUrls || st.matchApiUrl || '').split(/\r?\n/).map(function (x) { return x.trim(); }).filter(function (x) { return /^https?:\/\//i.test(x); });
+}
+function apiRefreshMs() { return Math.max(5, parseFloat((globalSettings || {}).matchApiRefresh) || 15) * 60000; }
+function fetchApiJson(spec) {
+    var parts = spec.split('|'), url = parts[0].trim(), headers = {};
+    parts.slice(1).forEach(function (p) { var i = p.indexOf('='); if (i > 0)
+        headers[p.slice(0, i).trim()] = p.slice(i + 1).trim(); });
+    var hasH = Object.keys(headers).length > 0;
+    var asJson = function (r) { if (!r.ok)
+        throw new Error('HTTP ' + r.status); return r.json(); };
+    return fetch(url, hasH ? { headers: headers } : {}).then(asJson).catch(function (err) {
+        var proxy = String((globalSettings && globalSettings.proxyUrl) || '').trim();
+        if (!proxy)
+            throw err;
+        return fetch(proxy + (proxy.indexOf('?') > -1 ? '&' : '?') + 'url=' + encodeURIComponent(url) + (hasH ? '&h=' + encodeURIComponent(JSON.stringify(headers)) : '')).then(asJson);
+    });
+}
+function revive(list) { return (list || []).map(function (e) { e.startMs = e.startMs == null ? NaN : e.startMs; e.channels = []; return e; }); }
+function pairKey(e) { var n = function (x) { return String(x).toLowerCase().replace(/[^a-z0-9]/g, ''); }; return [n(e.t1.name), n(e.t2.name)].sort().join('|'); }
+// Admin events + API events -> what the Live Event screen shows
+function rebuildEvents() {
+    var now = Date.now(), out = adminEvents.slice();
+    apiEvents.forEach(function (a) {
+        if (a.manual === 'upcoming' && !isNaN(a.startMs) && a.startMs - now > 10 * 86400000)
+            return;
+        var key = pairKey(a), dup = null;
+        adminEvents.forEach(function (ev) {
+            if (!dup && pairKey(ev) === key && (isNaN(ev.startMs) || isNaN(a.startMs) || Math.abs(ev.startMs - a.startMs) < 36 * 3600000))
+                dup = ev;
+        });
+        if (dup) {
+            // same match already added in the Admin Panel (it has the channels): only take score / result
+            var same = String(dup.t1.name).toLowerCase() === String(a.t1.name).toLowerCase();
+            dup.score1 = same ? a.score1 : a.score2;
+            dup.score2 = same ? a.score2 : a.score1;
+            dup.note = a.note;
+            return;
+        }
+        out.push(a);
+    });
+    allEvents = out;
+    renderMatches();
+}
+// data/matchApi.json (written every ~20 min by the GitHub Action) is shared by every phone, so the API limit is never used up
+var publishedApi = null;
+function publishedFresh() { return !!(publishedApi && Array.isArray(publishedApi.ev) && Date.now() - publishedApi.t < 90 * 60000); }
+function loadMatchApis() {
+    var urls = apiUrls();
+    if (!urls.length)
+        return;
+    // matches published by the GitHub Action are shown first (even if the Action is late, old data is better than an empty screen)
+    if (publishedApi && Array.isArray(publishedApi.ev)) {
+        apiEvents = revive(publishedApi.ev);
+        rebuildEvents();
+        if (publishedFresh())
+            return;
+    }
+    // fallback: this phone calls the API itself, only for links that contain the real key (a {{KEY}} link works only in the Action)
+    var direct = urls.filter(function (u) { return u.indexOf('{{KEY}}') < 0; });
+    if (!direct.length || apiBusy)
+        return;
+    var sig = apiSig, ttl = apiRefreshMs() * 0.9;
+    try {
+        var lc = JSON.parse(localStorage.getItem(API_CACHE_KEY) || 'null');
+        if (lc && lc.sig === sig && Array.isArray(lc.ev) && Date.now() - lc.t < ttl) {
+            apiEvents = revive(lc.ev);
+            rebuildEvents();
+            return;
+        }
+    }
+    catch (e) { }
+    apiBusy = true;
+    Promise.all(direct.map(function (u) {
+        return fetchApiJson(u).then(parseMatchApi).catch(function (err) { console.warn('[Match API]', err && err.message); return null; });
+    })).then(function (res) {
+        apiBusy = false;
+        var ok = res.filter(Boolean);
+        if (!ok.length)
+            return; // every API failed: keep what is on screen
+        var map = {};
+        ok.forEach(function (list) { list.forEach(function (e) { map[e.id] = e; }); }); // later lines (e.g. live score) win
+        apiEvents = Object.keys(map).map(function (k) { return map[k]; });
+        rebuildEvents();
+        try {
+            localStorage.setItem(API_CACHE_KEY, JSON.stringify({ sig: sig, t: Date.now(), ev: JSON.parse(JSON.stringify(apiEvents)) }));
+        }
+        catch (e) { }
+    });
+}
+function setupMatchApi() {
+    var urls = apiUrls();
+    var sig = h32(urls.join('\n')) + '_' + apiRefreshMs();
+    if (sig === apiSig)
+        return;
+    apiSig = sig;
+    if (apiTimer) {
+        clearInterval(apiTimer);
+        apiTimer = null;
+    }
+    if (!urls.length) {
+        apiEvents = [];
+        rebuildEvents();
+        return;
+    }
+    apiBusy = false;
+    loadMatchApis();
+    apiTimer = setInterval(function () { if (!document.hidden)
+        loadMatchApis(); }, apiRefreshMs());
+}
+
 function openEvent(id) {
     var e = allEvents.find(function (x) { return x.id === id; });
     if (!e)
@@ -1571,7 +1860,9 @@ document.addEventListener('click', function (e) {
     }
     var card = e.target.closest('#matchList .match-card');
     if (card) {
-        notifyNativeChannelClick('event-card');
+        var evc = allEvents.find(function (x) { return x.id === card.dataset.eid; });
+        if (evc && evc.channels.length)
+            notifyNativeChannelClick('event-card'); // a card without any channel link opens nothing, so it is not counted
         openEvent(card.dataset.eid);
     }
 });
