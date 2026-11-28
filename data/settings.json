@@ -5,6 +5,6 @@
   "updateUrl": "https://github.com/qlsopamensuqzfbenwkaid/sprtix-releases/releases/download/v4.9.3-build17-1/SPRtix.apk",
   "apiKey": "https://api.cricapi.com/v1/matches?apikey=c29e3f67-36cc-4c1a-b5e3-021198a616f4&offset=0",
   "matchApiEnabled": "yes",
-  "matchApiUrls": "https://api.cricapi.com/v1/matches?apikey={{KEY}}&offset=0",
-  "matchApiRefresh": 20
+  "matchApiRefresh": 20,
+  "matchApiUrls": "https://api.cricapi.com/v1/matches?apikey={{KEY}}&offset=0. {{KEY}}"
 }
