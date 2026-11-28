@@ -172,7 +172,21 @@ async function main() {
 
     const map = {};
     ok.forEach((list) => list.forEach((e) => { map[e.id] = e; })); // later lines (live score) win
-    const ev = JSON.parse(JSON.stringify(Object.keys(map).map((k) => map[k])));
+    const all = JSON.parse(JSON.stringify(Object.keys(map).map((k) => map[k])));
+    const now = Date.now();
+    const count = { live: 0, upcoming: 0, finished: 0 };
+    all.forEach((e) => { count[e.manual] = (count[e.manual] || 0) + 1; });
+    const times = all.map((e) => e.startMs).filter((x) => x != null).sort((a, b) => a - b);
+    console.log('API returned ' + all.length + ' matches: live ' + count.live + ', upcoming ' + count.upcoming + ', finished ' + count.finished
+        + (times.length ? ' (dates ' + new Date(times[0]).toISOString().slice(0, 10) + ' to ' + new Date(times[times.length - 1]).toISOString().slice(0, 10) + ')' : ''));
+    // same rule as the app: finished matches stay 48h, upcoming ones only the next 10 days
+    const ev = all.filter((e) => {
+        if (e.startMs == null) return true;
+        if (e.manual === 'finished' && now - (e.startMs + e.durMs) > 48 * 3600000) return false;
+        if (e.manual === 'upcoming' && e.startMs - now > 10 * 86400000) return false;
+        return true;
+    });
+    console.log('Matches the app will show: ' + ev.length);
 
     let old = null;
     try { old = JSON.parse(fs.readFileSync(OUT, 'utf8')); } catch (e) { }
